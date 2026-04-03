@@ -29,6 +29,12 @@ Join the [Discord server](https://discord.gg/P4tBdGRC3q) for discussion, questio
 
 Play the live demo here: [hbexplorer.helbreath.workers.dev](https://hbexplorer.helbreath.workers.dev/)
 
+## Built on or inspired by this project
+
+Projects that extend this codebase or took inspiration from it:
+
+- **[Helbreath.xyz](https://www.helbreath.xyz/)** — browser-based Helbreath MMORPG ([source on GitHub](https://github.com/juanrossi/helbreath))
+
 ## What This Is / Is Not
 
 This project is:
