@@ -1,0 +1,55 @@
+---
+description: Shared coding guidelines and rule lookup
+alwaysApply: true
+---
+
+# Common Guidelines
+
+- Preserve intentional user changes. Do not "correct" values that were deliberately changed after initial implementation.
+- When changing existing functionality or control flow, trace the current behavior end-to-end and verify the change does not regress prior behavior; if it does, fix the regression as part of the same change.
+- **Server/client network sync:** Assume server and client are deployed in sync; `multiplayer/proto/network.proto` (and regenerated code) is the contract. Do not add legacy branches, sentinel guessing (e.g. treating `0` as “field missing”), or other version-mismatch fallbacks in packet handling—extend the proto and wire both sides instead.
+
+### Comments
+
+- **Types and larger routines:** Document intent for every hand-authored class or primary type, and for larger or non-trivial methods and functions. Omit documentation on small, single-purpose members when the name alone is sufficient.
+- **Individual lines:** Comment only where intent is hard to infer from the surrounding code or names (e.g. non-obvious ordering, surprising literals, workarounds, constraints). Otherwise rely on self-documenting structure and naming.
+
+- For hand-authored code **outside** `multiplayer/server/**/*.cs` (e.g. `multiplayer/mp-client/`): follow the **Comments** subsection above; line comments often capture “why” something exists in addition to hard-to-read mechanics.
+- In `multiplayer/server/**/*.cs` (hand-authored sources under `multiplayer/server/`, not generated `obj/` output): follow the **Comments** subsection; additionally document instance and static fields whose meaning or threading/lifetime rules are not obvious from the name.
+
+- Keep comments accurate. When you change behavior, update or remove affected comments in the same edit so documentation stays aligned with the code.
+- Prefer project helpers and framework utilities over reimplementing common behavior.
+- Use meaningful errors for programming mistakes and warnings for recoverable issues.
+- Wrap fallible operations in error handling when a failure would otherwise crash the feature or hide useful debugging context.
+- Keep hot paths lean. Cache expensive work, batch when possible, and avoid repeated work in update loops.
+
+# Class layout (TypeScript client and C# server)
+
+Use the **same member order** for hand-authored classes in `multiplayer/mp-client/` and `multiplayer/server/**/*.cs` (generated code excluded). Adjust naming to the language (e.g. C# **properties** where you would use TS **fields**).
+
+1. **Imports / usings** — all imports at top of file (TS); `using` directives grouped as in `server-csharp-guidelines.mdc` (C#).
+2. **Primary type** — one main `class` per file when that is the file’s purpose, with members in this order:
+   - **Fields / properties** — instance and static state; backing fields for properties when not auto-implemented. Prefer **methods** over arrow-function fields for behavior; if a stable delegate is required (e.g. unsubscribe), store one bound reference assigned in the constructor (TS) or use a named handler method (C# `handler += Method` / `-= Method`).
+   - **Constructor(s)** — including primary ctor and static `Create`/`From` factories if they are the public construction path for the type.
+   - **Setup** — wiring and registration: DI-style assignment, event subscription, `Initialize`/`Awake`-style hooks, and helpers whose job is preparing or connecting the instance.
+   - **Main logic** — update loops, event handlers, public API, and private helpers that implement behavior.
+   - **Teardown / dispose** — `IDisposable.Dispose`, `destroy`/`shutdown`, `RemoveHandler` cleanup, and helpers used only for teardown.
+3. **Outside the primary class** — namespaces (C#), file-scoped types, `record`/`struct`/`interface`/`enum`, and small helpers **after** the main class when they exist in the same file.
+
+Avoid splitting field/property declarations across the class body; keep them in one block at the top of the type.
+
+For C#-specific formatting, braces, and documentation density, follow `server-csharp-guidelines.mdc` in addition to this order.
+
+# Rule Lookup By Work Surface
+
+- When working in `multiplayer/mp-client/`, prioritize the `client-*` rules in `multiplayer/.cursor/rules/`.
+- When working in `multiplayer/server/`, prioritize the `server-*` rules in `multiplayer/.cursor/rules/`.
+- When working in `tools/` C# code, apply the general C# formatting guidance from `server-csharp-guidelines.mdc`.
+- When editing rules themselves, keep them concise, split by concern, and prefer references over repeated guidance.
+
+# Updating Rules
+
+- Keep rules concise and focused.
+- Split by concern instead of building one large catch-all document.
+- Avoid repeating guidance that already lives in another rule or doc; reference it instead.
+- Use examples only when the pattern is hard to infer from prose.

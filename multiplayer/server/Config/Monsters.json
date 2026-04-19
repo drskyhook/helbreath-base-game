@@ -1,0 +1,476 @@
+[
+  {
+    "id": 0,
+    "name": "Ettin",
+    "sprite": "ettin",
+    "movementSpeed": 700,
+    "allegiance": 0
+  },
+  {
+    "id": 1,
+    "name": "Slime",
+    "sprite": "slm",
+    "movementSpeed": 800
+  },
+  {
+    "id": 2,
+    "name": "Ant",
+    "sprite": "ant",
+    "movementSpeed": 220
+  },
+  {
+    "id": 3,
+    "name": "Snake",
+    "sprite": "amp",
+    "movementSpeed": 700
+  },
+  {
+    "id": 4,
+    "name": "Armored Battle Steed",
+    "sprite": "abs",
+    "movementSpeed": 220
+  },
+  {
+    "id": 5,
+    "name": "Dragon",
+    "sprite": "barlog",
+    "movementSpeed": 220
+  },
+  {
+    "id": 6,
+    "name": "Bunny",
+    "sprite": "bunny",
+    "movementSpeed": 220
+  },
+  {
+    "id": 7,
+    "name": "Beholder",
+    "sprite": "beholder",
+    "movementSpeed": 220
+  },
+  {
+    "id": 8,
+    "name": "Battle Golem",
+    "sprite": "bg",
+    "movementSpeed": 220
+  },
+  {
+    "id": 9,
+    "name": "Cannibal Plant",
+    "sprite": "canplant",
+    "movementSpeed": 220
+  },
+  {
+    "id": 10,
+    "name": "Cat",
+    "sprite": "cat",
+    "movementSpeed": 220
+  },
+  {
+    "id": 11,
+    "name": "Centaurus",
+    "sprite": "centaurus",
+    "movementSpeed": 220
+  },
+  {
+    "id": 12,
+    "name": "Clay Golem",
+    "sprite": "cla",
+    "movementSpeed": 700,
+    "attackType": 3
+  },
+  {
+    "id": 13,
+    "name": "Claw Turtle",
+    "sprite": "clawturtle",
+    "movementSpeed": 220
+  },
+  {
+    "id": 14,
+    "name": "Cyclops",
+    "sprite": "cyc",
+    "movementSpeed": 600
+  },
+  {
+    "id": 15,
+    "name": "Dark Elf",
+    "sprite": "darkelf",
+    "movementSpeed": 700,
+    "chaseDistance": 4,
+    "chaseMaxDistance": 8,
+    "attackRange": 10,
+    "attackSpeed": 700,
+    "attackDamageMin": 5,
+    "attackDamageMax": 15,
+    "attackRecoveryTime": 700,
+    "minIdleTime": 3000,
+    "maxIdleTime": 5000,
+    "attackType": 2,
+    "attackStunDuration": 500,
+    "rangedAttack": true
+  },
+  {
+    "id": 16,
+    "name": "Elf Master",
+    "sprite": "elfmaster",
+    "movementSpeed": 220,
+    "rangedAttack": true
+  },
+  {
+    "id": 17,
+    "name": "Dark Shadow Knight",
+    "sprite": "darkknight",
+    "movementSpeed": 220
+  },
+  {
+    "id": 18,
+    "name": "Demon",
+    "sprite": "demon",
+    "movementSpeed": 220
+  },
+  {
+    "id": 19,
+    "name": "Detector",
+    "sprite": "detector",
+    "movementSpeed": 220
+  },
+  {
+    "id": 20,
+    "name": "Frost",
+    "sprite": "frost",
+    "movementSpeed": 220
+  },
+  {
+    "id": 21,
+    "name": "Gargoyle",
+    "sprite": "gagoyle",
+    "movementSpeed": 220
+  },
+  {
+    "id": 22,
+    "name": "God's Hand Knight",
+    "sprite": "ghk",
+    "movementSpeed": 220
+  },
+  {
+    "id": 23,
+    "name": "God's Hand Knight on Armored Battle Steed",
+    "sprite": "ghkabs",
+    "movementSpeed": 220
+  },
+  {
+    "id": 24,
+    "name": "Giant Cray Fish",
+    "sprite": "giantcrayfish",
+    "movementSpeed": 220
+  },
+  {
+    "id": 25,
+    "name": "Giant Frog",
+    "sprite": "giantfrog",
+    "movementSpeed": 220
+  },
+  {
+    "id": 26,
+    "name": "Giant Lizard",
+    "sprite": "giantlizard",
+    "movementSpeed": 220
+  },
+  {
+    "id": 27,
+    "name": "Giant Tree",
+    "sprite": "giantplant",
+    "movementSpeed": 900,
+    "chaseDistance": 20,
+    "chaseMaxDistance": 20,
+    "attackRange": 3,
+    "attackSpeed": 700,
+    "attackDamageMin": 1,
+    "attackDamageMax": 2,
+    "attackRecoveryTime": 700,
+    "minIdleTime": 3000,
+    "maxIdleTime": 5000,
+    "attackType": 1,
+    "attackStunDuration": 200,
+    "hp": 30
+  },
+  {
+    "id": 28,
+    "name": "Stone Golem",
+    "sprite": "gol",
+    "movementSpeed": 700,
+    "chaseDistance": 4,
+    "chaseMaxDistance": 8,
+    "attackRange": 1,
+    "attackSpeed": 700,
+    "attackDamageMin": 100,
+    "attackDamageMax": 200,
+    "attackRecoveryTime": 700,
+    "minIdleTime": 3000,
+    "maxIdleTime": 5000,
+    "attackType": 3,
+    "attackStunDuration": 200,
+    "hp": 30
+  },
+  {
+    "id": 29,
+    "name": "Arrow Guard Tower",
+    "sprite": "gt-arrow",
+    "movementSpeed": 220
+  },
+  {
+    "id": 30,
+    "name": "Cannon Guard Tower",
+    "sprite": "gt-cannon",
+    "movementSpeed": 220
+  },
+  {
+    "id": 31,
+    "name": "Guard",
+    "sprite": "guard",
+    "movementSpeed": 700,
+    "chaseDistance": 4,
+    "chaseMaxDistance": 8,
+    "attackRange": 1,
+    "attackSpeed": 700,
+    "attackDamageMin": 100,
+    "attackDamageMax": 200,
+    "attackRecoveryTime": 700,
+    "minIdleTime": 3000,
+    "maxIdleTime": 5000,
+    "attackType": 3,
+    "attackStunDuration": 200,
+    "hp": 30,
+    "spells": [
+      {
+        "spellId": 6,
+        "castProbability": 0.5
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "name": "Hellhound",
+    "sprite": "helb",
+    "movementSpeed": 500
+  },
+  {
+    "id": 33,
+    "name": "Hellclaw",
+    "sprite": "hellclaw",
+    "movementSpeed": 220
+  },
+  {
+    "id": 34,
+    "name": "Ice Golem",
+    "sprite": "icegolem",
+    "movementSpeed": 220
+  },
+  {
+    "id": 35,
+    "name": "Light War Beetle",
+    "sprite": "lwb",
+    "movementSpeed": 220
+  },
+  {
+    "id": 36,
+    "name": "Master Mage Orc",
+    "sprite": "mastermageorc",
+    "movementSpeed": 220
+  },
+  {
+    "id": 37,
+    "name": "Minotaur",
+    "sprite": "minotaurs",
+    "movementSpeed": 220
+  },
+  {
+    "id": 38,
+    "name": "Mountain Giant",
+    "sprite": "mtgiant",
+    "movementSpeed": 220
+  },
+  {
+    "id": 39,
+    "name": "Nizie",
+    "sprite": "nizie",
+    "movementSpeed": 220
+  },
+  {
+    "id": 40,
+    "name": "Orc",
+    "sprite": "orc",
+    "movementSpeed": 700,
+    "spells": [
+      {
+        "spellId": 1,
+        "castProbability": 0.2
+      }
+    ]
+  },
+  {
+    "id": 41,
+    "name": "Dire Boar",
+    "sprite": "direboar",
+    "movementSpeed": 220
+  },
+  {
+    "id": 42,
+    "name": "Dummy",
+    "sprite": "dummy",
+    "movementSpeed": 220
+  },
+  {
+    "id": 43,
+    "name": "Fire Wyvern",
+    "sprite": "firewyvern",
+    "movementSpeed": 220
+  },
+  {
+    "id": 44,
+    "name": "Wyvern",
+    "sprite": "wyvern",
+    "movementSpeed": 220
+  },
+  {
+    "id": 45,
+    "name": "Ugly Wyvern",
+    "sprite": "uglywyvern",
+    "movementSpeed": 220
+  },
+  {
+    "id": 46,
+    "name": "Lich",
+    "sprite": "liche",
+    "movementSpeed": 220
+  },
+  {
+    "id": 47,
+    "name": "Ogre",
+    "sprite": "orge",
+    "movementSpeed": 700
+  },
+  {
+    "id": 48,
+    "name": "Rudolph",
+    "sprite": "rudolph",
+    "movementSpeed": 1000
+  },
+  {
+    "id": 49,
+    "name": "Scarecrow",
+    "sprite": "scarecrow",
+    "movementSpeed": 220
+  },
+  {
+    "id": 50,
+    "name": "Scorpion",
+    "sprite": "scp",
+    "movementSpeed": 600
+  },
+  {
+    "id": 51,
+    "name": "Skeleton",
+    "sprite": "ske",
+    "movementSpeed": 600
+  },
+  {
+    "id": 52,
+    "name": "Sorceress",
+    "sprite": "sorceress",
+    "movementSpeed": 200,
+    "chaseDistance": 20,
+    "chaseMaxDistance": 20,
+    "attackRange": 20,
+    "attackSpeed": 200,
+    "attackDamageMin": 10,
+    "attackDamageMax": 20,
+    "attackRecoveryTime": 0,
+    "minIdleTime": 0,
+    "maxIdleTime": 0,
+    "attackType": 3,
+    "attackStunDuration": 200,
+    "hp": 100,
+    "spells": [
+      {
+        "spellId": 14,
+        "castProbability": 1
+      },{
+        "spellId": 16,
+        "castProbability": 1
+      }, {
+        "spellId": 19,
+        "castProbability": 1
+      }, {
+        "spellId": 20,
+        "castProbability": 1
+      }, {
+        "spellId": 21,
+        "castProbability": 1
+      }, {
+        "spellId": 22,
+        "castProbability": 1
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "name": "Stalker",
+    "sprite": "stalker",
+    "movementSpeed": 220
+  },
+  {
+    "id": 54,
+    "name": "Tentocle",
+    "sprite": "tentocle",
+    "movementSpeed": 220
+  },
+  {
+    "id": 55,
+    "name": "Tigerworm",
+    "sprite": "tigerworm",
+    "movementSpeed": 220
+  },
+  {
+    "id": 56,
+    "name": "Temple Knight",
+    "sprite": "tk",
+    "movementSpeed": 220
+  },
+  {
+    "id": 57,
+    "name": "Ancient Temple Knight",
+    "sprite": "tpknight",
+    "movementSpeed": 220
+  },
+  {
+    "id": 58,
+    "name": "Troll",
+    "sprite": "troll",
+    "movementSpeed": 220
+  },
+  {
+    "id": 59,
+    "name": "Unicorn",
+    "sprite": "unicorn",
+    "movementSpeed": 220
+  },
+  {
+    "id": 60,
+    "name": "Werewolf",
+    "sprite": "werewolf",
+    "movementSpeed": 700
+  },
+  {
+    "id": 61,
+    "name": "Zombie",
+    "sprite": "zom",
+    "movementSpeed": 220
+  },
+  {
+    "id": 62,
+    "name": "Abaddon (incomplete)",
+    "sprite": "yspro",
+    "movementSpeed": 220
+  }
+]

@@ -1,0 +1,24 @@
+---
+description: C# formatting guidelines for server and tools
+globs: multiplayer/server/**/*.cs
+alwaysApply: false
+---
+
+# C# Guidelines
+
+- Documentation expectations for `multiplayer/server/**` match **Common Guidelines** (class purpose, non-obvious fields, non-trivial methods; keep comments in sync when behavior changes).
+
+- In `multiplayer/server/**`, do not use visibility modifiers meant to harden assembly boundaries (`internal`, `file`, `protected internal`, `private protected`). Use `public` or `private` (and `protected` only when inheritance requires it).
+
+- Use K&R brace style with opening braces on the same line.
+- Keep `else`, `catch`, and `finally` on the same line as the preceding closing brace: `} else {`, `} catch (...) {`, `} finally {`.
+- Follow `.editorconfig` for formatting details instead of inventing file-local style.
+- In hand-authored types under `multiplayer/server/**`, declare members in this order: **fields**, **properties**, **constructor(s)**, then **methods** (group related methods as you prefer).
+
+- **Timestamp naming:** Do not put `Unix` in identifiers for wall-clock instants (e.g. prefer `lastFooMs`, `nowMs`). A `Ms` suffix is enough; say “ms since epoch” in XML docs when the representation matters.
+
+- **LINQ** (`Select`, `Where`, `ToList`, etc.): Prefer it when it makes intent obvious and the work is **not** on a hot path (e.g. building protobuf payloads, visibility diffs, config transforms). On **hot paths** (per-tick world updates, inner loops over many entities), prefer explicit loops to avoid extra allocations and enumerator overhead; see the **server-performance-implementation** skill for that work surface.
+
+- **Overflow and numeric extremes:** When combining quantities, timed deltas, costs, or any client or persisted value with server state, assume `int` overflow or underflow is possible unless proven otherwise. Prefer `long` (or `decimal` where appropriate) for intermediate sums, then clamp or saturate to an explicit bound (catalog max, protocol limits, `int.MaxValue`) before narrowing. Use `checked` where silent wrap must abort instead (treat as bug). If you reject an operation instead of capping, ensure upstream state stays consistent (no half-applied mutations).
+
+- Keep `Server.cs` focused on host and network-edge concerns; put gameplay state and packet handling in dedicated server classes.

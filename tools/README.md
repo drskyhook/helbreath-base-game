@@ -14,6 +14,36 @@ pnpm install
 
 ## Scripts
 
+### client-simulator.ts
+
+Load-testing harness that opens many WebSocket clients against the multiplayer game server, issues movement and ping traffic, and writes an HTML report (`report_<unix>.html`) in the current working directory when the run ends (Ctrl+C, SIGTERM, first disconnect, or startup failure).
+
+**Prerequisites:** Game server reachable at the configured host/port (defaults: `localhost:1337`). Map assets are read from `multiplayer/mp-client/public/assets/maps/`.
+
+**Setup:** Install tool dependencies (includes `grpc-tools`, `ts-proto`, `tsx`, and `@bufbuild/protobuf`):
+
+```bash
+cd tools && pnpm install
+```
+
+**Run** (from `tools/`; `proto:generate` runs first and writes TypeScript stubs into `multiplayer/mp-client/src/proto/generated`, matching the mp-client package):
+
+```bash
+pnpm run client-simulator
+pnpm run client-simulator -- --clients=50 --port=1337
+pnpm exec tsx client-simulator.ts --ip=127.0.0.1 --minInterval=500 --maxInterval=1000
+```
+
+Optional flags: `--ip`, `--port`, `--clients`, `--rampUpTime` (seconds), `--minInterval` / `--maxInterval` (ms between movement attempts; minimum allowed interval is 220 ms).
+
+To regenerate protos only:
+
+```bash
+pnpm run proto:generate
+```
+
+---
+
 ### compress-assets.js
 
 Bundles game assets into a ZIP archive for loading. Reads `Assets.ts`, `Monsters.ts`, `Effects.ts`, `NPCs.ts`, and `Items.ts` from the client to discover assets, then compresses them into `sp-client/public/assets.zip`.

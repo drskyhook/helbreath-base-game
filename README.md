@@ -6,7 +6,7 @@
 [![Play Demo](https://img.shields.io/badge/Demo-Live-blue)](https://hbexplorer.helbreath.workers.dev/)
 [![Discord](https://img.shields.io/badge/Chat-Discord-5865F2)](https://discord.gg/P4tBdGRC3q)
 
-Helbreath Base Game is a browser-based single-player recreation of the classic [Helbreath](https://helbreath.fandom.com/wiki/Helbreath_Wiki) client, built with [Phaser 3](https://phaser.io/) and [React](https://react.dev/), and designed as a foundation for building 2D (MMO)(A)RPG-style projects. It is best thought of as a playable base client or lightweight game framework rather than a complete game.
+Helbreath Base Game is a browser-based recreation of the classic [Helbreath](https://helbreath.fandom.com/wiki/Helbreath_Wiki) client, built with [Phaser 3](https://phaser.io/) and [React](https://react.dev/), paired with an authoritative multiplayer game server written in **C# / .NET 10** that communicates over **WebSockets** with **Protobuf** messages. It is designed as a foundation for building 2D (MMO)(A)RPG-style projects and is best thought of as a playable base client + server or lightweight game framework rather than a complete game.
 
 The repository already includes a substantial amount of core functionality:
 
@@ -16,8 +16,11 @@ The repository already includes a substantial amount of core functionality:
 - Grid-based movement
 - Spells and visual effects
 - Items and inventory
-- Basic melee and ranged combat
+- Combat supporting melee, ranged, and spell attacks in PvP, PvM, and MvM settings
 - Music and audio
+- Authoritative multiplayer server with client-side prediction and reconciliation
+- Anti-hack timing guards, anti-combat-log disconnect grace, and bump prevention
+- Multi-threaded world scheduling with single-threaded per-map simulation
 
 The project has been developed heavily with AI assistance and is intentionally kept approachable for AI-assisted workflows and iterative expansion.
 
@@ -27,7 +30,10 @@ Join the [Discord server](https://discord.gg/P4tBdGRC3q) for discussion, questio
 
 ![Helbreath Base Game screenshot](./screenshot.png)
 
-Play the live demo here: [hbexplorer.helbreath.workers.dev](https://hbexplorer.helbreath.workers.dev/)
+Play the live demos here:
+
+- Single-player client: [hbexplorer.helbreath.workers.dev](https://hbexplorer.helbreath.workers.dev/)
+- Multiplayer client (connects to a hosted instance of the C# server): [hbexplorermp.helbreath.workers.dev](https://hbexplorermp.helbreath.workers.dev/)
 
 ## Built on or inspired by this project
 
@@ -39,24 +45,27 @@ Projects that extend this codebase or took inspiration from it:
 
 This project is:
 
-- A browser-based Helbreath-inspired base client
+- A browser-based Helbreath-inspired base client and a MMO server to go with it
 - A foundation for hobby RPG and MMORPG-style projects
 - A practical codebase for experimenting with Helbreath assets, mechanics, and tooling
 
 This project is not:
 
 - A finished standalone game
-- A drop-in Helbreath client (has no networking setup or compatibility with C++ server version)
+- A drop-in replacement for the original Helbreath client or the old community C++ server — the multiplayer client and server here use their own WebSocket + Protobuf protocol and are not wire-compatible with the legacy C++ server
 
 ## Why This Project Exists
 
 The goal of this repository is to preserve and modernize a large amount of Helbreath client-side content in a form that is easier to understand, extend, and build on. Instead of starting from scratch with rendering, maps, sprites, effects, UI, and core gameplay systems, developers can use this as a working base for fan projects, experiments, and original games built on similar foundations.
+
+It also exists as a **base MMORPG project** — a working, authoritative-server-plus-client template — so that anyone wanting to build a 2D MMORPG does not have to design the full stack (netcode, world threading, visibility, anti-cheat, prediction, reconciliation) from zero.
 
 ## Who This Is For
 
 - Helbreath fans who want to explore or extend the game in a modern browser-based form
 - Hobby developers building 2D RPG or MMORPG-style projects
 - Developers interested in Phaser setup with web based UI built in React
+- Developers who want to experiment with or learn from an MMORPG server written in C# / .NET
 - People experimenting with AI-assisted iteration on an existing gameplay codebase
 
 ## About Helbreath
@@ -84,6 +93,14 @@ The client is built with:
 
 The UI is rendered outside the game canvas as standard web UI, which makes it easier to build, scale, and test. For more detail, see [`sp-client/docs/UI_LAYER.md`](./sp-client/docs/UI_LAYER.md).
 
+The multiplayer server is built with:
+
+- [C# / .NET 10](https://dotnet.microsoft.com/)
+- [ASP.NET Core WebSockets](https://learn.microsoft.com/aspnet/core/fundamentals/websockets) for transport
+- [Google.Protobuf](https://protobuf.dev/) for the wire format (shared `.proto` schemas in [`multiplayer/proto`](./multiplayer/proto))
+
+For the full server design, see [`multiplayer/server/README.md`](./multiplayer/server/README.md).
+
 ## Getting Started
 
 The playable client lives in [`sp-client`](./sp-client/). For full setup and development notes, see [`sp-client/README.md`](./sp-client/README.md).
@@ -104,9 +121,21 @@ More setup and development details:
 - UI architecture: [`sp-client/docs/UI_LAYER.md`](./sp-client/docs/UI_LAYER.md)
 - Full docs folder: [`sp-client/docs`](./sp-client/docs/)
 
+### Optional: multiplayer server
+
+To also run the authoritative multiplayer server locally, install the [.NET 10 SDK](https://dotnet.microsoft.com/download) and start it:
+
+```bash
+cd multiplayer/server
+dotnet run
+```
+
+The multiplayer client lives in [`multiplayer/mp-client`](./multiplayer/mp-client) and connects to the server over WebSockets. See [`multiplayer/server/README.md`](./multiplayer/server/README.md) for the full server setup, configuration reference, and performance / stress-test notes.
+
 ## Project Structure
 
 - `sp-client` - Browser-based single-player client
+- `multiplayer` - MMO server and networked client (C# / .NET 10 server in `multiplayer/server`, browser client in `multiplayer/mp-client`, shared protobuf schemas in `multiplayer/proto`, design docs in `multiplayer/docs`)
 - `tools` - Asset and development utilities
 - `reference` - Reference material, including community C++ client/server logic and some configuration files
 
@@ -123,6 +152,8 @@ If you plan to work on a larger improvement, it helps to mention it in [Discord]
 
 ## More Docs
 
+Client docs ([`sp-client/docs`](./sp-client/docs/)):
+
 - Asset loading: [`sp-client/docs/ASSET_LOADING.md`](./sp-client/docs/ASSET_LOADING.md)
 - Map rendering: [`sp-client/docs/MAP_RENDERING.md`](./sp-client/docs/MAP_RENDERING.md)
 - Movement system: [`sp-client/docs/MOVEMENT_SYSTEM.md`](./sp-client/docs/MOVEMENT_SYSTEM.md)
@@ -131,7 +162,22 @@ If you plan to work on a larger improvement, it helps to mention it in [Discord]
 - Inventory and loot: [`sp-client/docs/INVENTORY_AND_LOOT_MECHANICS.md`](./sp-client/docs/INVENTORY_AND_LOOT_MECHANICS.md)
 - Spells and effects: [`sp-client/docs/SPELLS_AND_EFFECTS_MECHANICS.md`](./sp-client/docs/SPELLS_AND_EFFECTS_MECHANICS.md)
 
+Multiplayer docs ([`multiplayer/docs`](./multiplayer/docs/)):
+
+- Server configuration: [`multiplayer/docs/SERVER_CONFIGURATION.md`](./multiplayer/docs/SERVER_CONFIGURATION.md)
+- Threading and packet flow: [`multiplayer/docs/SERVER_THREADING_AND_PACKET_FLOW.md`](./multiplayer/docs/SERVER_THREADING_AND_PACKET_FLOW.md)
+- Performance optimizations: [`multiplayer/docs/SERVER_PERFORMANCE_OPTIMIZATIONS.md`](./multiplayer/docs/SERVER_PERFORMANCE_OPTIMIZATIONS.md)
+- Visibility tracking: [`multiplayer/docs/SERVER_VISIBILITY_TRACKING.md`](./multiplayer/docs/SERVER_VISIBILITY_TRACKING.md)
+- Client–server sync: [`multiplayer/docs/CLIENT_SERVER_SYNC.md`](./multiplayer/docs/CLIENT_SERVER_SYNC.md)
+- Movement system: [`multiplayer/docs/MOVEMENT_SYSTEM.md`](./multiplayer/docs/MOVEMENT_SYSTEM.md)
+- Combat system: [`multiplayer/docs/COMBAT_SYSTEM.md`](./multiplayer/docs/COMBAT_SYSTEM.md)
+- Spell casting: [`multiplayer/docs/SPELL_CASTING_SYSTEM.md`](./multiplayer/docs/SPELL_CASTING_SYSTEM.md)
+- Inventory and items: [`multiplayer/docs/INVENTORY_AND_ITEMS_SYSTEM.md`](./multiplayer/docs/INVENTORY_AND_ITEMS_SYSTEM.md)
+- Server monster AI: [`multiplayer/docs/SERVER_MONSTER_AI.md`](./multiplayer/docs/SERVER_MONSTER_AI.md)
+
 ## Top Priorities
+
+### Client-side
 
 - Re-create missing original damaging spells, such as Magic Missile, Lightning Arrow, Fire Field, Mass Lightning Arrow, Mass Magic Missile, and perhaps even Hellfire and Fury of Thor.
 - Abaddon fixes:
@@ -150,4 +196,10 @@ If you plan to work on a larger improvement, it helps to mention it in [Discord]
 - GM effect (originally enabled when equipped with GM Shield) is not hooked up. Add a flag in the Player dialog to enable it.
 - Weapon hit sounds need to vary based on weapon type, including unarmed. Currently they are fixed to a single sound.
 - BUG: Wyvern special animation frames currently work with a start index of `3`, but should be `4`, so there is probably an off-by-one error somewhere.
+
+### Server-side
+
+- Set up map teleport points as in the original game.
+- Set up map monster pits as in the original game.
+- Set up NPC locations as in the original game.
 

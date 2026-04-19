@@ -1,0 +1,273 @@
+[
+  {
+    "id": 0,
+    "name": "Energy Bolt",
+    "damageType": 0,
+    "aoeRadius": 1,
+    "projectileSpeed": 1500
+  },
+  {
+    "id": 1,
+    "name": "Fire Ball",
+    "damageType": 0,
+    "aoeRadius": 1,
+    "projectileSpeed": 1500
+  },
+  {
+    "id": 2,
+    "name": "Fire Strike",
+    "damageType": 0,
+    "aoeRadius": 1,
+    "projectileSpeed": 1500
+  },
+  {
+    "id": 3,
+    "name": "Chill Wind",
+    "damageType": 0,
+    "aoeRadius": 1,
+    "projectileSpeed": 1500,
+    "projectileDistance": 200,
+    "temporaryEffects": [
+      {
+        "type": 1,
+        "group": 1,
+        "duration": 10000,
+        "movementSpeedModifier": -0.5,
+        "attackSpeedModifier": -0.5,
+        "castSpeedModifier": -0.5
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Poison Cloud",
+    "damageType": 4,
+    "group": 0,
+    "aoeRadius": 1,
+    "tickRate": 1000,
+    "duration": 30000,
+    "attackType": 0
+  },
+  {
+    "id": 5,
+    "name": "Triple Energy Bolt",
+    "damageType": 0,
+    "aoeRadius": 2,
+    "projectileSpeed": 1500
+  },
+  {
+    "id": 6,
+    "name": "Lightning Bolt",
+    "damageType": 3,
+    "aimAssist": true
+  },
+  {
+    "id": 7,
+    "name": "Spike Field",
+    "damageType": 4,
+    "group": 1,
+    "aoeRadius": 2,
+    "duration": 30000,
+    "attackType": 0
+  },
+  {
+    "id": 8,
+    "name": "Fire Field",
+    "damageType": 4,
+    "group": 0,
+    "aoeRadius": 2,
+    "tickRate": 1000,
+    "duration": 30000,
+    "attackType": 0
+  },
+  {
+    "id": 9,
+    "name": "Ice Storm",
+    "damageType": 4,
+    "group": 0,
+    "aoeRadius": 0,
+    "tickRate": 1000,
+    "duration": 30000,
+    "attackType": 0,
+    "temporaryEffects": [
+      {
+        "type": 1,
+        "group": 1,
+        "duration": 10000,
+        "movementSpeedModifier": -0.5,
+        "attackSpeedModifier": -0.5,
+        "castSpeedModifier": -0.5
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Ice Strike",
+    "damageType": 0,
+    "aoeRadius": 1,
+    "projectileSpeed": 600,
+    "projectileDistance": 200,
+    "temporaryEffects": [
+      {
+        "type": 1,
+        "group": 1,
+        "duration": 10000,
+        "movementSpeedModifier": -0.5,
+        "attackSpeedModifier": -0.5,
+        "castSpeedModifier": -0.5
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Energy Strike",
+    "damageType": 0,
+    "aoeRadius": 2,
+    "projectileSpeed": 2000
+  },
+  {
+    "id": 12,
+    "name": "Mass Fire Strike",
+    "damageType": 0,
+    "aoeRadius": 2,
+    "projectileSpeed": 1500
+  },
+  {
+    "id": 13,
+    "name": "Mass Chill Wind",
+    "damageType": 0,
+    "aoeRadius": 2,
+    "projectileSpeed": 1500,
+    "projectileDistance": 200,
+    "temporaryEffects": [
+      {
+        "type": 1,
+        "group": 1,
+        "duration": 10000,
+        "movementSpeedModifier": -0.5,
+        "attackSpeedModifier": -0.5,
+        "castSpeedModifier": -0.5
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Earthworm Strike",
+    "damageType": 0,
+    "aoeRadius": 1
+  },
+  {
+    "id": 15,
+    "name": "Armor Break",
+    "damageType": 0,
+    "aoeRadius": 1
+  },
+  {
+    "id": 16,
+    "name": "Bloody Shock Wave",
+    "damageType": 2,
+    "duration": 400
+  },
+  {
+    "id": 17,
+    "name": "Mass Ice Strike",
+    "damageType": 0,
+    "aoeRadius": 2,
+    "projectileSpeed": 600,
+    "projectileDistance": 200
+  },
+  {
+    "id": 18,
+    "name": "Lightning Strike",
+    "damageType": 0,
+    "aoeRadius": 1
+  },
+  {
+    "id": 19,
+    "name": "Meteor Strike",
+    "damageType": 0,
+    "aoeRadius": 1,
+    "projectileSpeed": 1500,
+    "projectileDistance": 600
+  },
+  {
+    "id": 20,
+    "name": "Mass Lightning Strike",
+    "damageType": 0,
+    "aoeRadius": 2
+  },
+  {
+    "id": 21,
+    "name": "Blizzard",
+    "damageType": 1,
+    "projectileSpeed": 300,
+    "emissionSteps": 10,
+    "startRadius": 1,
+    "endRadius": 3,
+    "startShards": 0,
+    "endShards": 10,
+    "attackType": 2,
+    "temporaryEffects": [
+      {
+        "type": 1,
+        "group": 1,
+        "duration": 10000,
+        "movementSpeedModifier": -0.5,
+        "attackSpeedModifier": -0.5,
+        "castSpeedModifier": -0.5
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Earth Shock Wave",
+    "damageType": 2,
+    "aoeRadius": 2,
+    "duration": 400,
+    "projectileSpeed": 1500,
+    "attackType": 3
+  },
+  {
+    "id": 23,
+    "name": "Mass Blizzard",
+    "damageType": 1,
+    "projectileSpeed": 300,
+    "emissionSteps": 10,
+    "startRadius": 1,
+    "endRadius": 6,
+    "startShards": 0,
+    "endShards": 20,
+    "attackType": 2,
+    "temporaryEffects": [
+      {
+        "type": 1,
+        "group": 1,
+        "duration": 10000,
+        "movementSpeedModifier": -0.5,
+        "attackSpeedModifier": -0.5,
+        "castSpeedModifier": -0.5
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "name": "Invisibility",
+    "aimAssist": true,
+    "temporaryEffects": [{ "type": 0, "group": 0, "duration": 40000 }]
+  },
+  {
+    "id": 25,
+    "name": "Berserk",
+    "aimAssist": true,
+    "temporaryEffects": [
+      {
+        "type": 2,
+        "group": 2,
+        "duration": 40000,
+        "movementSpeedModifier": 0.5,
+        "attackSpeedModifier": 0.5,
+        "castSpeedModifier": 0.5
+      }
+    ]
+  }
+]

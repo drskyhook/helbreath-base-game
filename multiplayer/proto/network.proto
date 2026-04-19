@@ -1,0 +1,1023 @@
+syntax = "proto3";
+
+package mmorpg.network;
+
+enum MonsterEntityState {
+  MONSTER_ENTITY_STATE_IDLE = 0;
+  MONSTER_ENTITY_STATE_MOVE = 1;
+  MONSTER_ENTITY_STATE_ATTACK = 2;
+}
+
+enum GroundEffectType {
+  GROUND_EFFECT_TYPE_FIRE = 0;
+  GROUND_EFFECT_TYPE_POISON = 1;
+  GROUND_EFFECT_TYPE_SPIKE_FIELD = 2;
+  GROUND_EFFECT_TYPE_ICE_STORM = 3;
+}
+
+enum TemporaryEffectType {
+  TEMPORARY_EFFECT_TYPE_INVISIBILITY = 0;
+  TEMPORARY_EFFECT_TYPE_CHILL = 1;
+  TEMPORARY_EFFECT_TYPE_BERSERK = 2;
+}
+
+enum TemporaryEffectEntityKind {
+  TEMPORARY_EFFECT_ENTITY_KIND_PLAYER = 0;
+  TEMPORARY_EFFECT_ENTITY_KIND_MONSTER = 1;
+}
+
+// Matches client Gender / server persistence: 0 = male, 1 = female.
+enum PlayerGender {
+  PLAYER_GENDER_MALE = 0;
+  PLAYER_GENDER_FEMALE = 1;
+}
+
+// Matches client SkinColor / server persistence: 0 = light, 1 = tanned, 2 = dark.
+enum PlayerSkinColor {
+  PLAYER_SKIN_COLOR_LIGHT = 0;
+  PLAYER_SKIN_COLOR_TANNED = 1;
+  PLAYER_SKIN_COLOR_DARK = 2;
+}
+
+// Matches client MapDialog / WeatherManager string modes (dry, rain-*, snow-*).
+enum WeatherMode {
+  WEATHER_MODE_DRY = 0;
+  WEATHER_MODE_RAIN_LIGHT = 1;
+  WEATHER_MODE_RAIN_MEDIUM = 2;
+  WEATHER_MODE_RAIN_HEAVY = 3;
+  WEATHER_MODE_SNOW_LIGHT = 4;
+  WEATHER_MODE_SNOW_MEDIUM = 5;
+  WEATHER_MODE_SNOW_HEAVY = 6;
+}
+
+message ClientMessage {
+  oneof payload {
+    PingRequest ping_request = 1;
+    RequestMovement request_movement = 2;
+    MakeServerCellOccupiedRequest make_server_cell_occupied_request = 3;
+    ChangePlayerMovementSpeedRequest change_player_movement_speed_request = 4;
+    PlayerMovementStateChangeRequest player_movement_state_change_request = 5;
+    AuthenticateRequest authenticate_request = 6;
+    LogoutRequest logout_request = 7;
+    LogoutCancelledRequest logout_cancelled_request = 8;
+    WorldChangeRequest world_change_request = 9;
+    PlayerAttackModeChangeRequest player_attack_mode_change_request = 10;
+    ChangePlayerIdleDirectionRequest change_player_idle_direction_request = 11;
+    SummonMonsterRequested summon_monster_requested = 12;
+    PlayerAttackedMonsterRequest player_attacked_monster_request = 13;
+    PlayerResurrectedRequest player_resurrected_request = 14;
+    PlayerPickupRequested player_pickup_requested = 15;
+    PlayerBowStanceRequested player_bow_stance_requested = 16;
+    PlayerAttackedPlayerRequest player_attacked_player_request = 17;
+    ChangePlayerAttackStunDurationRequest change_player_attack_stun_duration_request = 18;
+    ChangePlayerAttackSpeedRequest change_player_attack_speed_request = 19;
+    ChangePlayerAttackRangeRequest change_player_attack_range_request = 20;
+    ChangePlayerAttackDamageRequest change_player_attack_damage_request = 21;
+    KillAllMonstersRequested kill_all_monsters_requested = 22;
+    PlayerTeleportRequested player_teleport_requested = 23;
+    SpellCastStartRequest spell_cast_start_request = 24;
+    SpellCastCancelRequest spell_cast_cancel_request = 25;
+    SpellCastRequest spell_cast_request = 26;
+    ChangePlayerCastSpeedRequest change_player_cast_speed_request = 27;
+    ChangePlayerAttackTypeRequest change_player_attack_type_request = 28;
+    ChangePlayerAllowDashAttackRequest change_player_allow_dash_attack_request = 29;
+    CreateItemRequest create_item_request = 30;
+    MoveItemInBagRequest move_item_in_bag_request = 31;
+    EquipItemRequest equip_item_request = 32;
+    UnequipItemRequest unequip_item_request = 33;
+    ConsumeItemRequest consume_item_request = 34;
+    ChangePlayerAppearanceRequest change_player_appearance_request = 35;
+    PlayerItemDropRequested player_item_drop_requested = 36;
+    PlayerItemPickupRequested player_item_pickup_requested = 37;
+    ChatMessageSendRequest chat_message_send_request = 38;
+    WeatherChangeRequest weather_change_request = 39;
+    SummonNpcRequest summon_npc_request = 40;
+    KillAllNpcsRequest kill_all_npcs_request = 41;
+  }
+}
+
+message WeatherChangeRequest {
+  WeatherMode weather = 1;
+}
+
+message WeatherChanged {
+  WeatherMode weather = 1;
+}
+
+message CreateItemRequest {
+  int32 item_id = 1;
+  repeated ItemEffectEntry effect_overrides = 2;
+}
+
+message MoveItemInBagRequest {
+  int64 item_uid = 1;
+  optional int32 bag_x = 2;
+  optional int32 bag_y = 3;
+}
+
+message EquipItemRequest {
+  int64 item_uid = 1;
+  optional string target_slot = 2;
+}
+
+message UnequipItemRequest {
+  string slot = 1;
+  int64 item_uid = 2;
+  optional int32 bag_x = 3;
+  optional int32 bag_y = 4;
+}
+
+message ConsumeItemRequest {
+  int64 item_uid = 1;
+}
+
+message ChangePlayerAppearanceRequest {
+  PlayerGender gender = 1;
+  PlayerSkinColor skin_color = 2;
+  // Hair style index 0–7 (client Style 1–8; index 2 = no hair).
+  int32 hair_style_index = 3;
+  // Underwear palette index 0–7.
+  int32 underwear_color_index = 4;
+}
+
+message PlayerItemDropRequested {
+  int64 item_uid = 1;
+}
+
+message PlayerItemPickupRequested {
+}
+
+message ChangePlayerAttackTypeRequest {
+  // Persisted local-player hit mode selection mirrored back to the UI; matches server AttackType / client AttackType values.
+  int32 attack_type = 1;
+}
+
+message ChangePlayerAllowDashAttackRequest {
+  // Persisted local-player dash-attack preference mirrored back to the UI.
+  bool allow_dash_attack = 1;
+}
+
+message SpellCastStartRequest {
+  int32 spell_id = 1;
+}
+
+message SpellCastCancelRequest {
+}
+
+message SpellCastRequest {
+  int32 x = 1;
+  int32 y = 2;
+  optional int64 player_id = 3;
+  optional int64 monster_id = 4;
+}
+
+message PlayerTeleportRequested {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message KillAllMonstersRequested {
+}
+
+message ChangePlayerAttackSpeedRequest {
+  int32 attack_speed_ms = 1;
+}
+
+message ChangePlayerAttackRangeRequest {
+  int32 attack_range_cells = 1;
+}
+
+message ChangePlayerAttackDamageRequest {
+  int32 attack_damage = 1;
+}
+
+message ChangePlayerAttackStunDurationRequest {
+  int32 attack_stun_duration_ms = 1;
+}
+
+message ChangePlayerCastSpeedRequest {
+  int32 cast_speed_ms = 1;
+}
+
+message PlayerBowStanceRequested {
+  int32 direction = 1;
+}
+
+message PlayerPickupRequested {
+  int32 direction = 1;
+}
+
+message PlayerResurrectedRequest {
+}
+
+message PlayerAttackedMonsterRequest {
+  int64 monster_id = 1;
+  bool ranged_attack = 2;
+  // Player attack mode vs monsters (server AttackType). Matches client AttackType enum values.
+  int32 attack_type = 3;
+}
+
+message PlayerAttackedPlayerRequest {
+  int64 target_player_id = 1;
+  bool ranged_attack = 2;
+  // Player attack mode vs players (server AttackType). Matches client AttackType enum values.
+  int32 attack_type = 3;
+}
+
+message SummonMonsterRequested {
+  string sprite = 1;
+  int32 movement_speed_ms = 2;
+  // Facing in world grid terms; matches client Direction enum (0=North .. 7=NorthWest).
+  int32 direction = 3;
+  // Monster melee hit mode on players; matches server AttackType / client AttackType enum values.
+  int32 attack_type = 4;
+  // Stunlock duration on players for Stun/Knockback hit modes (ms); server accepts 100–2000.
+  int32 stun_duration_ms = 5;
+  // Max HP at spawn (current HP equals max); server accepts 1–1000 to match summon dialog slider.
+  int32 max_hp = 6;
+  // Melee damage roll (min and max both set to this); server accepts 1–1000 to match summon dialog damage slider.
+  int32 attack_damage = 7;
+  // Full melee swing duration in ms (200 = fast … 2000 = slow); matches summon dialog attack speed slider.
+  int32 attack_speed_ms = 8;
+  // Idle gate after damage resolves: ms added with half swing; 0 = no extra recovery. Matches `GameWorldMonster.AttackRecoveryMs`.
+  optional int32 attack_recovery_ms = 9;
+  // Max Chebyshev chase distance before abandoning target (cells); summon dialog 1–20. Matches `GameWorldMonster.ChaseMaxDistanceCells`.
+  optional int32 chase_range_cells = 10;
+  // Chebyshev cells within which the monster melee-attacks instead of stepping closer; summon dialog 1–20. Matches `GameWorldMonster.AttackRangeCells`.
+  optional int32 attack_range_cells = 11;
+  // Monster hostility mode: 0 = Hostile, 1 = Neutral, 2 = Friendly.
+  int32 allegiance = 12;
+  // How many monsters to spawn (1–1000); server places each on a free cell near the player until empty or failure.
+  int32 summon_count = 13;
+}
+
+message ChangePlayerIdleDirectionRequest {
+  int32 direction = 1;
+}
+
+message LogoutCancelledRequest {
+}
+
+message AuthenticateRequest {
+  string id = 1;
+  string character_name = 2;
+}
+
+message LogoutRequest {
+}
+
+message LogoutResponse {
+  int32 wait = 1;
+}
+
+/** Server pushes this when a pending timed logout is invalidated (e.g. combat damage). */
+message LogoutCancelled {
+}
+
+message ChangePlayerMovementSpeedRequest {
+  int32 movement_speed_ms = 1;
+}
+
+message PlayerMovementStateChangeRequest {
+  bool running_mode = 1;
+}
+
+message PlayerAttackModeChangeRequest {
+  bool attack_mode = 1;
+}
+
+message PlayerMovementStateChanged {
+  int64 player_id = 1;
+  bool running_mode = 2;
+  int32 movement_speed_ms = 3;
+}
+
+message PlayerAttackModeChanged {
+  int64 player_id = 1;
+  bool attack_mode = 2;
+}
+
+message PlayerDisconnected {
+  int64 player_id = 1;
+}
+
+message PlayerReconnected {
+  int64 player_id = 1;
+}
+
+message MakeServerCellOccupiedRequest {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message RequestMovement {
+  int32 cur_x = 1;
+  int32 cur_y = 2;
+  int32 dest_x = 3;
+  int32 dest_y = 4;
+  string game_world_id = 5;
+  bool dash_attack = 6;
+  optional int64 monster_id = 7;
+  optional int32 attack_type = 8;
+  optional int64 player_id = 9;
+}
+
+message WorldChangeRequest {
+  string world_id = 1;
+  string game_world_id = 2;
+  bool validate_teleport = 3;
+}
+
+message WorldLocation {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message TeleportTarget {
+  string world_id = 1;
+  string map_name = 2;
+  WorldLocation loc = 3;
+}
+
+message TeleportLocationSet {
+  repeated WorldLocation locs = 1;
+  TeleportTarget target = 2;
+}
+
+message GroundEffectEntry {
+  int64 ground_effect_id = 1;
+  GroundEffectType effect_type = 2;
+}
+
+message GroundItemEntry {
+  int32 item_id = 1;
+  int64 item_uid = 2;
+  optional int32 quantity = 3;
+  repeated ItemEffectEntry effect_overrides = 4;
+}
+
+message GroundStateCell {
+  WorldLocation loc = 1;
+  repeated GroundEffectEntry effects = 2;
+  optional GroundItemEntry ground_item = 3;
+}
+
+message GroundStateCellRemoved {
+  WorldLocation loc = 1;
+  repeated int64 ground_effect_ids = 2;
+  optional int64 ground_item_uid = 3;
+}
+
+message GroundStatesEnteredRange {
+  repeated GroundStateCell states = 1;
+}
+
+message GroundStatesLeftRange {
+  repeated GroundStateCellRemoved states = 1;
+}
+
+message ServerMessage {
+  oneof payload {
+    PingResponse ping_response = 1;
+    InitialGameWorldState initial_game_world_state = 2;
+    ResetPosition reset_position = 3;
+    PositionCorrected position_corrected = 4;
+    PlayersEnteredRange players_entered_range = 5;
+    PlayersLeftRange players_left_range = 6;
+    PlayerMoved player_moved = 7;
+    PlayerMovementStateChanged player_movement_state_changed = 8;
+    SendMessage send_message = 9;
+    PlayerParalyzed player_paralyzed = 10;
+    LogoutResponse logout_response = 11;
+    PlayerDisconnected player_disconnected = 12;
+    PlayerReconnected player_reconnected = 13;
+    WorldsList worlds_list = 14;
+    SpawnProtectionEnabled spawn_protection_enabled = 15;
+    SpawnProtectionDisabled spawn_protection_disabled = 16;
+    PlayerAttackModeChanged player_attack_mode_changed = 17;
+    PlayerIdleDirectionChanged player_idle_direction_changed = 18;
+    MonstersList monsters_list = 19;
+    MonstersEnteredRange monsters_entered_range = 20;
+    MonstersLeftRange monsters_left_range = 21;
+    MonsterMoved monster_moved = 22;
+    MonsterAttacked monster_attacked = 23;
+    PlayerReceiveDamage player_receive_damage = 24;
+    MonsterTakeDamage monster_take_damage = 25;
+    // Other players' attack animation sync (melee or bow); bow includes monster_id for arrow VFX.
+    PlayerAttackedMonster player_attacked_monster = 26;
+    MonsterDied monster_died = 27;
+    HpUpdated hp_updated = 28;
+    PlayerDied player_died = 29;
+    PlayerResurrected player_resurrected = 30;
+    PlayerPickupPerformed player_pickup_performed = 31;
+    PlayerBowStancePerformed player_bow_stance_performed = 32;
+    PlayerAttackedPlayer player_attacked_player = 33;
+    PlayerTakeDamage player_take_damage = 34;
+    MonsterAttackedMonster monster_attacked_monster = 35;
+    MonsterTakeDamageByMonster monster_take_damage_by_monster = 36;
+    PlayerTeleported player_teleported = 37;
+    InitialState initial_state = 38;
+    SpellCastStarted spell_cast_started = 39;
+    SpellCastCancelled spell_cast_cancelled = 40;
+    CastAoeSpell cast_aoe_spell = 41;
+    CastDirectionalAoeSpell cast_directional_aoe_spell = 42;
+    // Self only: cast request arrived before cast bar interval (anti-cheat / desync).
+    SpellCastFailed spell_cast_failed = 43;
+    GroundStatesEnteredRange ground_states_entered_range = 44;
+    GroundStatesLeftRange ground_states_left_range = 45;
+    ItemAddedToBag item_added_to_bag = 46;
+    ItemRemovedFromBag item_removed_from_bag = 47;
+    ItemMovedInBag item_moved_in_bag = 48;
+    ItemEquipped item_equipped = 49;
+    ItemUnequipped item_unequipped = 50;
+    PlayerAppearanceChanged player_appearance_changed = 51;
+    ChatMessageReceived chat_message_received = 52;
+    MonsterCastAoeSpell monster_cast_aoe_spell = 53;
+    MonsterCastDirectionalAoeSpell monster_cast_directional_aoe_spell = 54;
+    TemporaryEffectApplied temporary_effect_applied = 55;
+    TemporaryEffectExpired temporary_effect_expired = 56;
+    /** Plays a one-shot effect at a grid cell (e.g. buff cast VFX). */
+    CastEffect cast_effect = 59;
+    WeatherChanged weather_changed = 60;
+    NpcsEnteredRange npcs_entered_range = 61;
+    NpcsLeftRange npcs_left_range = 62;
+    LogoutCancelled logout_cancelled = 63;
+  }
+}
+
+message TemporaryEffectApplied {
+  TemporaryEffectEntityKind entity_kind = 1;
+  int64 entity_id = 2;
+  TemporaryEffectType temporary_effect_type = 3;
+  // Authoritative effective ms after this event; cast omitted for monsters.
+  optional int32 movement_speed_ms = 4;
+  optional int32 attack_speed_ms = 5;
+  optional int32 cast_speed_ms = 6;
+}
+
+message TemporaryEffectExpired {
+  TemporaryEffectEntityKind entity_kind = 1;
+  int64 entity_id = 2;
+  TemporaryEffectType temporary_effect_type = 3;
+  optional int32 movement_speed_ms = 4;
+  optional int32 attack_speed_ms = 5;
+  optional int32 cast_speed_ms = 6;
+}
+
+/** One-shot effect at a world cell; `effect_key` matches client `Effects.ts` keys (e.g. `invisibility`). */
+message CastEffect {
+  string game_world_id = 1;
+  string effect_key = 2;
+  int32 x = 3;
+  int32 y = 4;
+}
+
+message SpellCastFailed {
+}
+
+message PlayerAppearanceChanged {
+  int64 player_id = 1;
+  PlayerGender gender = 2;
+  PlayerSkinColor skin_color = 3;
+  int32 hair_style_index = 4;
+  int32 underwear_color_index = 5;
+}
+
+// Item catalog indices for ItemEffect (client ItemEffect enum order): STORM_BRINGER=0, STAR_TWINKLE=1, GLARE=2, GLOW=3, TINT_INVENTORY=4, TINT_APPEARANCE=5.
+message ItemEffectEntry {
+  int32 effect = 1;
+  optional uint32 effect_color = 2;
+}
+
+message InventoryItemEntry {
+  int32 item_id = 1;
+  int64 item_uid = 2;
+  optional int32 bag_x = 3;
+  optional int32 bag_y = 4;
+  optional int32 quantity = 5;
+  repeated ItemEffectEntry effect_overrides = 6;
+  optional int32 bag_z_index = 7;
+}
+
+message EquippedInventoryItemEntry {
+  string slot = 1;
+  InventoryItemEntry item = 2;
+}
+
+message VisibleEquippedItemEntry {
+  string slot = 1;
+  int32 item_id = 2;
+  repeated ItemEffectEntry effect_overrides = 3;
+}
+
+// Authoritative item directory from server Config/Items.json (ids match client sprite table).
+message ItemDirectoryEntry {
+  int32 id = 1;
+  string name = 2;
+  string item_type = 3;
+  repeated string blocked_item_slots = 4;
+  optional bool stackable = 5;
+  optional bool consumable = 6;
+  repeated ItemEffectEntry effects = 7;
+  // 0 = melee (default), 1 = bow.
+  optional int32 weapon_type = 8;
+  // When set, only this gender may equip the item (matches PlayerGender).
+  optional PlayerGender equip_gender = 9;
+}
+
+message SpellEntry {
+  int32 id = 1;
+  string name = 3;
+  optional int32 damage_type = 4;
+  optional int32 aoe_radius = 5;
+  optional int32 projectile_speed = 6;
+  optional int32 emission_steps = 7;
+  optional int32 start_radius = 8;
+  optional int32 end_radius = 9;
+  optional int32 start_shards = 10;
+  optional int32 end_shards = 11;
+  // Linear AoE (e.g. Earth Shock Wave): effect duration at destination (ms); client visuals and server damage deferral use this.
+  optional int32 duration_ms = 12;
+  // Rectangle AoE with projectile delay: fixed pixel distance for travel-time (ms) when set; otherwise server uses caster-to-target pixel distance.
+  optional int32 projectile_distance_px = 13;
+  // When true, the client may send spell_cast_request player_id / monster_id to snap the cast target to that entity (aim assist).
+  optional bool aim_assist = 14;
+  // Optional timed effects from spell catalog (buff-only and/or on-hit); matches server Spells.json temporaryEffects.
+  repeated SpellTemporaryEffectSpec temporary_effects = 17;
+}
+
+message SpellTemporaryEffectSpec {
+  int32 type = 1;
+  int32 duration_ms = 2;
+  int32 group = 3;
+  // Additive speed modifiers; effective duration ms = base / (1 + sum). Omitted when unset.
+  optional double movement_speed_modifier = 4;
+  optional double attack_speed_modifier = 5;
+  optional double cast_speed_modifier = 6;
+}
+
+message InitialState {
+  repeated SpellEntry spells = 1;
+  int64 player_id = 2;
+  // Final ms per tile for this player right now; client applies as movement duration with no further run/walk math (matches server MovementSpeedMs).
+  int32 movement_speed_ms = 3;
+  bool running_mode = 4;
+  int32 ping_interval_ms = 5;
+  bool attack_mode = 6;
+  // Run/walk base ms (100–500); matches server BaseMovementSpeedMs. For UI and ChangePlayerMovementSpeed only — not for applying tile duration.
+  int32 base_movement_speed_ms = 7;
+  int32 attack_range_cells = 8;
+  int32 attack_damage = 9;
+  int32 attack_speed_ms = 10;
+  // Arrow travel speed for ranged hit timing and visuals (pixels per second).
+  int32 arrow_speed_px_per_sec = 11;
+  int32 hp = 12;
+  int32 max_hp = 13;
+  int32 player_pickup_animation_time_ms = 14;
+  int32 player_bow_animation_duration_ms = 15;
+  int32 attack_stun_duration_ms = 16;
+  // Full spell cast bar duration (ms); server clamps 200–2000.
+  int32 cast_speed_ms = 17;
+  // Persisted local-player hit mode selection mirrored back to the client UI; matches server AttackType / client AttackType values.
+  int32 attack_type = 18;
+  // Persisted local-player dash-attack preference mirrored back to the client UI.
+  bool allow_dash_attack = 19;
+  repeated ItemDirectoryEntry items_directory = 20;
+  repeated InventoryItemEntry bag_items = 21;
+  repeated EquippedInventoryItemEntry equipped_items = 22;
+  PlayerGender gender = 23;
+  PlayerSkinColor skin_color = 24;
+  int32 hair_style_index = 25;
+  int32 underwear_color_index = 26;
+  repeated NpcDirectoryEntry npc_directory = 27;
+}
+
+message ItemAddedToBag {
+  InventoryItemEntry item = 1;
+}
+
+message ItemRemovedFromBag {
+  int64 item_uid = 1;
+}
+
+message ItemMovedInBag {
+  int64 item_uid = 1;
+  optional int32 bag_x = 2;
+  optional int32 bag_y = 3;
+  int32 bag_z_index = 4;
+}
+
+message ItemEquipped {
+  int64 player_id = 1;
+  EquippedInventoryItemEntry equipped_item = 2;
+}
+
+message ItemUnequipped {
+  int64 player_id = 1;
+  string slot = 2;
+  int64 item_uid = 3;
+}
+
+message SpellCastStarted {
+  int64 player_id = 1;
+  string spell_name = 2;
+  // Full cast bar duration (ms) for observers; matches caster `cast_speed_ms` (200–2000).
+  int32 cast_speed_ms = 3;
+}
+
+message SpellCastCancelled {
+  int64 player_id = 1;
+}
+
+message CastAoeSpell {
+  int64 player_id = 1;
+  int32 spell_id = 2;
+  int32 x = 3;
+  int32 y = 4;
+}
+
+message CastDirectionalAoeSpell {
+  int64 player_id = 1;
+  int32 spell_id = 2;
+  int32 caster_x = 3;
+  int32 caster_y = 4;
+  int32 target_x = 5;
+  int32 target_y = 6;
+}
+
+message MonsterCastAoeSpell {
+  int64 monster_id = 1;
+  int32 spell_id = 2;
+  int32 x = 3;
+  int32 y = 4;
+}
+
+message MonsterCastDirectionalAoeSpell {
+  int64 monster_id = 1;
+  int32 spell_id = 2;
+  int32 caster_x = 3;
+  int32 caster_y = 4;
+  int32 target_x = 5;
+  int32 target_y = 6;
+}
+
+message PlayerTeleported {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message PlayerBowStancePerformed {
+  int64 player_id = 1;
+  int32 direction = 2;
+  int32 animation_time_ms = 3;
+  reserved 4; // was monster_id; observers animate from direction + duration only
+}
+
+message PlayerPickupPerformed {
+  int64 player_id = 1;
+  int32 direction = 2;
+  int32 animation_time_ms = 3;
+}
+
+message PlayerDied {
+  int64 player_id = 1;
+  int32 x = 2;
+  int32 y = 3;
+}
+
+message PlayerResurrected {
+  int64 player_id = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 hp = 4;
+  int32 max_hp = 5;
+}
+
+message HpUpdated {
+  int32 hp = 1;
+  int32 max_hp = 2;
+}
+
+message PlayerAttackedMonster {
+  int64 player_id = 1;
+  int32 direction = 2;
+  int32 attack_speed_ms = 3;
+  bool ranged_attack = 4;
+  int64 monster_id = 5;
+  // Authoritative attacker grid cell at swing time (matches server player PosX/PosY); clients snap remote sprites here for animation origin.
+  int32 world_x = 6;
+  int32 world_y = 7;
+  // Player attack mode vs monsters (server AttackType); used for remote crit sound / VFX (e.g. Knockback).
+  int32 attack_type = 8;
+}
+
+message PlayerAttackedPlayer {
+  int64 player_id = 1;
+  int32 direction = 2;
+  int32 attack_speed_ms = 3;
+  bool ranged_attack = 4;
+  int64 target_player_id = 5;
+  // Authoritative attacker grid cell at swing time (matches server player PosX/PosY); clients snap remote sprites here for animation origin.
+  int32 world_x = 6;
+  int32 world_y = 7;
+  // Player attack mode vs players (server AttackType); used for remote crit sound / VFX (e.g. Knockback).
+  int32 attack_type = 8;
+}
+
+message MonsterTakeDamage {
+  int64 monster_id = 1;
+  int32 damage = 2;
+  int32 attack_type = 3;
+  // Ms of monster stunlock from this hit when attack_type is Stun and server applied it; 0 when not Stun or stun was skipped (already stunned).
+  int32 stunlock_duration_ms = 4;
+  // Present when attack_type is Knockback and the monster was moved one cell (matches server occupancy); client knockback interpolation.
+  optional int32 knockback_duration_ms = 5;
+  optional int32 dest_x = 6;
+  optional int32 dest_y = 7;
+  // Authoritative monster cell before knockback (server position); clients must not infer from local prediction.
+  optional int32 knockback_from_x = 8;
+  optional int32 knockback_from_y = 9;
+  // Remaining HP after this hit (authoritative).
+  int32 hp = 10;
+}
+
+message MonsterTakeDamageByMonster {
+  int64 target_monster_id = 1;
+  int32 damage = 2;
+  int64 attacker_monster_id = 3;
+  int32 attack_type = 4;
+  int32 stunlock_duration_ms = 5;
+  optional int32 knockback_duration_ms = 6;
+  optional int32 dest_x = 7;
+  optional int32 dest_y = 8;
+  // Authoritative monster cell before knockback (server position); clients must not infer from local prediction.
+  optional int32 knockback_from_x = 9;
+  optional int32 knockback_from_y = 10;
+  // Remaining HP after this hit (authoritative).
+  int32 hp = 11;
+}
+
+message MonsterDied {
+  int64 monster_id = 1;
+  // Full corpse linger duration for this monster type (ms), from catalog or settings default.
+  int32 corpse_decay_time_ms = 2;
+}
+
+message MonsterAttacked {
+  int64 monster_id = 1;
+  int32 direction = 2;
+  int32 attack_speed_ms = 3;
+  bool ranged_attack = 4;
+  // Chase target for this swing; arrow VFX homes toward this player when ranged_attack is true.
+  int64 target_player_id = 5;
+  // Authoritative monster grid cell at swing time (matches server monster PosX/PosY); clients snap here for animation origin.
+  int32 world_x = 6;
+  int32 world_y = 7;
+}
+
+message MonsterAttackedMonster {
+  int64 monster_id = 1;
+  int32 direction = 2;
+  int32 attack_speed_ms = 3;
+  bool ranged_attack = 4;
+  int64 target_monster_id = 5;
+  // Authoritative monster grid cell at swing time (matches server monster PosX/PosY); clients snap here for animation origin.
+  int32 world_x = 6;
+  int32 world_y = 7;
+}
+
+message PlayerReceiveDamage {
+  int64 player_id = 1;
+  int32 damage = 2;
+  int64 monster_id = 3;
+  int32 attack_type = 4;
+  int32 stun_duration_ms = 5;
+  optional int32 knockback_duration_ms = 6;
+  optional int32 dest_x = 7;
+  optional int32 dest_y = 8;
+  // Authoritative cell before knockback (server position); clients must not infer from predicted movement.
+  optional int32 knockback_from_x = 9;
+  optional int32 knockback_from_y = 10;
+}
+
+message PlayerTakeDamage {
+  int64 target_player_id = 1;
+  int32 damage = 2;
+  int64 attacker_player_id = 3;
+  int32 attack_type = 4;
+  int32 stun_duration_ms = 5;
+  optional int32 knockback_duration_ms = 6;
+  optional int32 dest_x = 7;
+  optional int32 dest_y = 8;
+  // Authoritative cell before knockback (server position); clients must not infer from predicted movement.
+  optional int32 knockback_from_x = 9;
+  optional int32 knockback_from_y = 10;
+}
+
+message MonsterMoved {
+  int64 monster_id = 1;
+  int32 dest_x = 2;
+  int32 dest_y = 3;
+  int32 movement_speed_ms = 4;
+  int32 cur_x = 5;
+  int32 cur_y = 6;
+  // Facing for this step; matches client Direction (0=North .. 7=NorthWest).
+  int32 direction = 7;
+}
+
+message PlayerIdleDirectionChanged {
+  int64 player_id = 1;
+  int32 direction = 2;
+}
+
+message SpawnProtectionEnabled {
+  int64 player_id = 1;
+}
+
+message SpawnProtectionDisabled {
+  int64 player_id = 1;
+}
+
+message GameWorldListEntry {
+  string id = 1;
+  string name = 2;
+  string map = 3;
+}
+
+message WorldsList {
+  repeated GameWorldListEntry worlds = 1;
+}
+
+message MonsterListEntry {
+  string name = 1;
+  string sprite = 2;
+}
+
+message MonstersList {
+  repeated MonsterListEntry monsters = 1;
+}
+
+message PlayerParalyzed {
+  int32 duration_seconds = 1;
+}
+
+message SendMessage {
+  string message = 1;
+}
+
+message ChatMessageSendRequest {
+  string message = 1;
+}
+
+message ChatMessageReceived {
+  string sender_character_name = 1;
+  int64 timestamp_ms = 2;
+  string message = 3;
+}
+
+message PlayerEnteredRange {
+  int64 player_id = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 movement_speed_ms = 4;
+  bool running_mode = 5;
+  bool spawn_protection = 6;
+  // Facing in world grid terms; matches client Direction enum (0=North .. 7=NorthWest).
+  int32 direction = 7;
+  bool attack_mode = 8;
+  bool dead = 9;
+  repeated VisibleEquippedItemEntry visible_equipped_items = 10;
+  PlayerGender gender = 11;
+  PlayerSkinColor skin_color = 12;
+  int32 hair_style_index = 13;
+  int32 underwear_color_index = 14;
+  string character_name = 15;
+  repeated TemporaryEffectType active_temporary_effects = 16;
+  optional int32 attack_speed_ms = 17;
+  optional int32 cast_speed_ms = 18;
+}
+
+message MonsterInRange {
+  int64 monster_id = 1;
+  string sprite = 2;
+  int32 x = 3;
+  int32 y = 4;
+  MonsterEntityState state = 5;
+  string name = 6;
+  bool ranged_attack = 7;
+  int32 hp = 8;
+  int32 max_hp = 9;
+  bool dead = 10;
+  // When dead: ms remaining until server removes the corpse; 0 when alive.
+  int32 corpse_decay_time_left_ms = 11;
+  // Authoritative facing; matches client Direction (0=North .. 7=NorthWest).
+  int32 direction = 12;
+  // Per-tile step duration in ms (0 = immobile); matches server `GameWorldMonster.MovementSpeedMs`.
+  int32 movement_speed_ms = 13;
+  // Full melee swing duration in ms; matches server `GameWorldMonster.AttackSpeedMs`.
+  int32 attack_speed_ms = 14;
+  // Display / UI: typical melee hit damage (server uses min/max roll; snapshot sends min).
+  int32 attack_damage = 15;
+  // Melee hit mode on players; matches server `AttackType` / client `AttackType`.
+  int32 attack_type = 16;
+  // Monster hostility mode: 0 = Hostile, 1 = Neutral, 2 = Friendly.
+  int32 allegiance = 17;
+  repeated TemporaryEffectType active_temporary_effects = 18;
+}
+
+message MonstersEnteredRange {
+  repeated MonsterInRange monsters = 1;
+}
+
+message MonstersLeftRange {
+  repeated int64 monster_ids = 1;
+}
+
+message NpcDirectoryEntry {
+  int32 id = 1;
+  string name = 2;
+}
+
+message NpcInRange {
+  int64 npc_id = 1;
+  int32 catalog_npc_id = 2;
+  int32 x = 3;
+  int32 y = 4;
+  int32 direction = 5;
+}
+
+message NpcsEnteredRange {
+  repeated NpcInRange npcs = 1;
+}
+
+message NpcsLeftRange {
+  repeated int64 npc_ids = 1;
+}
+
+message SummonNpcRequest {
+  int32 catalog_npc_id = 1;
+  int32 direction = 2;
+}
+
+message KillAllNpcsRequest {}
+
+message PlayersEnteredRange {
+  repeated PlayerEnteredRange players = 1;
+}
+
+message PlayersLeftRange {
+  repeated int64 player_ids = 1;
+}
+
+message PlayerMoved {
+  int64 player_id = 1;
+  int32 cur_x = 2;
+  int32 cur_y = 3;
+  int32 dest_x = 4;
+  int32 dest_y = 5;
+  int32 movement_speed_ms = 6;
+  bool running_mode = 7;
+  bool dash_attack = 8;
+  // When true, observers snap the avatar to dest (e.g. server admin teleport); when false, one-cell step animation.
+  bool teleport = 9;
+}
+
+message ResetPosition {
+  int32 x = 1;
+  int32 y = 2;
+  string game_world_id = 3;
+  int32 remaining_stunlock_ms = 4;
+}
+
+message PositionCorrected {
+  int32 cur_x = 1;
+  int32 cur_y = 2;
+  int32 dest_x = 3;
+  int32 dest_y = 4;
+  string game_world_id = 5;
+}
+
+// Sent on every map load / world snapshot; character stats and spells live in InitialState (once per session when needed).
+message InitialGameWorldState {
+  string game_world_id = 1;
+  string map_name = 2;
+  int32 player_x = 3;
+  int32 player_y = 4;
+  repeated TeleportLocationSet teleport_locs = 5;
+  string music_file = 6;
+  bool dead = 7;
+  // Authoritative local player grid facing; matches client Direction (0=North .. 7=NorthWest).
+  int32 player_direction = 8;
+  WeatherMode weather = 9;
+}
+
+message PingRequest {
+  uint32 sequence = 1;
+}
+
+message PingResponse {
+  uint32 sequence = 1;
+  int32 game_world_queue_length = 2;
+  int32 players_in_map = 3;
+  double ping_variance = 4;
+}

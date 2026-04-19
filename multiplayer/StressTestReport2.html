@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stress Test Report</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --background: #0f172a;
+            --panel: #111827;
+            --panel-border: #1f2937;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --grid: #334155;
+            --avg: #22c55e;
+            --p90: #3b82f6;
+            --max: #ef4444;
+            --line: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 32px;
+            font-family: Inter, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        main {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        h1, h2, p {
+            margin: 0;
+        }
+
+        .summary {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            margin-top: 24px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .value {
+            margin-top: 8px;
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .subvalue {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .settings {
+            margin-top: 12px;
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .chart-panel {
+            margin-top: 24px;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .swatch.line {
+            border-radius: 999px;
+            height: 3px;
+            margin-top: 4px;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            padding: 16px 0 8px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Stress Test Report</h1>
+        <p class="subvalue" style="margin-top: 8px;">First disconnect observed on client 416 after initialization.</p>
+
+        <section class="summary">
+            <article class="card">
+                <p class="label">Sustained connected clients</p>
+                <p class="value">3572</p>
+                <p class="subvalue">Runtime 00:01:38.466</p>
+            </article>
+
+            <article class="card">
+                <p class="label">Simulator settings</p>
+                <p class="settings">ws://localhost:1337/ws | clients=5000 | rampUpTime=60s | movementInterval=300-400ms</p>
+            </article>
+
+            <article class="card">
+                <p class="label">Totals</p>
+                <p class="settings">movementRequests=640643<br />pingRequests=241728<br />requestsPerSecond=8961.17<br />positionCorrections=206<br />resetPositions=961<br />playersEnteredBatches=695762<br />playersLeftBatches=656260<br />remotePlayerMoves=9205843<br />remoteMonsterMoves=1121162<br />monstersEnteredBatches=139547<br />monstersLeftBatches=136107<br />remoteMovementStateMessages=0<br />snapshotMeanAvgPingMs=22.59<br />snapshotP90PingMs=68<br />snapshotMaxPingMs=523</p>
+            </article>
+        </section>
+
+        <section class="chart-panel">
+            <div class="chart-header">
+                <div>
+                    <h2>Ping and Connected Clients by Second</h2>
+                    <p class="subvalue">Bars show average, P90, and max ping for each 1-second snapshot. The white line shows total connected clients.</p>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="swatch" style="background: var(--avg);"></span>Average ping</span>
+                    <span class="legend-item"><span class="swatch" style="background: var(--p90);"></span>P90 ping</span>
+                    <span class="legend-item"><span class="swatch" style="background: var(--max);"></span>Max ping</span>
+                    <span class="legend-item"><span class="swatch line" style="background: var(--line);"></span>Clients</span>
+                </div>
+            </div>
+            <div id="chart"></div>
+        </section>
+    </main>
+
+    <script>
+        const report = {"generatedAtUnixTime":1776460972,"runtimeMs":98466,"sustainedConnectedClients":3572,"endReason":"First disconnect observed on client 416 after initialization.","settings":{"ip":"localhost","port":1337,"clients":5000,"rampUpTimeSeconds":60,"minIntervalMs":300,"maxIntervalMs":400},"totals":{"movementRequests":640643,"pingRequests":241728,"positionCorrections":206,"resetPositions":961,"playersEnteredBatches":695762,"playersLeftBatches":656260,"remotePlayerMoves":9205843,"remoteMonsterMoves":1121162,"monstersEnteredBatches":139547,"monstersLeftBatches":136107,"remoteMovementStateMessages":0,"requestsPerSecond":8961.17,"snapshotMeanAvgPingMs":22.59,"snapshotP90PingMs":68,"snapshotMaxPingMs":523},"snapshots":[{"elapsedSeconds":1,"connectedClients":76,"averagePingMs":0.3,"p90PingMs":1,"maxPingMs":6},{"elapsedSeconds":2,"connectedClients":157,"averagePingMs":0.13,"p90PingMs":0,"maxPingMs":4},{"elapsedSeconds":3,"connectedClients":238,"averagePingMs":0.04,"p90PingMs":0,"maxPingMs":1},{"elapsedSeconds":4,"connectedClients":319,"averagePingMs":0.05,"p90PingMs":0,"maxPingMs":2},{"elapsedSeconds":5,"connectedClients":400,"averagePingMs":0.06,"p90PingMs":0,"maxPingMs":2},{"elapsedSeconds":6,"connectedClients":482,"averagePingMs":0.07,"p90PingMs":0,"maxPingMs":9},{"elapsedSeconds":7,"connectedClients":563,"averagePingMs":0.03,"p90PingMs":0,"maxPingMs":2},{"elapsedSeconds":8,"connectedClients":644,"averagePingMs":0.07,"p90PingMs":0,"maxPingMs":3},{"elapsedSeconds":9,"connectedClients":725,"averagePingMs":0.05,"p90PingMs":0,"maxPingMs":2},{"elapsedSeconds":10,"connectedClients":807,"averagePingMs":0.06,"p90PingMs":0,"maxPingMs":2},{"elapsedSeconds":11,"connectedClients":888,"averagePingMs":0.07,"p90PingMs":0,"maxPingMs":2},{"elapsedSeconds":12,"connectedClients":969,"averagePingMs":0.4,"p90PingMs":1,"maxPingMs":13},{"elapsedSeconds":13,"connectedClients":1051,"averagePingMs":0.14,"p90PingMs":1,"maxPingMs":3},{"elapsedSeconds":14,"connectedClients":1132,"averagePingMs":0.22,"p90PingMs":1,"maxPingMs":4},{"elapsedSeconds":15,"connectedClients":1214,"averagePingMs":0.28,"p90PingMs":1,"maxPingMs":4},{"elapsedSeconds":16,"connectedClients":1294,"averagePingMs":0.33,"p90PingMs":1,"maxPingMs":4},{"elapsedSeconds":17,"connectedClients":1374,"averagePingMs":1.22,"p90PingMs":2,"maxPingMs":28},{"elapsedSeconds":18,"connectedClients":1455,"averagePingMs":0.54,"p90PingMs":1,"maxPingMs":5},{"elapsedSeconds":19,"connectedClients":1534,"averagePingMs":1.73,"p90PingMs":2,"maxPingMs":37},{"elapsedSeconds":20,"connectedClients":1615,"averagePingMs":0.75,"p90PingMs":1,"maxPingMs":5},{"elapsedSeconds":21,"connectedClients":1695,"averagePingMs":0.87,"p90PingMs":2,"maxPingMs":7},{"elapsedSeconds":22,"connectedClients":1775,"averagePingMs":0.9,"p90PingMs":2,"maxPingMs":6},{"elapsedSeconds":23,"connectedClients":1856,"averagePingMs":0.95,"p90PingMs":2,"maxPingMs":7},{"elapsedSeconds":24,"connectedClients":1935,"averagePingMs":1.32,"p90PingMs":3,"maxPingMs":10},{"elapsedSeconds":25,"connectedClients":2010,"averagePingMs":2.98,"p90PingMs":6,"maxPingMs":30},{"elapsedSeconds":26,"connectedClients":2088,"averagePingMs":1.91,"p90PingMs":3,"maxPingMs":10},{"elapsedSeconds":27,"connectedClients":2161,"averagePingMs":2.72,"p90PingMs":5,"maxPingMs":10},{"elapsedSeconds":28,"connectedClients":2230,"averagePingMs":3.93,"p90PingMs":7,"maxPingMs":12},{"elapsedSeconds":29,"connectedClients":2288,"averagePingMs":5.65,"p90PingMs":10,"maxPingMs":21},{"elapsedSeconds":30,"connectedClients":2342,"averagePingMs":6.68,"p90PingMs":11,"maxPingMs":21},{"elapsedSeconds":31,"connectedClients":2394,"averagePingMs":8.11,"p90PingMs":16,"maxPingMs":23},{"elapsedSeconds":32,"connectedClients":2440,"averagePingMs":11.86,"p90PingMs":20,"maxPingMs":66},{"elapsedSeconds":33,"connectedClients":2486,"averagePingMs":12.95,"p90PingMs":23,"maxPingMs":70},{"elapsedSeconds":34,"connectedClients":2532,"averagePingMs":12.49,"p90PingMs":22,"maxPingMs":29},{"elapsedSeconds":35,"connectedClients":2569,"averagePingMs":12.34,"p90PingMs":20,"maxPingMs":31},{"elapsedSeconds":36,"connectedClients":2603,"averagePingMs":13.4,"p90PingMs":21,"maxPingMs":28},{"elapsedSeconds":37,"connectedClients":2634,"averagePingMs":15.34,"p90PingMs":24,"maxPingMs":38},{"elapsedSeconds":38,"connectedClients":2664,"averagePingMs":15.95,"p90PingMs":25,"maxPingMs":31},{"elapsedSeconds":39,"connectedClients":2693,"averagePingMs":15.55,"p90PingMs":24,"maxPingMs":31},{"elapsedSeconds":40,"connectedClients":2717,"averagePingMs":20.06,"p90PingMs":36,"maxPingMs":84},{"elapsedSeconds":41,"connectedClients":2743,"averagePingMs":18.14,"p90PingMs":27,"maxPingMs":36},{"elapsedSeconds":42,"connectedClients":2768,"averagePingMs":19.03,"p90PingMs":30,"maxPingMs":37},{"elapsedSeconds":43,"connectedClients":2792,"averagePingMs":18.6,"p90PingMs":31,"maxPingMs":39},{"elapsedSeconds":44,"connectedClients":2814,"averagePingMs":22.05,"p90PingMs":34,"maxPingMs":48},{"elapsedSeconds":45,"connectedClients":2836,"averagePingMs":20.33,"p90PingMs":33,"maxPingMs":42},{"elapsedSeconds":46,"connectedClients":2857,"averagePingMs":22.57,"p90PingMs":33,"maxPingMs":42},{"elapsedSeconds":47,"connectedClients":2876,"averagePingMs":24.76,"p90PingMs":40,"maxPingMs":66},{"elapsedSeconds":48,"connectedClients":2897,"averagePingMs":23.04,"p90PingMs":36,"maxPingMs":46},{"elapsedSeconds":49,"connectedClients":2917,"averagePingMs":23.06,"p90PingMs":38,"maxPingMs":54},{"elapsedSeconds":50,"connectedClients":2937,"averagePingMs":24.48,"p90PingMs":37,"maxPingMs":46},{"elapsedSeconds":51,"connectedClients":2957,"averagePingMs":23.79,"p90PingMs":36,"maxPingMs":47},{"elapsedSeconds":52,"connectedClients":2977,"averagePingMs":25.06,"p90PingMs":37,"maxPingMs":46},{"elapsedSeconds":53,"connectedClients":2995,"averagePingMs":27.01,"p90PingMs":41,"maxPingMs":65},{"elapsedSeconds":54,"connectedClients":3013,"averagePingMs":26.85,"p90PingMs":41,"maxPingMs":57},{"elapsedSeconds":55,"connectedClients":3033,"averagePingMs":27.53,"p90PingMs":42,"maxPingMs":49},{"elapsedSeconds":56,"connectedClients":3051,"averagePingMs":28.17,"p90PingMs":43,"maxPingMs":50},{"elapsedSeconds":57,"connectedClients":3068,"averagePingMs":29.73,"p90PingMs":45,"maxPingMs":57},{"elapsedSeconds":58,"connectedClients":3086,"averagePingMs":26.92,"p90PingMs":45,"maxPingMs":54},{"elapsedSeconds":59,"connectedClients":3102,"averagePingMs":34.05,"p90PingMs":56,"maxPingMs":89},{"elapsedSeconds":60,"connectedClients":3118,"averagePingMs":30.11,"p90PingMs":48,"maxPingMs":70},{"elapsedSeconds":61,"connectedClients":3135,"averagePingMs":29.84,"p90PingMs":48,"maxPingMs":56},{"elapsedSeconds":62,"connectedClients":3150,"averagePingMs":31.53,"p90PingMs":45,"maxPingMs":57},{"elapsedSeconds":63,"connectedClients":3165,"averagePingMs":31.16,"p90PingMs":53,"maxPingMs":80},{"elapsedSeconds":64,"connectedClients":3180,"averagePingMs":33.79,"p90PingMs":50,"maxPingMs":94},{"elapsedSeconds":65,"connectedClients":3195,"averagePingMs":32.6,"p90PingMs":50,"maxPingMs":60},{"elapsedSeconds":66,"connectedClients":3209,"averagePingMs":33.34,"p90PingMs":49,"maxPingMs":71},{"elapsedSeconds":67,"connectedClients":3224,"averagePingMs":34.33,"p90PingMs":53,"maxPingMs":68},{"elapsedSeconds":68,"connectedClients":3238,"averagePingMs":32.15,"p90PingMs":52,"maxPingMs":62},{"elapsedSeconds":69,"connectedClients":3251,"averagePingMs":38.08,"p90PingMs":60,"maxPingMs":85},{"elapsedSeconds":70,"connectedClients":3265,"averagePingMs":32.43,"p90PingMs":48,"maxPingMs":61},{"elapsedSeconds":71,"connectedClients":3279,"averagePingMs":35.25,"p90PingMs":56,"maxPingMs":66},{"elapsedSeconds":72,"connectedClients":3293,"averagePingMs":34.71,"p90PingMs":49,"maxPingMs":66},{"elapsedSeconds":73,"connectedClients":3305,"averagePingMs":44.19,"p90PingMs":76,"maxPingMs":117},{"elapsedSeconds":74,"connectedClients":3318,"averagePingMs":39.7,"p90PingMs":61,"maxPingMs":85},{"elapsedSeconds":75,"connectedClients":3331,"averagePingMs":38.45,"p90PingMs":59,"maxPingMs":69},{"elapsedSeconds":76,"connectedClients":3344,"averagePingMs":37.46,"p90PingMs":57,"maxPingMs":70},{"elapsedSeconds":77,"connectedClients":3357,"averagePingMs":39.64,"p90PingMs":59,"maxPingMs":71},{"elapsedSeconds":78,"connectedClients":3370,"averagePingMs":39.15,"p90PingMs":61,"maxPingMs":88},{"elapsedSeconds":79,"connectedClients":3382,"averagePingMs":44.79,"p90PingMs":70,"maxPingMs":101},{"elapsedSeconds":80,"connectedClients":3394,"averagePingMs":39.02,"p90PingMs":61,"maxPingMs":73},{"elapsedSeconds":81,"connectedClients":3406,"averagePingMs":40.18,"p90PingMs":62,"maxPingMs":76},{"elapsedSeconds":82,"connectedClients":3418,"averagePingMs":41.05,"p90PingMs":61,"maxPingMs":72},{"elapsedSeconds":83,"connectedClients":3430,"averagePingMs":41.14,"p90PingMs":57,"maxPingMs":71},{"elapsedSeconds":84,"connectedClients":3441,"averagePingMs":47.95,"p90PingMs":77,"maxPingMs":101},{"elapsedSeconds":85,"connectedClients":3453,"averagePingMs":42.68,"p90PingMs":64,"maxPingMs":73},{"elapsedSeconds":86,"connectedClients":3465,"averagePingMs":43.73,"p90PingMs":67,"maxPingMs":80},{"elapsedSeconds":87,"connectedClients":3477,"averagePingMs":43.85,"p90PingMs":65,"maxPingMs":78},{"elapsedSeconds":88,"connectedClients":3489,"averagePingMs":41.14,"p90PingMs":59,"maxPingMs":72},{"elapsedSeconds":89,"connectedClients":3499,"averagePingMs":47.57,"p90PingMs":75,"maxPingMs":101},{"elapsedSeconds":90,"connectedClients":3511,"averagePingMs":46.76,"p90PingMs":70,"maxPingMs":80},{"elapsedSeconds":91,"connectedClients":3522,"averagePingMs":46.82,"p90PingMs":73,"maxPingMs":96},{"elapsedSeconds":92,"connectedClients":3533,"averagePingMs":47.72,"p90PingMs":68,"maxPingMs":80},{"elapsedSeconds":93,"connectedClients":3544,"averagePingMs":46.3,"p90PingMs":70,"maxPingMs":83},{"elapsedSeconds":94,"connectedClients":3555,"averagePingMs":71.3,"p90PingMs":147,"maxPingMs":409},{"elapsedSeconds":95,"connectedClients":3565,"averagePingMs":108.64,"p90PingMs":207,"maxPingMs":523}]};
+
+        function renderChart() {
+            if (!Array.isArray(report.snapshots) || report.snapshots.length === 0) {
+                return;
+            }
+
+            const root = document.getElementById('chart');
+            if (!root) {
+                return;
+            }
+
+            const snapshots = report.snapshots;
+            const width = 1400;
+            const height = 640;
+            const margin = { top: 48, right: 88, bottom: 76, left: 88 };
+            const plotWidth = width - margin.left - margin.right;
+            const plotHeight = height - margin.top - margin.bottom;
+            const pingMax = Math.max(1, ...snapshots.map((snapshot) => snapshot.maxPingMs ?? 0));
+            const connectedMax = Math.max(1, ...snapshots.map((snapshot) => snapshot.connectedClients));
+            const xStep = plotWidth / snapshots.length;
+            const groupWidth = Math.max(6, xStep * 0.72);
+            const barWidth = Math.max(1, groupWidth / 3 - 2);
+            const labelStep = Math.max(1, Math.ceil(snapshots.length / 18));
+            const gridLines = 5;
+
+            const toPingY = (value) => margin.top + plotHeight - (value / pingMax) * plotHeight;
+            const toConnectedY = (value) => margin.top + plotHeight - (value / connectedMax) * plotHeight;
+            const xCenter = (index) => margin.left + xStep * index + xStep / 2;
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+            const append = (tag, attributes) => {
+                const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+                for (const [key, value] of Object.entries(attributes)) {
+                    element.setAttribute(key, String(value));
+                }
+                svg.appendChild(element);
+                return element;
+            };
+
+            for (let index = 0; index <= gridLines; index++) {
+                const ratio = index / gridLines;
+                const y = margin.top + plotHeight - ratio * plotHeight;
+                append('line', { x1: margin.left, y1: y, x2: margin.left + plotWidth, y2: y, stroke: '#334155', 'stroke-width': 1 });
+
+                const pingValue = Math.round(pingMax * ratio);
+                append('text', {
+                    x: margin.left - 12,
+                    y: y + 4,
+                    fill: '#94a3b8',
+                    'font-size': 12,
+                    'text-anchor': 'end',
+                }).textContent = String(pingValue);
+
+                const connectedValue = Math.round(connectedMax * ratio);
+                append('text', {
+                    x: margin.left + plotWidth + 12,
+                    y: y + 4,
+                    fill: '#94a3b8',
+                    'font-size': 12,
+                    'text-anchor': 'start',
+                }).textContent = String(connectedValue);
+            }
+
+            append('line', {
+                x1: margin.left,
+                y1: margin.top + plotHeight,
+                x2: margin.left + plotWidth,
+                y2: margin.top + plotHeight,
+                stroke: '#cbd5e1',
+                'stroke-width': 1.5,
+            });
+
+            append('line', {
+                x1: margin.left,
+                y1: margin.top,
+                x2: margin.left,
+                y2: margin.top + plotHeight,
+                stroke: '#cbd5e1',
+                'stroke-width': 1.5,
+            });
+
+            append('line', {
+                x1: margin.left + plotWidth,
+                y1: margin.top,
+                x2: margin.left + plotWidth,
+                y2: margin.top + plotHeight,
+                stroke: '#cbd5e1',
+                'stroke-width': 1.5,
+            });
+
+            append('text', {
+                x: margin.left - 56,
+                y: margin.top - 16,
+                fill: '#e5e7eb',
+                'font-size': 14,
+                'font-weight': 600,
+            }).textContent = 'Ping (ms)';
+
+            append('text', {
+                x: margin.left + plotWidth + 8,
+                y: margin.top - 16,
+                fill: '#e5e7eb',
+                'font-size': 14,
+                'font-weight': 600,
+            }).textContent = 'Clients';
+
+            append('text', {
+                x: margin.left + plotWidth / 2,
+                y: height - 20,
+                fill: '#e5e7eb',
+                'font-size': 14,
+                'text-anchor': 'middle',
+                'font-weight': 600,
+            }).textContent = 'Time (seconds)';
+
+            const linePoints = [];
+
+            snapshots.forEach((snapshot, index) => {
+                const centerX = xCenter(index);
+                const leftX = centerX - groupWidth / 2;
+                const bars = [
+                    { value: snapshot.averagePingMs, color: '#22c55e' },
+                    { value: snapshot.p90PingMs, color: '#3b82f6' },
+                    { value: snapshot.maxPingMs, color: '#ef4444' },
+                ];
+
+                bars.forEach((bar, barIndex) => {
+                    if (bar.value === null) {
+                        return;
+                    }
+
+                    const barHeight = Math.max(1, margin.top + plotHeight - toPingY(bar.value));
+                    append('rect', {
+                        x: leftX + barIndex * (barWidth + 2),
+                        y: toPingY(bar.value),
+                        width: barWidth,
+                        height: barHeight,
+                        fill: bar.color,
+                        rx: 2,
+                    });
+                });
+
+                linePoints.push(`${centerX},${toConnectedY(snapshot.connectedClients)}`);
+                append('circle', {
+                    cx: centerX,
+                    cy: toConnectedY(snapshot.connectedClients),
+                    r: 3,
+                    fill: '#f8fafc',
+                });
+
+                if ((index + 1) % labelStep === 0 || index === 0 || index === snapshots.length - 1) {
+                    append('text', {
+                        x: centerX,
+                        y: margin.top + plotHeight + 24,
+                        fill: '#94a3b8',
+                        'font-size': 12,
+                        'text-anchor': 'middle',
+                    }).textContent = String(snapshot.elapsedSeconds);
+                }
+            });
+
+            append('polyline', {
+                points: linePoints.join(' '),
+                fill: 'none',
+                stroke: '#f8fafc',
+                'stroke-width': 2.5,
+                'stroke-linejoin': 'round',
+                'stroke-linecap': 'round',
+            });
+
+            root.replaceChildren(svg);
+        }
+
+        renderChart();
+    </script>
+</body>
+</html>

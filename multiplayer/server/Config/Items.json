@@ -1,0 +1,1762 @@
+[
+  {
+    "id": 1,
+    "name": "Barbarian Battle Hammer",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Storm Bringer",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 0
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Short Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 4,
+    "name": "Tower Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 5,
+    "name": "Knight Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 6,
+    "name": "Lagi Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 7,
+    "name": "Leather Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 8,
+    "name": "Aresden Hero Armor",
+    "itemType": "armor"
+  },
+  {
+    "id": 9,
+    "name": "Elvine Hero Armor",
+    "itemType": "armor"
+  },
+  {
+    "id": 10,
+    "name": "Aresden Hero Hauberk",
+    "itemType": "hauberk"
+  },
+  {
+    "id": 11,
+    "name": "Elvine Hero Hauberk",
+    "itemType": "hauberk"
+  },
+  {
+    "id": 12,
+    "name": "Chemise",
+    "itemType": "hauberk",
+    "gender": 1
+  },
+  {
+    "id": 13,
+    "name": "Aresden Hero Leggings",
+    "itemType": "leggings"
+  },
+  {
+    "id": 14,
+    "name": "Elvine Hero Leggings",
+    "itemType": "leggings"
+  },
+  {
+    "id": 15,
+    "name": "Aresden Hero Helmet",
+    "itemType": "helmet"
+  },
+  {
+    "id": 16,
+    "name": "Elvine Hero Helmet",
+    "itemType": "helmet"
+  },
+  {
+    "id": 17,
+    "name": "Aresden Hero Robe",
+    "itemType": "armor"
+  },
+  {
+    "id": 18,
+    "name": "Elvine Hero Robe",
+    "itemType": "armor"
+  },
+  {
+    "id": 20,
+    "name": "Aresden Hero Cap",
+    "itemType": "helmet"
+  },
+  {
+    "id": 21,
+    "name": "Elvine Hero Cap",
+    "itemType": "helmet"
+  },
+  {
+    "id": 22,
+    "name": "Aresden Hero Cape",
+    "itemType": "cape"
+  },
+  {
+    "id": 23,
+    "name": "Aresden Hero Long Cape",
+    "itemType": "cape"
+  },
+  {
+    "id": 24,
+    "name": "Elvine Hero Cape",
+    "itemType": "cape"
+  },
+  {
+    "id": 25,
+    "name": "Elvine Hero Long Cape",
+    "itemType": "cape"
+  },
+  {
+    "id": 26,
+    "name": "Long Boots (White)",
+    "itemType": "boots"
+  },
+  {
+    "id": 27,
+    "name": "Angelic Pendant (STR)",
+    "itemType": "accessory",
+    "effects": [
+      {
+        "effect": 1
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Angelic Pendant (DEX)",
+    "itemType": "accessory",
+    "effects": [
+      {
+        "effect": 1
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Angelic Pendant (INT)",
+    "itemType": "accessory",
+    "effects": [
+      {
+        "effect": 1
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Angelic Pendant (MAG)",
+    "itemType": "accessory",
+    "effects": [
+      {
+        "effect": 1
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "name": "Necklace of Ice Elemental",
+    "itemType": "necklace"
+  },
+  {
+    "id": 32,
+    "name": "Gold Ring",
+    "itemType": "ring"
+  },
+  {
+    "id": 33,
+    "name": "Silver Ring",
+    "itemType": "ring"
+  },
+  {
+    "id": 34,
+    "name": "Emerald Ring",
+    "itemType": "ring"
+  },
+  {
+    "id": 35,
+    "name": "Gold",
+    "itemType": "misc",
+    "stackable": true
+  },
+  {
+    "id": 36,
+    "name": "Red Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 37,
+    "name": "Dark Knight Templar Sword",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 255
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "name": "Templar Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 39,
+    "name": "Merien Shield",
+    "itemType": "shield",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 65280
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "name": "Merien Plate Mail",
+    "itemType": "armor",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 65280
+      },
+      {
+        "effect": 4,
+        "effectColor": 65280
+      }
+    ]
+  },
+  {
+    "id": 41,
+    "name": "Dark Mage Templar Wand",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 65280
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "name": "Xelima Axe",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 16711680
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "name": "Long Boots (Red)",
+    "itemType": "boots",
+    "effects": [
+      {
+        "effect": 5,
+        "effectColor": 16711680
+      },
+      {
+        "effect": 4,
+        "effectColor": 16711680
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "name": "Giant Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 45,
+    "name": "Radiance (unofficial)",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 4,
+        "effectColor": 16771584
+      },
+      {
+        "effect": 3,
+        "effectColor": 16777103
+      },
+      {
+        "effect": 2,
+        "effectColor": 16777103
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "name": "Short Bow",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ],
+    "weaponType": 1
+  },
+  {
+    "id": 47,
+    "name": "Long Bow",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ],
+    "weaponType": 1
+  },
+  {
+    "id": 48,
+    "name": "Direction Bow",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ],
+    "weaponType": 1
+  },
+  {
+    "id": 49,
+    "name": "Fire Bow",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ],
+    "weaponType": 1
+  },
+  {
+    "id": 50,
+    "name": "Composite Bow",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ],
+    "weaponType": 1
+  },
+  {
+    "id": 51,
+    "name": "Dark Elf Bow",
+    "itemType": "weapon",
+    "blockedItemSlots": [
+      "shield"
+    ],
+    "weaponType": 1
+  },
+  {
+    "id": 52,
+    "name": "Dagger",
+    "itemType": "weapon"
+  },
+  {
+    "id": 53,
+    "name": "Long Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 54,
+    "name": "Sabre",
+    "itemType": "weapon"
+  },
+  {
+    "id": 55,
+    "name": "Excalibur",
+    "itemType": "weapon"
+  },
+  {
+    "id": 56,
+    "name": "Scimitar",
+    "itemType": "weapon"
+  },
+  {
+    "id": 57,
+    "name": "Falchion",
+    "itemType": "weapon"
+  },
+  {
+    "id": 58,
+    "name": "Rapier",
+    "itemType": "weapon"
+  },
+  {
+    "id": 59,
+    "name": "Broad Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 60,
+    "name": "Bastard Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 61,
+    "name": "Claymore",
+    "itemType": "weapon"
+  },
+  {
+    "id": 62,
+    "name": "Great Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 63,
+    "name": "Flamberge",
+    "itemType": "weapon"
+  },
+  {
+    "id": 64,
+    "name": "Light Axe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 65,
+    "name": "Tomahawk",
+    "itemType": "weapon"
+  },
+  {
+    "id": 66,
+    "name": "Double Axe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 67,
+    "name": "War Axe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 68,
+    "name": "4 Bladed Golden Axe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 69,
+    "name": "Pickaxe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 70,
+    "name": "Battle Axe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 71,
+    "name": "Kloness Axe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 72,
+    "name": "Hoe",
+    "itemType": "weapon"
+  },
+  {
+    "id": 73,
+    "name": "Targe Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 74,
+    "name": "Scooterm Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 75,
+    "name": "Blonde Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 76,
+    "name": "Iron Shield",
+    "itemType": "shield"
+  },
+  {
+    "id": 77,
+    "name": "Magic Wand 1",
+    "itemType": "weapon"
+  },
+  {
+    "id": 78,
+    "name": "Magic Wand 2",
+    "itemType": "weapon"
+  },
+  {
+    "id": 79,
+    "name": "Berserk Wand",
+    "itemType": "weapon"
+  },
+  {
+    "id": 80,
+    "name": "Kloness Wand",
+    "itemType": "weapon"
+  },
+  {
+    "id": 81,
+    "name": "Resurrection Wand",
+    "itemType": "weapon"
+  },
+  {
+    "id": 82,
+    "name": "Templar Wand",
+    "itemType": "weapon"
+  },
+  {
+    "id": 83,
+    "name": "Magic Necklace (RM10)",
+    "itemType": "necklace"
+  },
+  {
+    "id": 84,
+    "name": "Magic Necklace (DM+1)",
+    "itemType": "necklace"
+  },
+  {
+    "id": 85,
+    "name": "Magic Necklace (MS10)",
+    "itemType": "necklace"
+  },
+  {
+    "id": 86,
+    "name": "Magic Necklace (DF+10)",
+    "itemType": "necklace"
+  },
+  {
+    "id": 87,
+    "name": "Gold Necklace",
+    "itemType": "necklace"
+  },
+  {
+    "id": 88,
+    "name": "Silver Necklace",
+    "itemType": "necklace"
+  },
+  {
+    "id": 89,
+    "name": "Necklace of Lightning Protection",
+    "itemType": "necklace"
+  },
+  {
+    "id": 90,
+    "name": "Necklace of Fire Protection",
+    "itemType": "necklace"
+  },
+  {
+    "id": 91,
+    "name": "Necklace of Poision Protection",
+    "itemType": "necklace"
+  },
+  {
+    "id": 92,
+    "name": "Necklace of Medusa",
+    "itemType": "necklace"
+  },
+  {
+    "id": 93,
+    "name": "Necklace of Ice Protection",
+    "itemType": "necklace"
+  },
+  {
+    "id": 94,
+    "name": "Necklace of Air Elemental",
+    "itemType": "necklace"
+  },
+  {
+    "id": 95,
+    "name": "Necklace of Efreet",
+    "itemType": "necklace"
+  },
+  {
+    "id": 96,
+    "name": "Necklace of Beholder",
+    "itemType": "necklace"
+  },
+  {
+    "id": 97,
+    "name": "Necklace of Stone Golem",
+    "itemType": "necklace"
+  },
+  {
+    "id": 98,
+    "name": "Necklace of Lich",
+    "itemType": "necklace"
+  },
+  {
+    "id": 99,
+    "name": "Necklace of Merien",
+    "itemType": "necklace"
+  },
+  {
+    "id": 100,
+    "name": "Necklace of Kloness",
+    "itemType": "necklace"
+  },
+  {
+    "id": 101,
+    "name": "Necklace of Xelima",
+    "itemType": "necklace"
+  },
+  {
+    "id": 102,
+    "name": "Lucky Gold Ring",
+    "itemType": "ring"
+  },
+  {
+    "id": 104,
+    "name": "Sapphire Ring",
+    "itemType": "ring"
+  },
+  {
+    "id": 105,
+    "name": "Ruby Ring",
+    "itemType": "ring"
+  },
+  {
+    "id": 106,
+    "name": "Ring of Xelima",
+    "itemType": "ring"
+  },
+  {
+    "id": 107,
+    "name": "Ring of Abaddon",
+    "itemType": "ring"
+  },
+  {
+    "id": 108,
+    "name": "Ring of Ogre Power",
+    "itemType": "ring"
+  },
+  {
+    "id": 109,
+    "name": "Ring of Demon Power",
+    "itemType": "ring"
+  },
+  {
+    "id": 110,
+    "name": "Ring of Wizard",
+    "itemType": "ring"
+  },
+  {
+    "id": 111,
+    "name": "Ring of Mage",
+    "itemType": "ring"
+  },
+  {
+    "id": 112,
+    "name": "Ring of Grand Mage",
+    "itemType": "ring"
+  },
+  {
+    "id": 123,
+    "name": "Ring of Arch Mage",
+    "itemType": "ring"
+  },
+  {
+    "id": 124,
+    "name": "Ring of Dragon Power",
+    "itemType": "ring"
+  },
+  {
+    "id": 125,
+    "name": "Cape",
+    "itemType": "cape"
+  },
+  {
+    "id": 126,
+    "name": "Long Cape",
+    "itemType": "cape"
+  },
+  {
+    "id": 127,
+    "name": "Shoes",
+    "itemType": "boots"
+  },
+  {
+    "id": 128,
+    "name": "Shirt",
+    "itemType": "hauberk"
+  },
+  {
+    "id": 129,
+    "name": "Hauberk",
+    "itemType": "hauberk"
+  },
+  {
+    "id": 130,
+    "name": "Leather Armor",
+    "itemType": "armor"
+  },
+  {
+    "id": 131,
+    "name": "Chain Mail",
+    "itemType": "armor"
+  },
+  {
+    "id": 132,
+    "name": "Scale Mail",
+    "itemType": "armor"
+  },
+  {
+    "id": 133,
+    "name": "Plate Mail",
+    "itemType": "armor"
+  },
+  {
+    "id": 134,
+    "name": "Trousers",
+    "itemType": "leggings"
+  },
+  {
+    "id": 135,
+    "name": "Knee Trousers",
+    "itemType": "leggings"
+  },
+  {
+    "id": 136,
+    "name": "Chain Hose",
+    "itemType": "leggings"
+  },
+  {
+    "id": 137,
+    "name": "Plate Leggings",
+    "itemType": "leggings"
+  },
+  {
+    "id": 138,
+    "name": "Bodice",
+    "itemType": "armor",
+    "gender": 1
+  },
+  {
+    "id": 139,
+    "name": "Long Bodice",
+    "itemType": "armor",
+    "gender": 1
+  },
+  {
+    "id": 140,
+    "name": "Skirt",
+    "itemType": "leggings",
+    "gender": 1
+  },
+  {
+    "id": 141,
+    "name": "Tunic",
+    "itemType": "armor",
+    "gender": 0
+  },
+  {
+    "id": 142,
+    "name": "Robe",
+    "itemType": "armor"
+  },
+  {
+    "id": 143,
+    "name": "Helmet",
+    "itemType": "helmet"
+  },
+  {
+    "id": 144,
+    "name": "Full Helmet",
+    "itemType": "helmet"
+  },
+  {
+    "id": 145,
+    "name": "Xelima Blade",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 16711680
+      }
+    ]
+  },
+  {
+    "id": 146,
+    "name": "Xelima Rapier",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 16711680
+      }
+    ]
+  },
+  {
+    "id": 147,
+    "name": "Sword of Medusa",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 65280
+      }
+    ]
+  },
+  {
+    "id": 148,
+    "name": "Sword of Ice Elemental",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 2,
+        "effectColor": 255
+      }
+    ]
+  },
+  {
+    "id": 149,
+    "name": "Demon Slayer",
+    "itemType": "weapon",
+    "effects": [
+      {
+        "effect": 5,
+        "effectColor": 16711680
+      },
+      {
+        "effect": 4,
+        "effectColor": 16711680
+      }
+    ]
+  },
+  {
+    "id": 150,
+    "name": "Horned Helmet",
+    "itemType": "helmet"
+  },
+  {
+    "id": 151,
+    "name": "Winged Helmet",
+    "itemType": "helmet"
+  },
+  {
+    "id": 152,
+    "name": "Wizard Cap",
+    "itemType": "helmet"
+  },
+  {
+    "id": 153,
+    "name": "Wizard Hat",
+    "itemType": "helmet"
+  },
+  {
+    "id": 154,
+    "name": "Hammer",
+    "itemType": "weapon"
+  },
+  {
+    "id": 155,
+    "name": "Battle Hammer",
+    "itemType": "weapon"
+  },
+  {
+    "id": 156,
+    "name": "Santa Costume",
+    "itemType": "armor",
+    "blockedItemSlots": [
+      "helmet",
+      "boots"
+    ]
+  },
+  {
+    "id": 157,
+    "name": "Black Shadow Sword",
+    "itemType": "weapon"
+  },
+  {
+    "id": 158,
+    "name": "Devastator",
+    "itemType": "weapon"
+  },
+  {
+    "id": 159,
+    "name": "Dark Executor",
+    "itemType": "weapon"
+  },
+  {
+    "id": 160,
+    "name": "Lightning Blade",
+    "itemType": "weapon"
+  },
+  {
+    "id": 161,
+    "name": "Kloness Blade",
+    "itemType": "weapon"
+  },
+  {
+    "id": 162,
+    "name": "Kloness Rapier",
+    "itemType": "weapon"
+  },
+  {
+    "id": 163,
+    "name": "Ticket",
+    "itemType": "misc"
+  },
+  {
+    "id": 164,
+    "name": "Big Red Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 165,
+    "name": "Blue Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 166,
+    "name": "Big Blue Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 167,
+    "name": "Green Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 168,
+    "name": "Big Green Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 169,
+    "name": "Baguette",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 170,
+    "name": "Meat",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 171,
+    "name": "Fish",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 172,
+    "name": "Red Fish",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 173,
+    "name": "Green Fish",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 174,
+    "name": "Yellow Fish",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 175,
+    "name": "Fishing Rod",
+    "itemType": "misc"
+  },
+  {
+    "id": 176,
+    "name": "Manual",
+    "itemType": "misc"
+  },
+  {
+    "id": 177,
+    "name": "Snake Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 178,
+    "name": "Snake Skin",
+    "itemType": "misc"
+  },
+  {
+    "id": 179,
+    "name": "Snake Teeth",
+    "itemType": "misc"
+  },
+  {
+    "id": 180,
+    "name": "Snake Tongue",
+    "itemType": "misc"
+  },
+  {
+    "id": 181,
+    "name": "Ant Leg",
+    "itemType": "misc"
+  },
+  {
+    "id": 182,
+    "name": "Ant Feeler",
+    "itemType": "misc"
+  },
+  {
+    "id": 183,
+    "name": "Cyclops Eye",
+    "itemType": "misc"
+  },
+  {
+    "id": 184,
+    "name": "Cyclops Hand Edge",
+    "itemType": "misc"
+  },
+  {
+    "id": 185,
+    "name": "Cyclops Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 186,
+    "name": "Cyclops Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 187,
+    "name": "Hellbound Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 188,
+    "name": "Hellbound Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 189,
+    "name": "Hellbound Tail",
+    "itemType": "misc"
+  },
+  {
+    "id": 190,
+    "name": "Hellbound Teeth",
+    "itemType": "misc"
+  },
+  {
+    "id": 191,
+    "name": "Hellbound Claw",
+    "itemType": "misc"
+  },
+  {
+    "id": 192,
+    "name": "Hellbound Tongue",
+    "itemType": "misc"
+  },
+  {
+    "id": 193,
+    "name": "Lump of Clay",
+    "itemType": "misc"
+  },
+  {
+    "id": 194,
+    "name": "Orc Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 195,
+    "name": "Orc Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 196,
+    "name": "Orc Teeth",
+    "itemType": "misc"
+  },
+  {
+    "id": 197,
+    "name": "Ogre Hair",
+    "itemType": "misc"
+  },
+  {
+    "id": 198,
+    "name": "Ogre Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 199,
+    "name": "Ogre Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 200,
+    "name": "Ogre Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 201,
+    "name": "Ogre Teeth",
+    "itemType": "misc"
+  },
+  {
+    "id": 202,
+    "name": "Ogre Claw",
+    "itemType": "misc"
+  },
+  {
+    "id": 203,
+    "name": "Scorpion Pincers",
+    "itemType": "misc"
+  },
+  {
+    "id": 204,
+    "name": "Scorpion Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 205,
+    "name": "Scorpion Sting",
+    "itemType": "misc"
+  },
+  {
+    "id": 206,
+    "name": "Scorpion Skin",
+    "itemType": "misc"
+  },
+  {
+    "id": 207,
+    "name": "Skeleton Bones",
+    "itemType": "misc"
+  },
+  {
+    "id": 208,
+    "name": "Slime Jelly",
+    "itemType": "misc"
+  },
+  {
+    "id": 209,
+    "name": "Stone Golem Piece",
+    "itemType": "misc"
+  },
+  {
+    "id": 210,
+    "name": "Troll Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 211,
+    "name": "Troll Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 212,
+    "name": "Troll Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 213,
+    "name": "Troll Claw",
+    "itemType": "misc"
+  },
+  {
+    "id": 214,
+    "name": "Alchemy Bowl",
+    "itemType": "misc"
+  },
+  {
+    "id": 215,
+    "name": "Anvil",
+    "itemType": "misc"
+  },
+  {
+    "id": 216,
+    "name": "Aresden Flag",
+    "itemType": "misc"
+  },
+  {
+    "id": 217,
+    "name": "Elvine Flag",
+    "itemType": "misc"
+  },
+  {
+    "id": 218,
+    "name": "Diamond",
+    "itemType": "misc"
+  },
+  {
+    "id": 219,
+    "name": "Ruby",
+    "itemType": "misc"
+  },
+  {
+    "id": 220,
+    "name": "Sapphire",
+    "itemType": "misc"
+  },
+  {
+    "id": 221,
+    "name": "Emerald",
+    "itemType": "misc"
+  },
+  {
+    "id": 222,
+    "name": "Gold Nugget",
+    "itemType": "misc"
+  },
+  {
+    "id": 223,
+    "name": "Coal",
+    "itemType": "misc"
+  },
+  {
+    "id": 224,
+    "name": "Silver Nugget",
+    "itemType": "misc"
+  },
+  {
+    "id": 225,
+    "name": "Iron Ore",
+    "itemType": "misc"
+  },
+  {
+    "id": 226,
+    "name": "Crystal",
+    "itemType": "misc"
+  },
+  {
+    "id": 227,
+    "name": "Dye (Indigo)",
+    "itemType": "misc"
+  },
+  {
+    "id": 228,
+    "name": "Dye (Green)",
+    "itemType": "misc"
+  },
+  {
+    "id": 229,
+    "name": "Dye (Gray)",
+    "itemType": "misc"
+  },
+  {
+    "id": 230,
+    "name": "Dye (Aqua)",
+    "itemType": "misc"
+  },
+  {
+    "id": 231,
+    "name": "Dye (Violet)",
+    "itemType": "misc"
+  },
+  {
+    "id": 232,
+    "name": "Dye (Blue)",
+    "itemType": "misc"
+  },
+  {
+    "id": 233,
+    "name": "Dye (Tan)",
+    "itemType": "misc"
+  },
+  {
+    "id": 234,
+    "name": "Dye (Khaki)",
+    "itemType": "misc"
+  },
+  {
+    "id": 235,
+    "name": "Dye (Yellow)",
+    "itemType": "misc"
+  },
+  {
+    "id": 236,
+    "name": "Dye (Red)",
+    "itemType": "misc"
+  },
+  {
+    "id": 237,
+    "name": "Iron Ingot",
+    "itemType": "misc"
+  },
+  {
+    "id": 238,
+    "name": "Super Coal",
+    "itemType": "misc"
+  },
+  {
+    "id": 239,
+    "name": "Gold Ingot",
+    "itemType": "misc"
+  },
+  {
+    "id": 240,
+    "name": "Silver Ingot",
+    "itemType": "misc"
+  },
+  {
+    "id": 241,
+    "name": "Blonde Ingot",
+    "itemType": "misc"
+  },
+  {
+    "id": 242,
+    "name": "Mithril Ingot",
+    "itemType": "misc"
+  },
+  {
+    "id": 243,
+    "name": "Blonde Stone",
+    "itemType": "misc"
+  },
+  {
+    "id": 244,
+    "name": "Mithril",
+    "itemType": "misc"
+  },
+  {
+    "id": 245,
+    "name": "Arena Ticket",
+    "itemType": "misc"
+  },
+  {
+    "id": 246,
+    "name": "Bouquet",
+    "itemType": "misc"
+  },
+  {
+    "id": 247,
+    "name": "Flower Basket",
+    "itemType": "misc"
+  },
+  {
+    "id": 248,
+    "name": "Flowerpot",
+    "itemType": "misc"
+  },
+  {
+    "id": 249,
+    "name": "Demon Eye",
+    "itemType": "misc"
+  },
+  {
+    "id": 250,
+    "name": "Demon Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 251,
+    "name": "Demon Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 252,
+    "name": "Demon Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 253,
+    "name": "Unicorn Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 254,
+    "name": "Unicorn Horn",
+    "itemType": "misc"
+  },
+  {
+    "id": 255,
+    "name": "Unicorn Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 256,
+    "name": "Unicorn Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 257,
+    "name": "Werewolf Heart",
+    "itemType": "misc"
+  },
+  {
+    "id": 258,
+    "name": "Werewolf Nail",
+    "itemType": "misc"
+  },
+  {
+    "id": 259,
+    "name": "Werewolf Meat",
+    "itemType": "misc"
+  },
+  {
+    "id": 260,
+    "name": "Werewolf Tail",
+    "itemType": "misc"
+  },
+  {
+    "id": 261,
+    "name": "Werewolf Teeth",
+    "itemType": "misc"
+  },
+  {
+    "id": 262,
+    "name": "Werewolf Leather",
+    "itemType": "misc"
+  },
+  {
+    "id": 263,
+    "name": "Werewolf Claw",
+    "itemType": "misc"
+  },
+  {
+    "id": 264,
+    "name": "Red Carp",
+    "itemType": "misc"
+  },
+  {
+    "id": 265,
+    "name": "Green Carp",
+    "itemType": "misc"
+  },
+  {
+    "id": 266,
+    "name": "Gold Carp",
+    "itemType": "misc"
+  },
+  {
+    "id": 267,
+    "name": "Crucian Carp",
+    "itemType": "misc"
+  },
+  {
+    "id": 268,
+    "name": "Blue Sea Bream",
+    "itemType": "misc"
+  },
+  {
+    "id": 269,
+    "name": "Salmon",
+    "itemType": "misc"
+  },
+  {
+    "id": 270,
+    "name": "Red Sea Bream",
+    "itemType": "misc"
+  },
+  {
+    "id": 271,
+    "name": "Gray Mullet",
+    "itemType": "misc"
+  },
+  {
+    "id": 272,
+    "name": "Zemstone of Sacrifice",
+    "itemType": "misc"
+  },
+  {
+    "id": 273,
+    "name": "Green Ball",
+    "itemType": "misc"
+  },
+  {
+    "id": 274,
+    "name": "Red Ball",
+    "itemType": "misc"
+  },
+  {
+    "id": 275,
+    "name": "Yellow Ball",
+    "itemType": "misc"
+  },
+  {
+    "id": 276,
+    "name": "Blue Ball",
+    "itemType": "misc"
+  },
+  {
+    "id": 277,
+    "name": "Pearl Ball",
+    "itemType": "misc"
+  },
+  {
+    "id": 278,
+    "name": "Stone of Xelima",
+    "itemType": "misc"
+  },
+  {
+    "id": 279,
+    "name": "Stone of Merien",
+    "itemType": "misc"
+  },
+  {
+    "id": 280,
+    "name": "Unfreeze Potion",
+    "itemType": "misc"
+  },
+  {
+    "id": 281,
+    "name": "Songpyon",
+    "itemType": "misc"
+  },
+  {
+    "id": 282,
+    "name": "Ginseng",
+    "itemType": "misc"
+  },
+  {
+    "id": 283,
+    "name": "Beef Rib Set",
+    "itemType": "misc"
+  },
+  {
+    "id": 284,
+    "name": "Wine",
+    "itemType": "misc"
+  },
+  {
+    "id": 285,
+    "name": "Gold Pocket 1",
+    "itemType": "misc"
+  },
+  {
+    "id": 286,
+    "name": "Gold Pocket 2",
+    "itemType": "misc"
+  },
+  {
+    "id": 287,
+    "name": "Gold Pocket 3",
+    "itemType": "misc"
+  },
+  {
+    "id": 288,
+    "name": "Gold Pocket 4",
+    "itemType": "misc"
+  },
+  {
+    "id": 289,
+    "name": "Gold Pocket 5",
+    "itemType": "misc"
+  },
+  {
+    "id": 290,
+    "name": "Red Candy",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 291,
+    "name": "Blue Candy",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 292,
+    "name": "Green Candy",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 293,
+    "name": "Seed Bag",
+    "itemType": "misc"
+  },
+  {
+    "id": 294,
+    "name": "Water Melon",
+    "itemType": "misc"
+  },
+  {
+    "id": 295,
+    "name": "Pumpkin",
+    "itemType": "misc"
+  },
+  {
+    "id": 296,
+    "name": "Garlic",
+    "itemType": "misc"
+  },
+  {
+    "id": 297,
+    "name": "Barley",
+    "itemType": "misc"
+  },
+  {
+    "id": 298,
+    "name": "Carrot",
+    "itemType": "misc"
+  },
+  {
+    "id": 299,
+    "name": "Radish",
+    "itemType": "misc"
+  },
+  {
+    "id": 300,
+    "name": "Corn",
+    "itemType": "misc"
+  },
+  {
+    "id": 301,
+    "name": "Chinese Bellflower",
+    "itemType": "misc"
+  },
+  {
+    "id": 302,
+    "name": "Melone",
+    "itemType": "misc"
+  },
+  {
+    "id": 303,
+    "name": "Tommato",
+    "itemType": "misc"
+  },
+  {
+    "id": 304,
+    "name": "Grapes",
+    "itemType": "misc"
+  },
+  {
+    "id": 305,
+    "name": "Blue Grapes",
+    "itemType": "misc"
+  },
+  {
+    "id": 306,
+    "name": "Mushroom",
+    "itemType": "misc"
+  },
+  {
+    "id": 307,
+    "name": "Super Red Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 308,
+    "name": "Super Blue Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 309,
+    "name": "Super Green Potion",
+    "itemType": "misc",
+    "stackable": true,
+    "consumable": true
+  },
+  {
+    "id": 310,
+    "name": "Ancient Tablet",
+    "itemType": "misc",
+    "consumable": true
+  },
+  {
+    "id": 311,
+    "name": "Ancient Tablet (LU)",
+    "itemType": "misc"
+  },
+  {
+    "id": 312,
+    "name": "Ancient Tablet (LD)",
+    "itemType": "misc"
+  },
+  {
+    "id": 313,
+    "name": "Ancient Tablet (RU)",
+    "itemType": "misc"
+  },
+  {
+    "id": 314,
+    "name": "Ancient Tablet (LD)",
+    "itemType": "misc"
+  },
+  {
+    "id": 315,
+    "name": "Armor Dye (Crimson Red)",
+    "itemType": "misc"
+  },
+  {
+    "id": 316,
+    "name": "Armor Dye (Gold)",
+    "itemType": "misc"
+  },
+  {
+    "id": 318,
+    "name": "Armor Dye (Pink)",
+    "itemType": "misc"
+  },
+  {
+    "id": 319,
+    "name": "Magic Diamond",
+    "itemType": "misc"
+  },
+  {
+    "id": 320,
+    "name": "Magic Ruby",
+    "itemType": "misc"
+  },
+  {
+    "id": 321,
+    "name": "Magic Emerald",
+    "itemType": "misc"
+  },
+  {
+    "id": 322,
+    "name": "Magic Sapphire",
+    "itemType": "misc"
+  },
+  {
+    "id": 323,
+    "name": "Diamond Ware",
+    "itemType": "misc"
+  },
+  {
+    "id": 324,
+    "name": "Sapphire Ware",
+    "itemType": "misc"
+  },
+  {
+    "id": 325,
+    "name": "Ruby Ware",
+    "itemType": "misc"
+  },
+  {
+    "id": 326,
+    "name": "Amethyst Ware",
+    "itemType": "misc"
+  },
+  {
+    "id": 327,
+    "name": "Crystal Ware",
+    "itemType": "misc"
+  },
+  {
+    "id": 328,
+    "name": "Crafting Vessel",
+    "itemType": "misc"
+  }
+]

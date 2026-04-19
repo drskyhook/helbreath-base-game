@@ -1,0 +1,22 @@
+---
+description: Server threading and packet flow architecture
+globs: multiplayer/server/**
+alwaysApply: false
+---
+
+# Server Threading And Packet Flow
+
+When working in `multiplayer/server/**`, follow the threading and packet-flow architecture documented in `multiplayer/docs/SERVER_THREADING_AND_PACKET_FLOW.md`.
+
+- Keep `Server.cs` focused on WebSocket lifetime, authentication, packet IO, deserialization, routing, session tables, background cleanup/transfer loops, and per-connection send loops.
+- Do not put gameplay or mutable map-state logic in `Server.cs`.
+- `GameWorld` owns map-specific mutable state and map-scoped packet handling; `GlobalWorld` owns mailbox-isolated global state (e.g. chat). Extend cross-map packets via `GlobalPacketRouting` and `GlobalWorld`, not by branching in `Server.cs`.
+- Route playable-world traffic with `WorldRegistry.RouteGameWorldMessageAsync` and global traffic with `WorldRegistry.RouteGlobalMessageAsync` (not a `GameWorldRegistry` type).
+- Keep one bounded incoming channel per `GameWorld` and one per `GlobalWorld`; do not replace this with one shared mailbox per worker.
+- Multiple `IWorkerWorld` instances (`GameWorld`, `GlobalWorld`) may run on the same `WorldWorker` thread.
+- Only the assigned `WorldWorker` should process a world's incoming messages (`ProcessPendingMessages`) and call `Update()` when `RequiresPeriodicUpdate` is true (`GameWorld` ticks; `GlobalWorld` does not).
+- Preserve actor-style ownership: avoid adding locks around map state when single-threaded world ownership is sufficient.
+- Keep WebSocket writes off gameplay threads: enqueue `ServerMessage` through the per-connection outbound channel and the dedicated send loop (under the send lock), rather than calling `WebSocket.SendAsync` from world logic.
+- When extending packet handling, add world-facing mailbox types (`GameWorldMessage` / `GlobalWorldMessage` as appropriate) and keep the network edge thin.
+
+Before changing this architecture, review `multiplayer/docs/SERVER_THREADING_AND_PACKET_FLOW.md` and keep the implementation consistent with it.

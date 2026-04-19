@@ -1,0 +1,27 @@
+---
+description: TypeScript and Phaser client guidelines
+globs: multiplayer/mp-client/**
+alwaysApply: false
+---
+
+# TypeScript Client Guidelines
+
+- The TypeScript and JavaScript client code in `multiplayer/mp-client/src/` is the source of truth for client behavior. Do not reference external C++ codebases in comments.
+- Prefer inferred types when TypeScript already knows the answer. Add explicit types at API boundaries and where inference is unclear.
+- Define interfaces or types for structured data that crosses boundaries such as UI state, registry data, API responses, and event payloads.
+- Prefer `undefined` over `null` for absent values unless both states are intentionally distinct.
+- Avoid `as` casts unless there is no safer option. Prefer type guards, helper functions, and runtime validation.
+- Use `switch` instead of long `if`/`else if` chains when branching on one discriminant with three or more cases.
+- Always use braces for control-flow bodies.
+- Merge consecutive early-return guards when they all return for the same reason.
+- Inline variables that are used once unless naming the value makes the code clearer.
+- Use registry helpers from `multiplayer/mp-client/src/utils/RegistryUtils.ts` instead of direct registry access.
+- Use coordinate helpers from `multiplayer/mp-client/src/utils/CoordinateUtils.ts` instead of manual world/pixel math.
+- Use constants from `multiplayer/mp-client/src/constants/EventNames.ts` rather than hardcoded event strings.
+- Keep EventBus payloads typed and reuse the same payload type on emit and receive.
+- For intra-Phaser communication, prefer EventBus over direct cross-object references when constructor-time callbacks are not enough.
+- Implement cleanup in `destroy()` or `shutdown()`: remove listeners, destroy Phaser objects, and clear references.
+- When a resource is expected to exist, prefer an explicit check with a warning over silent fallbacks.
+- Do not swallow exceptions in `catch` blocks without logging. Default: log something (`console.warn` when the miss is an expected/ordinary case, `console.error` or rethrow when it is not) unless a task explicitly calls for silence.
+- Use explicit `public` on class methods that are part of a class's public API.
+- For boolean predicates on game entities, prefer `isX()` / `hasX()` method names over `getIsX()` (e.g. `isDead()` rather than `getIsDead()`). Internal backing fields can use a plain name like `dead` to avoid clashing with the predicate method.

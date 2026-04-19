@@ -1,0 +1,69 @@
+{
+  "port": 1337,
+  "initialMap": "aresden",
+  "logoutTime": 5,
+  "courseCorrection": true,
+  "spawnInMiddle": true,
+  "spawnToRandomMap": false,
+  "chatMessageMaxLength": 500,
+  "maxCellsJumpDistance": 3,
+  "maxDroppedItemsInStack": 10,
+  "enableZeroCopyProtobufTransfer": true,
+  "maxConsecutiveOutboundSendFailures": 10,
+  "threads": {
+    "gameWorldWorkers": 1,
+    "globalWorldWorkerThread": 0
+  },
+  "radius": {
+    "viewRadiusX": 18,
+    "viewRadiusY": 11,
+    "cameraRadiusX": 16,
+    "cameraRadiusY": 9
+  },
+  "timings": {
+    "disconnectTime": 20,
+    "arrowSpeed": 1000,
+    "blizzardSpellDamageDelayMs": 200,
+    "playerPickupAnimationTime": 400,
+    "playerBowAnimationTime": 400,
+    "spawnProtectionTime": 20,
+    "knockbackTimeMs": 100,
+    "antiHackTimingLagFactor": 0.05
+  },
+  "ping": {
+    "timeout": 5000,
+    "interval": 1000,
+    "allowedVariance": 500,
+    "varianceSampleSize": 20
+  },
+  "gameWorld": {
+    "tickInterval": 50,
+    "incomingMessagesQueueSize": 10240,
+    "incomingMessagesBatchSizePerDispatch": 2560
+  },
+  "monsterDefaults": {
+    "chaseDistance": 6,
+    "chaseMaxDistance": 10,
+    "attackSpeed": 600,
+    "attackDamageMin": 1,
+    "attackDamageMax": 5,
+    "attackRecoveryTime": 400,
+    "minIdleTime": 0,
+    "maxIdleTime": 5000,
+    "hp": 100,
+    "corpseDecayTime": 3000,
+    "respawnTime": 3000
+  },
+  "movementSpeedViolationsChecker": {
+    "verbose": false,
+    "limit": 5,
+    "window": 20,
+    "segmentsPerWindow": 20,
+    "paralysisDuration": 10,
+    "maxPingVariance": 50
+  },
+  "debug": {
+    "enableGcLogs": false,
+    "profileMonstersAILoop": false
+  }
+}
