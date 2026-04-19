@@ -1,4 +1,4 @@
-# MMORPG Base Game — Multiplayer Server
+# Multiplayer Server
 
 An authoritative multiplayer game server written in **C# / .NET 10**, designed as a base to build MMORPG projects on top of. It runs the full game simulation (movement, combat, spells, inventory, monster AI, NPCs, world transfers, chat) on the server and synchronises every connected client over **WebSockets** using **Protobuf** binary messages.
 
