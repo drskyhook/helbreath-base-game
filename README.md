@@ -16,8 +16,12 @@ The repository already includes a substantial amount of core functionality:
 - Grid-based movement
 - Spells and visual effects
 - Items and inventory
-- Combat supporting melee, ranged, and spell attacks in PvP, PvM, and MvM settings
+- Combat supporting melee, ranged, and spell attacks in PvP, PvM, and MvM settings (spell damage and MvM only supported in server implementation)
 - Music and audio
+
+Server only:
+- Chat
+- Buffs and debuffs
 - Authoritative multiplayer server with client-side prediction and reconciliation
 - Anti-hack timing guards, anti-combat-log disconnect grace, and bump prevention
 - Multi-threaded world scheduling with single-threaded per-map simulation
