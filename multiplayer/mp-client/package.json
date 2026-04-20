@@ -29,9 +29,9 @@
         "dev-nolog": "vite --config vite/config.dev.mjs",
         "prebuild-nolog": "pnpm run proto:generate",
         "build-nolog": "vite build --config vite/config.prod.mjs",
-        "compress-assets": "node ../tools/compress-assets.js --ratio=1",
-        "compress-assets:fast": "node ../tools/compress-assets.js --ratio=1",
-        "compress-assets:best": "node ../tools/compress-assets.js --ratio=9",
+        "compress-assets": "node ../../tools/compress-assets.js --ratio=1",
+        "compress-assets:fast": "node ../../tools/compress-assets.js --ratio=1",
+        "compress-assets:best": "node ../../tools/compress-assets.js --ratio=9",
         "lint": "pnpm exec tsc --noEmit",
         "lint:eslint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.{ts,tsx}\""
     },
