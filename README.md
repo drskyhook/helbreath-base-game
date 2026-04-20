@@ -169,10 +169,12 @@ Client docs ([`sp-client/docs`](./sp-client/docs/)):
 Multiplayer docs ([`multiplayer/docs`](./multiplayer/docs/)):
 
 - Server configuration: [`multiplayer/docs/SERVER_CONFIGURATION.md`](./multiplayer/docs/SERVER_CONFIGURATION.md)
+- Authorization and storage: [`multiplayer/docs/AUTHORIZATION_AND_STORAGE.md`](./multiplayer/docs/AUTHORIZATION_AND_STORAGE.md)
 - Threading and packet flow: [`multiplayer/docs/SERVER_THREADING_AND_PACKET_FLOW.md`](./multiplayer/docs/SERVER_THREADING_AND_PACKET_FLOW.md)
 - Performance optimizations: [`multiplayer/docs/SERVER_PERFORMANCE_OPTIMIZATIONS.md`](./multiplayer/docs/SERVER_PERFORMANCE_OPTIMIZATIONS.md)
 - Visibility tracking: [`multiplayer/docs/SERVER_VISIBILITY_TRACKING.md`](./multiplayer/docs/SERVER_VISIBILITY_TRACKING.md)
 - Client–server sync: [`multiplayer/docs/CLIENT_SERVER_SYNC.md`](./multiplayer/docs/CLIENT_SERVER_SYNC.md)
+- Network debugging (Server / Performance dialogs, simulated latency): [`multiplayer/docs/NETWORK_DEBUGGING.md`](./multiplayer/docs/NETWORK_DEBUGGING.md)
 - Movement system: [`multiplayer/docs/MOVEMENT_SYSTEM.md`](./multiplayer/docs/MOVEMENT_SYSTEM.md)
 - Combat system: [`multiplayer/docs/COMBAT_SYSTEM.md`](./multiplayer/docs/COMBAT_SYSTEM.md)
 - Spell casting: [`multiplayer/docs/SPELL_CASTING_SYSTEM.md`](./multiplayer/docs/SPELL_CASTING_SYSTEM.md)
