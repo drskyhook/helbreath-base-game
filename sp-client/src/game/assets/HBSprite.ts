@@ -6,9 +6,7 @@ import { getBinaryBuffer, setPivotDataByTextureKey, setPivotDataBySpriteName } f
 import { ITEMS, getItemSheetIndex, getItemSpriteIndex, getTintInventoryEffectColor } from '../../constants/Items';
 import { Gender } from '../../Types';
 
-/**
- * Enum representing different sprite types based on various items types in Helbreath.
- */
+/** Sprite category for loading/rendering (human, tiles, monster, item packs, etc.). */
 export enum SpriteType {
     Human = 'Human',
     Tiles = 'Tiles',
@@ -24,27 +22,12 @@ export enum SpriteType {
     ItemGround = 'ItemGround',
 }
 
-/**
- * Frame metadata parsed from sprite file binary data.
- * Contains position, dimensions, and pivot point information.
- */
-type SpriteFrameMetadata = {
-    left: number;
-    top: number;
+interface DecodedSpriteImage {
+    source: CanvasImageSource;
     width: number;
     height: number;
-    pivotX: number;
-    pivotY: number;
-};
-
-/**
- * Sprite metadata item containing frame metadata and image length.
- * Used during sprite file parsing.
- */
-type SpriteMetaItem = {
-    frames: SpriteFrameMetadata[];
-    imageLength: number;
-};
+    close(): void;
+}
 
 /**
  * Represents a single frame within a sprite sheet.
@@ -140,29 +123,25 @@ export class HBSpriteSheet {
      * @param exportFramesAsDataUrls - Whether to extract all frames as data URLs (default: false)
      * @param customTextureKey - Optional custom texture key to use instead of default naming (default: undefined)
      */
-    private readonly scene: Scene;
-
     constructor(
         scene: Scene,
         spriteName: string,
         spriteSheetIndex: number,
         frames: HBSpriteFrame[],
-        spriteSheetImage: ImageBitmap,
+        spriteSheetImage: DecodedSpriteImage,
         exportFramesAsDataUrls = false,
+        useCanvasTexture = false,
         customTextureKey?: string
     ) {
-        this.scene = scene;
         this.frames = frames;
         this.spriteName = spriteName;
         this.spriteSheetIndex = spriteSheetIndex;
         
         // Build texture key: use custom key if provided, otherwise use {spriteName}-{spriteSheetIndex}
         this.textureKey = customTextureKey ?? `${spriteName}-${spriteSheetIndex}`;
-        
-        // Create texture from sprite sheet image
-        this.createTexture(scene, spriteSheetImage, frames);
-        
-        // Extract all frames as data URLs if requested (stored in registry for UI)
+
+        this.createTexture(scene, spriteSheetImage, frames, exportFramesAsDataUrls, useCanvasTexture);
+
         if (exportFramesAsDataUrls) {
             this.extractAllFramesAsDataUrls();
         }
@@ -176,32 +155,48 @@ export class HBSpriteSheet {
      * @param spriteSheetImage - The ImageBitmap containing the sprite sheet image
      * @param frames - Array of frame definitions to slice from the texture
      */
-    private createTexture(scene: Scene, spriteSheetImage: ImageBitmap, frames: HBSpriteFrame[]): void {
+    private createTexture(
+        scene: Scene,
+        spriteSheetImage: DecodedSpriteImage,
+        frames: HBSpriteFrame[],
+        exportFramesAsDataUrls: boolean,
+        useCanvasTexture: boolean
+    ): void {
         // Check if texture already exists
         if (scene.textures.exists(this.textureKey)) {
             return;
         }
 
-        // Create canvas for the texture using the original sprite sheet image
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = spriteSheetImage.width;
-        this.canvas.height = spriteSheetImage.height;
-        const ctx = this.canvas.getContext('2d', { alpha: true });
+        let texture: Phaser.Textures.Texture;
 
-        if (!ctx) {
-            throw new Error('Failed to get canvas context for texture creation');
+        if (useCanvasTexture) {
+            this.canvas = document.createElement('canvas');
+            this.canvas.width = spriteSheetImage.width;
+            this.canvas.height = spriteSheetImage.height;
+            const ctx = this.canvas.getContext('2d', { alpha: true });
+
+            if (!ctx) {
+                throw new Error('Failed to get canvas context for texture creation');
+            }
+
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(spriteSheetImage.source, 0, 0);
+            scene.textures.addCanvas(this.textureKey, this.canvas);
+            texture = scene.textures.get(this.textureKey);
+        } else {
+            const textureManager = scene.textures as Phaser.Textures.TextureManager & {
+                create: (key: string, source: ImageBitmap, width?: number, height?: number) => Phaser.Textures.Texture | null;
+            };
+            const createdTexture = textureManager.create(
+                this.textureKey,
+                spriteSheetImage.source as ImageBitmap,
+                spriteSheetImage.width,
+                spriteSheetImage.height
+            );
+            texture = createdTexture ?? scene.textures.get(this.textureKey);
         }
 
-        ctx.imageSmoothingEnabled = false;
-
-        // Draw the entire sprite sheet onto the canvas
-        ctx.drawImage(spriteSheetImage, 0, 0);
-
-        // Add canvas as texture to Phaser
-        scene.textures.addCanvas(this.textureKey, this.canvas);
-
         // Set texture filter to NEAREST for pixel-perfect rendering
-        const texture = scene.textures.get(this.textureKey);
         if (texture.source && texture.source[0]) {
             const source = texture.source[0];
             source.scaleMode = 0; // Phaser.ScaleModes.NEAREST
@@ -211,6 +206,20 @@ export class HBSpriteSheet {
         frames.forEach((sprite, frameIndex) => {
             texture.add(String(frameIndex), 0, sprite.x, sprite.y, sprite.width, sprite.height);
         });
+
+        if (exportFramesAsDataUrls && !this.canvas) {
+            this.canvas = document.createElement('canvas');
+            this.canvas.width = spriteSheetImage.width;
+            this.canvas.height = spriteSheetImage.height;
+            const ctx = this.canvas.getContext('2d', { alpha: true });
+
+            if (!ctx) {
+                throw new Error('Failed to get canvas context for frame extraction');
+            }
+
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(spriteSheetImage.source, 0, 0);
+        }
     }
 
     /**
@@ -515,7 +524,6 @@ export class HBSpriteFile {
         // Extract sprite name from file name
         const spriteName = this.fileName.toLowerCase();
         
-        // Parse sprite file - this now returns SpriteFrame instances directly
         const parsedSprites = this.parseSprite(buffer, spriteName, this.tileStartIndex);
         
         // Process each sprite sheet
@@ -524,8 +532,10 @@ export class HBSpriteFile {
         for (let spriteSheetIndex = 0; spriteSheetIndex < parsedSprites.length; spriteSheetIndex++) {
             const parsedSprite = parsedSprites[spriteSheetIndex];
             
-            // Convert sprite sheet image data to ImageBitmap
-            const spriteSheetImage = await this.createImageFromPng(parsedSprite.imageData);
+            const spriteSheetImage = await this.createImageFromPng(
+                parsedSprite.imageData,
+                this.spriteType !== SpriteType.Tiles && !this.exportFramesAsDataUrls
+            );
             
             try {
                 // Frames are already SpriteFrame instances from parseSprite
@@ -546,6 +556,7 @@ export class HBSpriteFile {
                     frames, 
                     spriteSheetImage, 
                     this.exportFramesAsDataUrls,
+                    this.spriteType === SpriteType.Tiles,
                     customTextureKey
                 );
                 spriteSheets.push(spriteSheet);
@@ -625,17 +636,75 @@ export class HBSpriteFile {
      * @returns A Promise that resolves to an ImageBitmap
      * @throws Error if the PNG data cannot be decoded
      */
-    private async createImageFromPng(data: Uint8Array): Promise<ImageBitmap> {
-        const buffer = data.byteOffset === 0 && data.byteLength === data.buffer.byteLength
-            ? data.buffer
-            : data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-        const arrayBuffer = buffer instanceof ArrayBuffer ? buffer : new Uint8Array(data).buffer;
-        const blob = new Blob([arrayBuffer], { type: 'image/png' });
-        
+    private async createImageFromPng(data: Uint8Array, preferDirectTextureSource: boolean): Promise<DecodedSpriteImage> {
         try {
-            return await createImageBitmap(blob);
+            if (preferDirectTextureSource) {
+                const decodedVideoFrame = await this.tryDecodeWithImageDecoder(data);
+                if (decodedVideoFrame) {
+                    return decodedVideoFrame;
+                }
+            }
+
+            const imageBytes = new Uint8Array(data.byteLength);
+            imageBytes.set(data);
+            const blob = new Blob([imageBytes], { type: 'image/png' });
+            const imageBitmap = await createImageBitmap(blob);
+            return {
+                source: imageBitmap,
+                width: imageBitmap.width,
+                height: imageBitmap.height,
+                close: () => imageBitmap.close(),
+            };
         } catch (error) {
             throw new Error(`Failed to decode sprite PNG: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    /**
+     * Attempts to decode the PNG with WebCodecs ImageDecoder.
+     * Returns undefined when the API is unavailable or decode fails, so callers can
+     * fall back to the broadly supported createImageBitmap path.
+     */
+    private async tryDecodeWithImageDecoder(data: Uint8Array): Promise<DecodedSpriteImage | undefined> {
+        const ImageDecoderCtor = (globalThis as { ImageDecoder?: new (init: { data: Uint8Array; type: string }) => any }).ImageDecoder;
+
+        if (!ImageDecoderCtor) {
+            return undefined;
+        }
+
+        try {
+            const imageBytes = new Uint8Array(data.byteLength);
+            imageBytes.set(data);
+            const decoder = new ImageDecoderCtor({
+                data: imageBytes,
+                type: 'image/png',
+            });
+            const result = await decoder.decode({ frameIndex: 0 });
+            const frame = result.image as {
+                displayWidth?: number;
+                displayHeight?: number;
+                codedWidth?: number;
+                codedHeight?: number;
+                close(): void;
+            } & CanvasImageSource;
+            const width = frame.displayWidth ?? frame.codedWidth;
+            const height = frame.displayHeight ?? frame.codedHeight;
+
+            decoder.close?.();
+
+            if (!width || !height) {
+                frame.close();
+                return undefined;
+            }
+
+            return {
+                source: frame,
+                width,
+                height,
+                close: () => frame.close(),
+            };
+        } catch {
+            return undefined;
         }
     }
 
@@ -658,7 +727,8 @@ export class HBSpriteFile {
         const spriteCount = readInt16(view, offset);
         offset += HEADER_SIZE;
     
-        const meta: SpriteMetaItem[] = [];
+        const spriteFramesBySheet = new Array<HBSpriteFrame[]>(spriteCount);
+        const imageLengths = new Array<number>(spriteCount);
     
         for (let i = 0; i < spriteCount; i += 1)
         {
@@ -667,12 +737,16 @@ export class HBSpriteFile {
     
             const imageLength = readInt32(view, offset);
             offset += 4;
+            imageLengths[i] = imageLength;
     
             offset += 4; // width (unused in parser)
             offset += 4; // height (unused in parser)
             offset += 1; // startLocation placeholder byte
     
-            const frames: SpriteFrameMetadata[] = [];
+            const textureKey = tileStartIndex !== undefined
+                ? `map-tile-${tileStartIndex + i}`
+                : `${spriteName}-${i}`;
+            const frames = new Array<HBSpriteFrame>(frameCount);
     
             for (let f = 0; f < frameCount; f += 1)
             {
@@ -689,50 +763,34 @@ export class HBSpriteFile {
                 const pivotY = readInt16(view, offset);
                 offset += 2;
     
-                frames.push({ left, top, width, height, pivotX, pivotY });
+                frames[f] = new HBSpriteFrame(
+                    left,
+                    top,
+                    width,
+                    height,
+                    pivotX,
+                    pivotY,
+                    textureKey,
+                    f
+                );
             }
     
-            meta.push({ frames, imageLength });
+            spriteFramesBySheet[i] = frames;
         }
     
-        const sprites: Array<{ frames: HBSpriteFrame[]; imageData: Uint8Array }> = [];
+        const sprites = new Array<{ frames: HBSpriteFrame[]; imageData: Uint8Array }>(spriteCount);
     
-        for (let i = 0; i < meta.length; i += 1)
+        for (let i = 0; i < spriteCount; i += 1)
         {
             offset += 4; // startLocation, not needed for sequential read
-            const { imageLength, frames } = meta[i];
-            
-            const imageBuffer = buffer.slice(offset, offset + imageLength);
+            const imageLength = imageLengths[i];
+            const imageData = new Uint8Array(buffer, offset, imageLength);
             offset += imageLength;
     
-            // Create Uint8Array view - slice already returns a new ArrayBuffer, so this is safe
-            const imageData = new Uint8Array(imageBuffer);
-    
-            // Build texture key for this sprite sheet
-            // For tiles with a start index, use map-tile-{index} naming
-            // Otherwise use the default {spriteName}-{i} naming
-            const textureKey = tileStartIndex !== undefined 
-                ? `map-tile-${tileStartIndex + i}` 
-                : `${spriteName}-${i}`;
-            
-            // Build SpriteFrame instances directly
-            const spriteFrames = frames.map((frame, frameIndex) => {
-                return new HBSpriteFrame(
-                    frame.left,
-                    frame.top,
-                    frame.width,
-                    frame.height,
-                    frame.pivotX,
-                    frame.pivotY,
-                    textureKey,
-                    frameIndex
-                );
-            });
-    
-            sprites.push({
-                frames: spriteFrames,
+            sprites[i] = {
+                frames: spriteFramesBySheet[i],
                 imageData
-            });
+            };
         }
     
         return sprites;

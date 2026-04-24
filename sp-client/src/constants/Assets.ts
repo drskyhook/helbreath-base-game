@@ -163,7 +163,6 @@ export const ASSETS: AssetData[] = [
     // Item sprite sheets (pack = inventory/bag, ground = on map)
     { key: 'sprite-item-pack', fileName: 'item-pack.spr', assetType: AssetType.SPRITE, spriteType: SpriteType.ItemPack, exportFramesAsDataUrls: true },
     { key: 'sprite-item-ground', fileName: 'item-ground.spr', assetType: AssetType.SPRITE, spriteType: SpriteType.ItemGround, exportFramesAsDataUrls: true },
-    { key: 'sprite-effect', fileName: 'effect.spr', assetType: AssetType.SPRITE, spriteType: SpriteType.Effect },
     
     // Music files
     { key: 'abaddon', fileName: 'abaddon.mp3', assetType: AssetType.MUSIC },
