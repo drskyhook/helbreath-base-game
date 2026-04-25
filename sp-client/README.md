@@ -99,7 +99,7 @@ sp-client/src/
     ├── CameraManager.ts, CastManager.ts, GameStateManager.ts
     ├── InputManager.ts, InventoryManager.ts, LootManager.ts
     ├── MapManager.ts, MusicManager.ts, ShadowManager.ts
-    ├── SoundManager.ts, SoundTracker.ts, SpatialAudioUtils.ts
+    ├── MonsterAssets.ts, SoundManager.ts, SoundTracker.ts, SpatialAudioUtils.ts
     ├── SpatialGrid.ts, SpriteUtils.ts
     ├── PlayerAppearanceManager.ts, WeatherManager.ts
     └── RegistryUtils.ts  # Phaser registry helpers
@@ -113,14 +113,16 @@ The client supports two loading modes:
 
 | Mode | Use case | How to enable |
 |------|----------|---------------|
-| **Per-file** | Development, debugging, CDN limitations | Default. Set `IGNORE_ZIP_ASSETS: true` in `src/Config.ts` |
-| **ZIP** | Production, slower networks | Set `IGNORE_ZIP_ASSETS: false` in `src/Config.ts`. Add `?ignoreZip=true` to the URL to bypass ZIP loading at runtime |
+| **Per-file** | Development, debugging, CDN limitations | Set `ENABLE_ZIP_LOADING = false` in `src/Config.ts` |
+| **ZIP** | Production, slower networks | Set `ENABLE_ZIP_LOADING = true` in `src/Config.ts` |
 
-**Local development:** Per-file loading is recommended for local dev—set `IGNORE_ZIP_ASSETS` to `true` in `src/Config.ts`. It avoids decompression overhead and Phaser's native audio loading is faster when loading files directly.
+**Local development:** Per-file loading is recommended for local dev: set `ENABLE_ZIP_LOADING` to `false` in `src/Config.ts`. It avoids decompression overhead and Phaser's native audio loading is faster when loading files directly.
 
 **CDN limitations:** Some CDNs don't support large files (e.g. multi-megabyte `assets.zip`). Use per-file loading in those cases.
 
-**Building `assets.zip`:** Run `pnpm compress-assets` from `sp-client`. Output: `sp-client/public/assets.zip`. If ZIP loading fails, the client falls back to per-file loading automatically.
+**Building `assets.zip`:** Run `pnpm compress-assets` from `sp-client`. Output: `sp-client/public/assets.zip`. Existing ZIPs are deleted before writing a new one. If ZIP loading fails, the client falls back to per-file loading automatically.
+
+**Monster assets:** `LOAD_MONSTER_ASSETS_ON_DEMAND` controls whether monster sprite and sound assets are loaded up front or fetched when a monster is spawned. When enabled, only `MONSTER_PLACEHOLDER_SPRITE` and its configured sounds are included in the eager manifest/ZIP; the real monster assets are fetched and registered by `utils/MonsterAssets.ts`, then swapped onto the monster at runtime.
 
 ---
 
@@ -132,8 +134,8 @@ See [ASSET_LOADING.md](./docs/ASSET_LOADING.md) for for how assets are loaded. F
 
 ## Development Tips
 
-- **Faster loading:** Comment out unused maps in `constants/Assets.ts` and monsters in `constants/Monsters.ts` so their assets are not loaded.
-- **Local dev:** Set `IGNORE_ZIP_ASSETS` to `true` in `src/Config.ts` (or use `?ignoreZip=true`) for quicker iteration; per-file loading is often faster on localhost.
+- **Faster loading:** Comment out unused maps in `constants/Assets.ts`, or enable `LOAD_MONSTER_ASSETS_ON_DEMAND` so non-placeholder monster assets are fetched only when needed.
+- **Local dev:** Set `ENABLE_ZIP_LOADING` to `false` in `src/Config.ts` for quicker iteration; per-file loading is often faster on localhost.
 - **AI guidance:** Cursor rules live in `sp-client/.cursor/` and can be adapted for other AI tools.
 
 ---

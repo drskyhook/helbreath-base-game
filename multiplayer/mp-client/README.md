@@ -73,7 +73,7 @@ multiplayer/mp-client/src/
 
 ## Asset Loading
 
-Same two modes as single-player: per-file vs ZIP, controlled by **`IGNORE_ZIP_ASSETS`** in [`src/Config.ts`](src/Config.ts), optional `?ignoreZip=true` on the URL, and `pnpm compress-assets` output under `public/assets.zip`. Details: **[`sp-client/README.md` § Asset Loading](../../sp-client/README.md#asset-loading)** and [`sp-client/docs/ASSET_LOADING.md`](../../sp-client/docs/ASSET_LOADING.md).
+Same two modes as single-player: per-file vs ZIP, controlled by **`ENABLE_ZIP_LOADING`** in [`src/Config.ts`](src/Config.ts), with `pnpm compress-assets` output under `public/assets.zip`. Monster assets can also be lazy-loaded with **`LOAD_MONSTER_ASSETS_ON_DEMAND`**; when enabled, only `MONSTER_PLACEHOLDER_SPRITE` and its sounds are eager-loaded or bundled, and real monster assets load when monsters enter range. Details: **[`sp-client/README.md` § Asset Loading](../../sp-client/README.md#asset-loading)** and [`sp-client/docs/ASSET_LOADING.md`](../../sp-client/docs/ASSET_LOADING.md).
 
 ---
 
@@ -89,7 +89,7 @@ For **wire protocol, prediction, and server authority**, use the multiplayer rep
 
 - **Server first:** Start [`multiplayer/server`](../server) before connecting; port must match the Connect dialog (default **1337**).
 - **Proto changes:** After editing `../proto/network.proto`, run `pnpm proto:generate` (or rely on `pnpm dev` / `pnpm build` which run it automatically).
-- **Faster loading / local dev:** Same as single-player — trim unused maps/monsters in `constants/`, and prefer per-file assets via `IGNORE_ZIP_ASSETS` or `?ignoreZip=true`; see [`sp-client/README.md`](../../sp-client/README.md).
+- **Faster loading / local dev:** Same as single-player: trim unused maps, enable `LOAD_MONSTER_ASSETS_ON_DEMAND`, and prefer per-file assets with `ENABLE_ZIP_LOADING = false`; see [`sp-client/README.md`](../../sp-client/README.md).
 
 ---
 
