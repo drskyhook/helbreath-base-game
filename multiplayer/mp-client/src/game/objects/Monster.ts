@@ -148,6 +148,13 @@ type MonsterConfig = {
     height?: number;
 };
 
+type LoadedMonsterAssetsConfig = {
+    spriteName: string;
+    states?: MonsterStatesConfig;
+    shadow?: MonsterShadow;
+    height?: number;
+};
+
 /**
  * Represents a monster in the game.
  * Extends GameObject and defaults to Idle state with appropriate animations.
@@ -192,6 +199,9 @@ export class Monster extends GameObject {
 
     /** When true, data-driven spawn uses berserk red overlay; combined with server Berserk buff in {@link onTemporaryEffectsChanged}. */
     private readonly spawnBerserkVisual: boolean;
+
+    /** Shadow mode for the currently active monster sprite. */
+    private shadowOption: MonsterShadow;
 
     /** Attack damage dealt */
     private attackDamage: number;
@@ -318,6 +328,7 @@ export class Monster extends GameObject {
         this.height = config.height ?? getSpriteFrameHeight(scene, config.spriteName, 0, 0);
         this.spawnChilledVisual = config.chilledEffect ?? false;
         this.spawnBerserkVisual = config.berserkedEffect ?? false;
+        this.shadowOption = config.shadow ?? MonsterShadow.BodyShadow;
 
         if (config.dead) {
             this.enterSpawnedCorpseState();
@@ -335,8 +346,7 @@ export class Monster extends GameObject {
         );
         
         // Create shadow manager only if BodyShadow is specified (default behavior). Corpses drop shadow in `enterSpawnedCorpseState`.
-        const shadowOption = config.shadow ?? MonsterShadow.BodyShadow;
-        if (shadowOption === MonsterShadow.BodyShadow && !config.dead) {
+        if (this.shadowOption === MonsterShadow.BodyShadow && !config.dead) {
             const initialShadowSpriteSheetIndex = MONSTER_SPRITESHEET[MonsterState.Idle] + config.direction;
             this.shadowManager = new ShadowManager({
                 scene,
@@ -794,6 +804,41 @@ export class Monster extends GameObject {
         return this.attackSpeedMs;
     }
 
+    /** Switches a placeholder monster to its real sprite/sound config after lazy assets are registered. */
+    public applyLoadedMonsterAssets(config: LoadedMonsterAssetsConfig): void {
+        if (this.monsterSpriteName === config.spriteName && this.states === config.states) {
+            return;
+        }
+
+        this.monsterSpriteName = config.spriteName;
+        this.states = config.states;
+        this.shadowOption = config.shadow ?? MonsterShadow.BodyShadow;
+        this.height = config.height ?? getSpriteFrameHeight(this.scene, config.spriteName, 0, 0);
+
+        this.movementFrameCount = this.getMovementFrameCount();
+        const attackAnimFrames = this.getStateAnimationConfig(MonsterState.Attack).animationFrames;
+        this.attackSpeedFrameRate = calculateFrameRateFromDuration(attackAnimFrames, Math.max(1, this.attackSpeedMs));
+        if (!this.moving) {
+            this.movementFrameRate = calculateFrameRateFromDuration(
+                this.movementFrameCount,
+                Math.max(1, this.movementSpeedMs > 0 ? this.movementSpeedMs : 1),
+            );
+        }
+
+        for (const asset of this.assets) {
+            asset.setSpriteName(config.spriteName);
+        }
+
+        this.recreateShadowForCurrentSprite();
+        if (this.dead && this.currentState === MonsterState.Dead) {
+            const animConfig = this.getStateAnimationConfig(MonsterState.Dead);
+            this.switchMonsterState(MonsterState.Dead, true, Math.max(0, animConfig.animationFrames - 1));
+        } else {
+            this.switchMonsterState(this.currentState, true);
+        }
+        this.onTemporaryEffectsChanged();
+    }
+
     /**
      * Updates movement and/or melee swing durations from server snapshots or temporary-effect packets (e.g. Chill).
      * Omitted axes keep the previous authoritative values.
@@ -1036,6 +1081,31 @@ export class Monster extends GameObject {
             // Standard 8 frames starting at 0 - use simplified call
             this.shadowManager.updateAnimation(shadowSpriteSheetIndex, animationFrameRate, repeat, undefined, undefined, playFromFrame);
         }
+    }
+
+    private recreateShadowForCurrentSprite(): void {
+        if (this.shadowManager) {
+            this.shadowManager.destroy();
+            this.shadowManager = undefined;
+        }
+
+        if (this.dead || this.shadowOption !== MonsterShadow.BodyShadow) {
+            return;
+        }
+
+        const animConfig = this.getStateAnimationConfig(this.currentState);
+        this.shadowManager = new ShadowManager({
+            scene: this.scene,
+            shadowSpriteName: animConfig.spriteName,
+            shadowSpriteSheetIndex: animConfig.startSpriteSheet + this.direction,
+            worldX: this.worldX,
+            worldY: this.worldY,
+            offsetX: this.offsetX,
+            offsetY: this.offsetY,
+            frameRate: this.getAnimationFrameRate(this.currentState),
+        });
+        this.updateShadow();
+        this.updateShadowDepth();
     }
     
     /**

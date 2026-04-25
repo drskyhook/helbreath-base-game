@@ -154,6 +154,13 @@ type MonsterConfig = {
     height?: number;
 };
 
+type LoadedMonsterAssetsConfig = {
+    spriteName: string;
+    states?: MonsterStatesConfig;
+    shadow?: MonsterShadow;
+    height?: number;
+};
+
 /**
  * Represents a monster in the game.
  * Extends GameObject and defaults to Idle state with appropriate animations.
@@ -236,6 +243,9 @@ export class Monster extends GameObject {
 
     /** Temporal coefficient controlling animation speed (defaults to 1.0) */
     private temporalCoefficient: number = 1.0;
+
+    /** Shadow mode for the currently active monster sprite. */
+    private shadowOption: MonsterShadow;
 
     /**
      * Creates a new Monster instance.
@@ -339,8 +349,8 @@ export class Monster extends GameObject {
         this.movementFrameRate = this.movementFrameCount / movementDurationSeconds;
         
         // Create shadow manager only if BodyShadow is specified (default behavior)
-        const shadowOption = config.shadow ?? MonsterShadow.BodyShadow;
-        if (shadowOption === MonsterShadow.BodyShadow) {
+        this.shadowOption = config.shadow ?? MonsterShadow.BodyShadow;
+        if (this.shadowOption === MonsterShadow.BodyShadow) {
             const initialShadowSpriteSheetIndex = MONSTER_SPRITESHEET[MonsterState.Idle] + config.direction;
             this.shadowManager = new ShadowManager({
                 scene,
@@ -754,6 +764,29 @@ export class Monster extends GameObject {
     public getAttackType(): AttackType {
         return this.attackType;
     }
+
+    /** Switches a placeholder monster to its real sprite/sound config after lazy assets are registered. */
+    public applyLoadedMonsterAssets(config: LoadedMonsterAssetsConfig): void {
+        if (this.monsterSpriteName === config.spriteName && this.states === config.states) {
+            return;
+        }
+
+        this.monsterSpriteName = config.spriteName;
+        this.states = config.states;
+        this.shadowOption = config.shadow ?? MonsterShadow.BodyShadow;
+        this.height = config.height ?? getSpriteFrameHeight(this.scene, config.spriteName, 0, 0);
+
+        this.movementFrameCount = this.getMovementFrameCount();
+        const movementDurationSeconds = this.movementSpeedDurationMs / 1000;
+        this.movementFrameRate = this.movementFrameCount / movementDurationSeconds;
+
+        for (const asset of this.assets) {
+            asset.setSpriteName(config.spriteName);
+        }
+
+        this.recreateShadowForCurrentSprite();
+        this.switchMonsterState(this.currentState, true);
+    }
     
     /**
      * Evaluates the monster's AI state and makes decisions.
@@ -905,6 +938,31 @@ export class Monster extends GameObject {
             // Standard 8 frames starting at 0 - use simplified call
             this.shadowManager.updateAnimation(shadowSpriteSheetIndex, animationFrameRate, repeat, undefined, undefined, playFromFrame);
         }
+    }
+
+    private recreateShadowForCurrentSprite(): void {
+        if (this.shadowManager) {
+            this.shadowManager.destroy();
+            this.shadowManager = undefined;
+        }
+
+        if (this.isDead || this.shadowOption !== MonsterShadow.BodyShadow) {
+            return;
+        }
+
+        const animConfig = this.getStateAnimationConfig(this.currentState);
+        this.shadowManager = new ShadowManager({
+            scene: this.scene,
+            shadowSpriteName: animConfig.spriteName,
+            shadowSpriteSheetIndex: animConfig.startSpriteSheet + this.direction,
+            worldX: this.worldX,
+            worldY: this.worldY,
+            offsetX: this.offsetX,
+            offsetY: this.offsetY,
+            frameRate: this.getAnimationFrameRate(this.currentState),
+        });
+        this.updateShadow();
+        this.updateShadowDepth();
     }
     
     /**

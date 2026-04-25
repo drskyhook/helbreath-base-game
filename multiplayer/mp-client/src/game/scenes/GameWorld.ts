@@ -18,6 +18,7 @@ import {
     DEPTH_MULTIPLIER,
     GAME_STATS_UPDATE_INTERVAL_MS,
     MONSTER_HOVER_OVERLAY_ANCHOR_OFFSET_Y,
+    MONSTER_PLACEHOLDER_SPRITE,
     PLAYER_HOVER_OVERLAY_ANCHOR_OFFSET_Y,
 } from '../../Config';
 import { InputManager } from '../../utils/InputManager';
@@ -215,6 +216,11 @@ import { getTeleportSourceCellsFromLocSets } from '../../utils/NetworkManager';
 import { runSafeSync, subscribeSafe } from '../../utils/SafeEntry';
 import { drawEffect, type DrawEffectOptions } from '../../utils/EffectUtils';
 import { GroundEffectType, MonsterEntityState } from '../../proto/generated/network';
+import {
+    areMonsterAssetsLoaded,
+    loadMonsterAssetsOnDemand,
+    shouldLoadMonsterAssetsOnDemand,
+} from '../../utils/MonsterAssets';
 
 /**
  * Main game scene. Manages player, monsters, NPCs, ground items, map, camera, input,
@@ -2162,15 +2168,25 @@ export class GameWorld extends Scene {
                 `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Ignoring monster enter: invalid allegiance ${data.allegiance} (id=${data.monsterId})`);
             return;
         }
+        const lazyMonsterAssets = shouldLoadMonsterAssetsOnDemand();
+        const concreteAssetsReady = !lazyMonsterAssets || areMonsterAssetsLoaded(this, data.sprite);
+        const visualSpriteName = concreteAssetsReady ? data.sprite : MONSTER_PLACEHOLDER_SPRITE;
+        const visualTemplate = concreteAssetsReady ? monsterTemplate : getMonsterData(MONSTER_PLACEHOLDER_SPRITE);
+        if (!visualTemplate) {
+            console.warn(
+                `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Missing placeholder monster sprite '${MONSTER_PLACEHOLDER_SPRITE}'`);
+            return;
+        }
+
         const monster = new Monster(this, {
             x: data.x,
             y: data.y,
-            spriteName: data.sprite,
+            spriteName: visualSpriteName,
             displayName: data.name,
             direction: facing,
             soundManager: this.soundManager,
             map,
-            states: monsterTemplate.states,
+            states: visualTemplate.states,
             movementSpeedMs: data.movementSpeedMs,
             attackSpeedMs: data.attackSpeedMs,
             playerX: this.player.getWorldX(),
@@ -2182,7 +2198,7 @@ export class GameWorld extends Scene {
             attackDamage: data.attackDamage,
             monsterId: data.monsterId,
             temporalCoefficient: monsterTemplate.temporalCoefficient,
-            shadow: monsterTemplate.shadow,
+            shadow: visualTemplate.shadow,
             opacity: monsterTemplate.opacity,
             height: monsterTemplate.height,
             dead: data.dead,
@@ -2194,6 +2210,28 @@ export class GameWorld extends Scene {
             this.player.clearAttackTarget();
         }
         this.monsters.push(monster);
+
+        if (!concreteAssetsReady) {
+            loadMonsterAssetsOnDemand(this, data.sprite)
+                .then(() => {
+                    const currentMonster = this.monsters.find((entry) => entry.getMonsterId() === data.monsterId);
+                    if (!currentMonster) {
+                        return;
+                    }
+                    currentMonster.applyLoadedMonsterAssets({
+                        spriteName: data.sprite,
+                        states: monsterTemplate.states,
+                        shadow: monsterTemplate.shadow,
+                        height: monsterTemplate.height,
+                    });
+                })
+                .catch((error) => {
+                    console.error(
+                        `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Failed to lazy-load monster assets for '${data.sprite}' (id=${data.monsterId})`,
+                        error,
+                    );
+                });
+        }
     }
 
     private handleTemporaryEffectAppliedForPlayer(data: TemporaryEffectPlayerEventData): void {

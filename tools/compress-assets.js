@@ -2,27 +2,38 @@
 
 /**
  * Asset compression script
- * Reads assets from Assets.ts and compresses them into a ZIP archive
+ * Reads assets from a client Assets.ts and compresses them into that client's ZIP archive.
+ * When run from a client directory (sp-client or multiplayer/mp-client), that client is used.
+ * Otherwise, sp-client is used for backward compatibility. Use --client-dir to override.
  * 
  * Compression Level: Default is 1 (recommended for game assets)
  * - Game assets (MP3, binary sprites/maps) are already compressed or don't compress well
  * - Level 1: Fast compression, fast decompression, minimal size penalty (~3-5% vs level 9)
  * - Higher levels: Much slower compression/decompression, minimal size benefit
  * 
- * Usage: node compress-assets.js [--ratio=N] [--output=filename.zip]
+ * Usage: node compress-assets.js [--client-dir=DIR] [--ratio=N] [--output=filename.zip] [--dry-run]
  */
 
 const fs = require('fs');
 const path = require('path');
 const { zipSync } = require('fflate');
 
-// Client directory (script lives in tools/, sp-client is sibling)
-const clientDir = path.join(__dirname, '..', 'sp-client');
+function resolveDefaultClientDir() {
+    const cwdAssetsPath = path.join(process.cwd(), 'src', 'constants', 'Assets.ts');
+    if (fs.existsSync(cwdAssetsPath)) {
+        return process.cwd();
+    }
+
+    // Backward-compatible default for direct `node tools/compress-assets.js` usage.
+    return path.join(__dirname, '..', 'sp-client');
+}
 
 // Parse command line arguments
 const args = process.argv.slice(2);
+let clientDir = resolveDefaultClientDir();
 let compressionRatio = 1; // Default compression level (0-9)
 let outputFile = 'public/assets.zip';
+let dryRun = false;
 
 args.forEach(arg => {
     if (arg.startsWith('--ratio=')) {
@@ -33,16 +44,25 @@ args.forEach(arg => {
         }
     } else if (arg.startsWith('--output=')) {
         outputFile = arg.split('=')[1];
+    } else if (arg.startsWith('--client-dir=')) {
+        clientDir = path.resolve(arg.split('=')[1]);
+    } else if (arg === '--dry-run') {
+        dryRun = true;
     } else if (arg === '--help' || arg === '-h') {
         console.log(`
 Usage: node compress-assets.js [options]
 
 Options:
+  --client-dir=DIR
+                Client directory containing src/constants/Assets.ts.
+                Defaults to current working directory when it looks like a client,
+                otherwise sp-client/ for backward compatibility.
   --ratio=N     Compression ratio (0-9, default: 1)
                 Note: Higher ratios (6-9) provide minimal size benefit (~3-5%)
                       but significantly slower compression AND decompression.
                       Level 1 is recommended for best balance.
-  --output=FILE Output ZIP file path relative to sp-client/ (default: public/assets.zip)
+  --output=FILE Output ZIP file path relative to the selected client (default: public/assets.zip)
+  --dry-run     Parse and scan files without writing a ZIP
   --help, -h    Show this help message
 
 Example:
@@ -52,8 +72,11 @@ Example:
     }
 });
 
-// Parse the TypeScript files to extract ASSETS array, MONSTERS array, EFFECTS array, NPCS array, and SoundFileNames
+console.log(`Using client directory: ${clientDir}`);
+
+// Parse the TypeScript files to extract ASSETS array, config flags, MONSTERS array, EFFECTS array, NPCS array, and SoundFileNames
 const assetsPath = path.join(clientDir, 'src', 'constants', 'Assets.ts');
+const configPath = path.join(clientDir, 'src', 'Config.ts');
 const monstersPath = path.join(clientDir, 'src', 'constants', 'Monsters.ts');
 const effectsPath = path.join(clientDir, 'src', 'constants', 'Effects.ts');
 const npcsPath = path.join(clientDir, 'src', 'constants', 'NPCs.ts');
@@ -62,6 +85,11 @@ const soundFileNamesPath = path.join(clientDir, 'src', 'constants', 'SoundFileNa
 
 if (!fs.existsSync(assetsPath)) {
     console.error(`Error: Could not find Assets.ts at ${assetsPath}`);
+    process.exit(1);
+}
+
+if (!fs.existsSync(configPath)) {
+    console.error(`Error: Could not find Config.ts at ${configPath}`);
     process.exit(1);
 }
 
@@ -91,11 +119,17 @@ if (!fs.existsSync(soundFileNamesPath)) {
 }
 
 const assetsContent = fs.readFileSync(assetsPath, 'utf-8');
+const configContent = fs.readFileSync(configPath, 'utf-8');
 const monstersContent = fs.readFileSync(monstersPath, 'utf-8');
 const effectsContent = fs.readFileSync(effectsPath, 'utf-8');
 const npcsContent = fs.readFileSync(npcsPath, 'utf-8');
 const itemsContent = fs.readFileSync(itemsPath, 'utf-8');
 const soundFileNamesContent = fs.readFileSync(soundFileNamesPath, 'utf-8');
+
+const loadMonsterAssetsOnDemandMatch = configContent.match(/export const LOAD_MONSTER_ASSETS_ON_DEMAND\s*=\s*(true|false)/);
+const loadMonsterAssetsOnDemand = loadMonsterAssetsOnDemandMatch?.[1] === 'true';
+const placeholderSpriteMatch = configContent.match(/export const MONSTER_PLACEHOLDER_SPRITE\s*=\s*['"]([^'"]+)['"]/);
+const monsterPlaceholderSprite = placeholderSpriteMatch?.[1] ?? 'ghk';
 
 // Parse SoundFileNames.ts to resolve effect sound constants (e.g. EFFECT_EXPLOSION -> E4.mp3)
 const soundConstantMap = {};
@@ -128,9 +162,11 @@ const monstersArrayContent = monstersMatch[1];
 const effectsMatch = effectsContent.match(/export const EFFECTS[^=]*=\s*\[([\s\S]*?)\];/);
 const effectsArrayContent = effectsMatch ? effectsMatch[1] : '';
 
-// Extract the NPCS array content
+// Extract the NPC asset array content. Single-player uses NPCS objects; multiplayer uses NPC_SPRITE_NAMES strings.
 const npcsMatch = npcsContent.match(/export const NPCS:\s*NPCData\[\]\s*=\s*\[([\s\S]*?)\];/);
+const npcSpriteNamesMatch = npcsContent.match(/export const NPC_SPRITE_NAMES:\s*readonly string\[\]\s*=\s*\[([\s\S]*?)\];/);
 const npcsArrayContent = npcsMatch ? npcsMatch[1] : '';
+const npcSpriteNamesArrayContent = npcSpriteNamesMatch ? npcSpriteNamesMatch[1] : '';
 
 // Extract the ITEMS array content
 const itemsMatch = itemsContent.match(/export const ITEMS[^=]*=\s*\[([\s\S]*?)\];/);
@@ -321,7 +357,7 @@ if (effectsArrayContent) {
     });
 }
 
-// Parse NPCS array to extract sprite names
+// Parse NPCS/NPC_SPRITE_NAMES arrays to extract sprite names
 const npcSprites = new Set();
 if (npcsArrayContent) {
     const npcObjects = [];
@@ -366,6 +402,12 @@ if (npcsArrayContent) {
         if (spriteMatch) npcSprites.add(spriteMatch[1]);
     });
 }
+if (npcSpriteNamesArrayContent) {
+    const spriteMatches = npcSpriteNamesArrayContent.matchAll(/['"]([^'"]+)['"]/g);
+    for (const match of spriteMatches) {
+        npcSprites.add(match[1]);
+    }
+}
 
 // Parse ITEMS array to extract equipped sprites and consumption sounds
 const equippedSprites = new Set();
@@ -385,9 +427,21 @@ if (itemsArrayContent) {
     }
 }
 
+const bundledMonsterSprites = loadMonsterAssetsOnDemand
+    ? new Set([...monsterSprites].filter((spriteName) => spriteName === monsterPlaceholderSprite))
+    : monsterSprites;
+const bundledMonsterSounds = loadMonsterAssetsOnDemand
+    ? new Set(
+        monsterObjects
+            .filter((monsterObj) => monsterObj.match(/spriteName:\s*['"]([^'"]+)['"]/)?.[1] === monsterPlaceholderSprite)
+            .flatMap((monsterObj) => [...monsterObj.matchAll(/sound:\s*['"]([^'"]+)['"]/g)].map((match) => match[1]))
+    )
+    : monsterSounds;
+
 console.log(`Parsed ${assetEntries.length} base assets from Assets.ts`);
-console.log(`Found ${monsterSprites.size} unique monster sprites from Monsters.ts`);
-console.log(`Found ${monsterSounds.size} unique monster sounds from Monsters.ts`);
+console.log(`Monster on-demand assets: ${loadMonsterAssetsOnDemand ? `enabled (bundling placeholder sprite "${monsterPlaceholderSprite}" and its sounds only)` : 'disabled (bundling all monster assets)'}`);
+console.log(`Found ${monsterSprites.size} unique monster sprites from Monsters.ts (${bundledMonsterSprites.size} bundled)`);
+console.log(`Found ${monsterSounds.size} unique monster sounds from Monsters.ts (${bundledMonsterSounds.size} bundled)`);
 console.log(`Found ${effectSprites.size} unique effect sprites from Effects.ts`);
 console.log(`Found ${effectSounds.size} unique effect sounds from Effects.ts`);
 console.log(`Found ${npcSprites.size} unique NPC sprites from NPCs.ts`);
@@ -395,7 +449,7 @@ console.log(`Found ${equippedSprites.size} unique equipped sprites from Items.ts
 console.log(`Found ${consumptionSounds.size} unique consumption sounds from Items.ts`);
 
 // Add monster sprites to asset entries (with .spr extension)
-monsterSprites.forEach(spriteName => {
+bundledMonsterSprites.forEach(spriteName => {
     assetEntries.push({
         key: `sprite-${spriteName}`,
         fileName: `${spriteName}.spr`,
@@ -404,7 +458,7 @@ monsterSprites.forEach(spriteName => {
 });
 
 // Add monster sounds to asset entries
-monsterSounds.forEach(soundFile => {
+bundledMonsterSounds.forEach(soundFile => {
     // Extract key from filename (e.g., 'M91.mp3' -> 'M91')
     const key = soundFile.replace('.mp3', '');
     assetEntries.push({
@@ -521,6 +575,11 @@ if (Object.keys(filesToCompress).length === 0) {
     process.exit(1);
 }
 
+if (dryRun) {
+    console.log('\nDry run enabled; ZIP file was not written.');
+    process.exit(0);
+}
+
 // Read all files and prepare for compression
 console.log('Reading files...');
 const fileData = {};
@@ -552,8 +611,12 @@ const compressedSize = zipped.length;
 console.log(`Compressed size: ${(compressedSize / 1024 / 1024).toFixed(2)} MB`);
 console.log(`Compression ratio: ${((1 - compressedSize / totalSize) * 100).toFixed(1)}%`);
 
-// Write ZIP file (output path is relative to sp-client/)
+// Write ZIP file (output path is relative to the selected client)
 const outputPath = path.join(clientDir, outputFile);
+if (fs.existsSync(outputPath)) {
+    fs.unlinkSync(outputPath);
+    console.log(`Deleted existing ZIP: ${outputFile}`);
+}
 fs.writeFileSync(outputPath, zipped);
 
 console.log(`\n✓ Successfully created: ${outputFile}`);

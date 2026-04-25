@@ -1211,14 +1211,19 @@ export class GameAsset {
                     : this.directionStartFrame;
             }
 
-            // Stop current animation if playing to ensure clean state
-            if (this.sprite.anims.isPlaying) {
-                this.sprite.anims.stop();
+            const anim = this.scene.anims.get(animationKey);
+            const frameCount = anim?.frames?.length ?? 0;
+            if (frameCount < 1) {
+                console.warn(`Animation key "${animationKey}" has no frames`);
+                return;
             }
+
+            startFrame = Math.max(0, Math.min(frameCount - 1, startFrame));
+
+            this.stopCurrentAnimationForSwitch(animationKey);
 
             // Reset to frame 0 when starting from a non-zero frame to avoid carryover from previous animation
             if (startFrame > 0) {
-                const anim = this.scene.anims.get(animationKey);
                 const firstFrame = anim?.frames?.[0];
                 if (firstFrame?.frame) {
                     this.sprite.anims.setCurrentFrame(firstFrame);
@@ -1249,7 +1254,13 @@ export class GameAsset {
                 this.isAnimationLooping = repeat === undefined || repeat !== 0;
             }
             
-            this.sprite.play(playConfig);
+            try {
+                this.sprite.play(playConfig);
+            } catch (error) {
+                this.resetAnimationStateForSwitch(animationKey);
+                this.setStaticFrameFromAnimation(animationKey, startFrame);
+                throw error;
+            }
 
             // Sync overlays to parent's current frame (do not play—overlays must respect parent's
             // DirectionalSubFrame/SubFrame limits; playing would cycle through all frames).
@@ -1260,8 +1271,68 @@ export class GameAsset {
                 this.syncGlareOverlayFrame();
             }
         } catch (error) {
+            this.resetAnimationStateForSwitch(animationKey);
             console.error(`Error playing animation with direction for GameAsset`, this, error);
         }
+    }
+
+    private setStaticFrameFromAnimation(animationKey: string, frameIndex: number): void {
+        const anim = this.scene.anims.get(animationKey);
+        const frame = anim?.frames?.[frameIndex] ?? anim?.frames?.[0];
+        if (!frame?.frame) {
+            return;
+        }
+
+        this.sprite.setTexture(frame.frame.texture.key, frame.frame.name);
+        this.applyFramePivotOffset(frame);
+        this.updateDebug(frame);
+    }
+
+    private stopCurrentAnimationForSwitch(nextAnimationKey: string): void {
+        const animationState = this.sprite.anims;
+        if (!animationState.isPlaying) {
+            return;
+        }
+
+        if (!animationState.currentAnim || !animationState.currentFrame) {
+            this.resetAnimationStateForSwitch(nextAnimationKey);
+            return;
+        }
+
+        try {
+            animationState.stop();
+        } catch (error) {
+            console.warn(
+                `[GameAsset] Resetting stale animation state before playing "${nextAnimationKey}"`,
+                error,
+            );
+            this.resetAnimationStateForSwitch(nextAnimationKey);
+        }
+    }
+
+    private resetAnimationStateForSwitch(nextAnimationKey: string): void {
+        type MutableAnimationState = {
+            currentAnim?: Phaser.Animations.Animation | null;
+            currentFrame?: Phaser.Animations.AnimationFrame | null;
+            hasStarted?: boolean;
+            isPlaying?: boolean;
+            nextAnim?: Phaser.Animations.Animation | string | null;
+            stopAfterDelay?: number;
+            stopAfterRepeat?: number;
+            stopOnFrame?: Phaser.Animations.AnimationFrame | null;
+        };
+
+        const animationState = this.sprite.anims as unknown as MutableAnimationState;
+        animationState.currentAnim = null;
+        animationState.currentFrame = null;
+        animationState.nextAnim = null;
+        animationState.stopOnFrame = null;
+        animationState.stopAfterDelay = 0;
+        animationState.stopAfterRepeat = 0;
+        animationState.hasStarted = false;
+        animationState.isPlaying = false;
+
+        console.warn(`[GameAsset] Recovered stale animation state before playing "${nextAnimationKey}"`);
     }
 
     /**

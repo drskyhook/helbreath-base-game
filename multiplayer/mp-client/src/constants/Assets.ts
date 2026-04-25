@@ -19,7 +19,8 @@ export enum AssetType {
 }
 
 import { SpriteType } from '../game/assets/HBSprite';
-import { MONSTERS } from './Monsters';
+import { LOAD_MONSTER_ASSETS_ON_DEMAND, MONSTER_PLACEHOLDER_SPRITE } from '../Config';
+import { getMonsterData, MONSTERS, type MonsterData, type MonsterStateConfig } from './Monsters';
 import { NPC_SPRITE_NAMES } from './NPCs';
 import { EFFECTS } from './Effects';
 import { ITEMS } from './Items';
@@ -38,6 +39,11 @@ export interface AssetData {
     exportFramesAsDataUrls?: boolean;
     tileStartIndex?: number;
 }
+
+type GetAssetsOptions = {
+    /** Forces all monster-derived sprites/sounds into the manifest, used by ZIP eager loading. */
+    eagerMonsterAssets?: boolean;
+};
 
 /** All registerable assets; LoadingScreen walks this for preload. */
 export const ASSETS: AssetData[] = [
@@ -158,7 +164,6 @@ export const ASSETS: AssetData[] = [
     // Item sprite sheets (pack = inventory/bag, ground = on map)
     { key: 'sprite-item-pack', fileName: 'item-pack.spr', assetType: AssetType.SPRITE, spriteType: SpriteType.ItemPack, exportFramesAsDataUrls: true },
     { key: 'sprite-item-ground', fileName: 'item-ground.spr', assetType: AssetType.SPRITE, spriteType: SpriteType.ItemGround, exportFramesAsDataUrls: true },
-    { key: 'sprite-effect', fileName: 'effect.spr', assetType: AssetType.SPRITE, spriteType: SpriteType.Effect },
     
     // Music files
     { key: 'abaddon', fileName: 'abaddon.mp3', assetType: AssetType.MUSIC },
@@ -193,58 +198,84 @@ export const ASSETS: AssetData[] = [
     { key: 'E45', fileName: 'E45.mp3', assetType: AssetType.SOUND },
 ];
 
+/** Adds sound/override sprite references from a single monster state into the provided sets. */
+function collectMonsterStateAssets(state: MonsterStateConfig | undefined, spriteNames: Set<string>, sounds: Set<string>): void {
+    if (state?.sound) {
+        sounds.add(state.sound);
+    }
+    if (state?.animation?.spriteName) {
+        spriteNames.add(state.animation.spriteName);
+    }
+}
+
+/** Collects sprite and sound basenames required by a monster template. */
+export function collectMonsterAssetNames(monster: MonsterData): { spriteNames: Set<string>; sounds: Set<string> } {
+    const spriteNames = new Set<string>([monster.spriteName]);
+    const sounds = new Set<string>();
+    collectMonsterStateAssets(monster.states?.idle, spriteNames, sounds);
+    collectMonsterStateAssets(monster.states?.move, spriteNames, sounds);
+    collectMonsterStateAssets(monster.states?.attack, spriteNames, sounds);
+    collectMonsterStateAssets(monster.states?.takeDamage, spriteNames, sounds);
+    collectMonsterStateAssets(monster.states?.death, spriteNames, sounds);
+    return { spriteNames, sounds };
+}
+
+/** Returns loadable asset rows for one monster sprite and its state override assets. */
+export function getMonsterAssets(spriteName: string): AssetData[] {
+    const monster = getMonsterData(spriteName);
+    if (!monster) {
+        return [];
+    }
+
+    const { spriteNames, sounds } = collectMonsterAssetNames(monster);
+    const assets: AssetData[] = [];
+    spriteNames.forEach((name) => {
+        assets.push({
+            key: `sprite-${name}`,
+            fileName: `${name}.spr`,
+            assetType: AssetType.SPRITE,
+            spriteType: SpriteType.Monster
+        });
+    });
+    sounds.forEach((soundFile) => {
+        assets.push({
+            key: soundFile.replace('.mp3', ''),
+            fileName: soundFile,
+            assetType: AssetType.SOUND
+        });
+    });
+    return assets;
+}
+
 /**
  * Get complete list of assets including dynamically generated monster assets.
  * This function combines the static ASSETS array with assets inferred from the MONSTERS array.
- * 
+ *
  * @returns Complete array of all assets to load
  */
-export function getAssets(): AssetData[] {
+export function getAssets(options?: GetAssetsOptions): AssetData[] {
     // Start with base assets (maps, tile sprites, non-monster sprites, music, non-monster sounds)
     const assets = [...ASSETS];
-    
+
+    const eagerMonsterAssets = options?.eagerMonsterAssets ?? !LOAD_MONSTER_ASSETS_ON_DEMAND;
     // Track unique monster sprites and sounds to avoid duplicates
     const monsterSpriteNames = new Set<string>();
     const monsterSounds = new Set<string>();
-    
+
     // Extract monster sprites and sounds from MONSTERS array
     MONSTERS.forEach(monster => {
-        // Add sprite with .spr extension
-        monsterSpriteNames.add(monster.spriteName);
-        
-        // Extract all sounds and override sprites from monster states
-        if (monster.states) {
-            if (monster.states.move?.sound) {
-                monsterSounds.add(monster.states.move.sound);
+        if (!eagerMonsterAssets) {
+            if (monster.spriteName === MONSTER_PLACEHOLDER_SPRITE) {
+                const monsterAssetNames = collectMonsterAssetNames(monster);
+                monsterAssetNames.spriteNames.forEach((spriteName) => monsterSpriteNames.add(spriteName));
+                monsterAssetNames.sounds.forEach((soundFile) => monsterSounds.add(soundFile));
             }
-            if (monster.states.move?.animation?.spriteName) {
-                monsterSpriteNames.add(monster.states.move.animation.spriteName);
-            }
-            if (monster.states.attack?.sound) {
-                monsterSounds.add(monster.states.attack.sound);
-            }
-            if (monster.states.attack?.animation?.spriteName) {
-                monsterSpriteNames.add(monster.states.attack.animation.spriteName);
-            }
-            if (monster.states.death?.sound) {
-                monsterSounds.add(monster.states.death.sound);
-            }
-            if (monster.states.death?.animation?.spriteName) {
-                monsterSpriteNames.add(monster.states.death.animation.spriteName);
-            }
-            if (monster.states.takeDamage?.sound) {
-                monsterSounds.add(monster.states.takeDamage.sound);
-            }
-            if (monster.states.takeDamage?.animation?.spriteName) {
-                monsterSpriteNames.add(monster.states.takeDamage.animation.spriteName);
-            }
-            if (monster.states.idle?.sound) {
-                monsterSounds.add(monster.states.idle.sound);
-            }
-            if (monster.states.idle?.animation?.spriteName) {
-                monsterSpriteNames.add(monster.states.idle.animation.spriteName);
-            }
+            return;
         }
+
+        const monsterAssetNames = collectMonsterAssetNames(monster);
+        monsterAssetNames.spriteNames.forEach((spriteName) => monsterSpriteNames.add(spriteName));
+        monsterAssetNames.sounds.forEach((soundFile) => monsterSounds.add(soundFile));
     });
     
     // Add monster sprite assets
@@ -259,7 +290,7 @@ export function getAssets(): AssetData[] {
 
     // Add NPC sprite assets (NPCs use Monster sprite type - same format)
     NPC_SPRITE_NAMES.forEach((sprite) => {
-        if (!monsterSpriteNames.has(sprite)) {
+        if (!assets.some((asset) => asset.key === `sprite-${sprite}`) && !monsterSpriteNames.has(sprite)) {
             assets.push({
                 key: `sprite-${sprite}`,
                 fileName: `${sprite}.spr`,
@@ -376,8 +407,8 @@ export function getMapAssets(): AssetData[] {
  * Calculate the total number of activities for the create phase
  * This includes tile sprites, other sprites, and maps that are processed in create()
  */
-export function getCreatePhaseTotalActivities(): number {
-    const allAssets = getAssets();
+export function getCreatePhaseTotalActivities(assets: AssetData[] = getAssets()): number {
+    const allAssets = assets;
     const tileSprites = allAssets.filter(a => a.assetType === AssetType.TILE_SPRITE).length;
     const sprites = allAssets.filter(a => a.assetType === AssetType.SPRITE).length;
     const maps = allAssets.filter(a => a.assetType === AssetType.MAP).length;

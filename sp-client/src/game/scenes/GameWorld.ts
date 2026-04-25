@@ -20,6 +20,7 @@ import {
     MAP_OBJECT_COLLISION_GRID_RADIUS_CELLS,
     MAP_OBJECT_COLLISION_RADIUS_CELLS,
     MONSTER_HOVER_OVERLAY_ANCHOR_OFFSET_Y,
+    MONSTER_PLACEHOLDER_SPRITE,
 } from '../../Config';
 import { InputManager } from '../../utils/InputManager';
 import { CameraManager } from '../../utils/CameraManager';
@@ -27,8 +28,9 @@ import { getMusicManager, getGameStateManager, getLootManager, setDebugModeEnabl
 import { playerDialogStore } from '../../ui/store/PlayerDialog.store';
 import { MapManager } from '../../utils/MapManager';
 import { SoundManager } from '../../utils/SoundManager';
-import { MONSTERS } from '../../constants/Monsters';
+import { getMonsterData, MONSTERS } from '../../constants/Monsters';
 import { getNPCData } from '../../constants/NPCs';
+import { areMonsterAssetsLoaded, loadMonsterAssetsOnDemand, shouldLoadMonsterAssetsOnDemand } from '../../utils/MonsterAssets';
 import {
     ITEM_ADD_FROM_GROUND,
     ITEM_DROPPED_TO_GROUND,
@@ -810,11 +812,20 @@ export class GameWorld extends Scene {
             // Generate unique monster ID
             const monsterId = this.nextMonsterId++;
 
+            const lazyMonsterAssets = shouldLoadMonsterAssetsOnDemand();
+            const concreteAssetsReady = !lazyMonsterAssets || areMonsterAssetsLoaded(this, data.spriteName);
+            const visualSpriteName = concreteAssetsReady ? data.spriteName : MONSTER_PLACEHOLDER_SPRITE;
+            const visualTemplate = concreteAssetsReady ? monsterData : getMonsterData(MONSTER_PLACEHOLDER_SPRITE);
+            if (!visualTemplate) {
+                console.warn(`[GameWorld] Cannot summon monster: missing placeholder sprite '${MONSTER_PLACEHOLDER_SPRITE}'`);
+                return;
+            }
+
             // Create new monster at the movable location
             const monster = new Monster(this, {
                 x: movableLocation.x,
                 y: movableLocation.y,
-                spriteName: data.spriteName,
+                spriteName: visualSpriteName,
                 displayName: monsterData.name,
                 direction: data.direction,
                 hp: data.health,
@@ -822,7 +833,7 @@ export class GameWorld extends Scene {
                 attackDamage: data.damage,
                 soundManager: this.soundManager,
                 map,
-                states: monsterData.states,
+                states: visualTemplate.states,
                 movementSpeed: data.movementSpeed,
                 attackSpeed: data.attackSpeed,
                 player: this.player,
@@ -830,19 +841,37 @@ export class GameWorld extends Scene {
                 followDistance: data.followDistance,
                 attackDistance: data.attackDistance,
                 attackType: data.attackType,
-                corpseDecayTime: monsterData.corpseDecayTime,
+                corpseDecayTime: visualTemplate.corpseDecayTime,
                 monsterId,
-                temporalCoefficient: monsterData.temporalCoefficient,
-                shadow: monsterData.shadow,
-                opacity: monsterData.opacity,
-                height: monsterData.height,
-                bowAttack: monsterData.bowAttack,
+                temporalCoefficient: visualTemplate.temporalCoefficient,
+                shadow: visualTemplate.shadow,
+                opacity: visualTemplate.opacity,
+                height: visualTemplate.height,
+                bowAttack: visualTemplate.bowAttack,
                 transparency: data.transparency,
                 chilledEffect: data.chilledEffect,
                 berserkedEffect: data.berserkedEffect,
             });
 
             this.monsters.push(monster);
+            if (!concreteAssetsReady) {
+                loadMonsterAssetsOnDemand(this, data.spriteName)
+                    .then(() => {
+                        const currentMonster = this.monsters.find((entry) => entry.getMonsterId() === monsterId);
+                        if (!currentMonster) {
+                            return;
+                        }
+                        currentMonster.applyLoadedMonsterAssets({
+                            spriteName: data.spriteName,
+                            states: monsterData.states,
+                            shadow: monsterData.shadow,
+                            height: monsterData.height,
+                        });
+                    })
+                    .catch((error) => {
+                        console.error(`[GameWorld] Failed to lazy-load monster assets for '${data.spriteName}' (id=${monsterId})`, error);
+                    });
+            }
             console.log(`[GameWorld] Summoned ${data.spriteName} (ID: ${monsterId}) at (${movableLocation.x}, ${movableLocation.y}) with speed ${data.movementSpeed}, attack speed ${data.attackSpeed}, follow distance ${data.followDistance}, attack distance ${data.attackDistance}`);
         });
 

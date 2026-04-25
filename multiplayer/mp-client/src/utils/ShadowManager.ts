@@ -216,6 +216,12 @@ export class ShadowManager {
 
             // Update shadow animation and frame rate
             if (this.scene.anims.exists(shadowAnimationKey)) {
+                const anim = this.scene.anims.get(shadowAnimationKey);
+                const frameCount = anim?.frames?.length ?? 0;
+                if (frameCount < 1) {
+                    return;
+                }
+
                 const playConfig: Phaser.Types.Animations.PlayAnimationConfig = {
                     key: shadowAnimationKey,
                     frameRate: this.frameRate
@@ -223,16 +229,14 @@ export class ShadowManager {
 
                 // Set start frame: playFromFrame keeps shadow in sync with object when switching animations,
                 // otherwise use animation range startFrame if provided
-                const effectiveStartFrame = playFromFrame ?? startFrame ?? 0;
-                if (playFromFrame !== undefined) {
-                    playConfig.startFrame = playFromFrame;
-                } else if (startFrame !== undefined) {
-                    playConfig.startFrame = startFrame;
+                const requestedStartFrame = playFromFrame ?? startFrame ?? 0;
+                const effectiveStartFrame = Math.max(0, Math.min(frameCount - 1, requestedStartFrame));
+                if (playFromFrame !== undefined || startFrame !== undefined) {
+                    playConfig.startFrame = effectiveStartFrame;
                 }
 
                 // Reset to frame 0 when starting from non-zero to avoid carryover from previous animation
                 if (effectiveStartFrame > 0) {
-                    const anim = this.scene.anims.get(shadowAnimationKey);
                     const firstFrame = anim?.frames?.[0];
                     if (firstFrame?.frame) {
                         this.shadowSprite.anims.setCurrentFrame(firstFrame);
@@ -244,7 +248,14 @@ export class ShadowManager {
                     playConfig.repeat = repeat;
                 }
 
-                this.shadowSprite.play(playConfig);
+                this.stopShadowAnimationForSwitch(shadowAnimationKey);
+                try {
+                    this.shadowSprite.play(playConfig);
+                } catch (error) {
+                    this.resetShadowAnimationState(shadowAnimationKey);
+                    this.setStaticFrameFromAnimation(shadowAnimationKey, effectiveStartFrame);
+                    throw error;
+                }
 
                 // Frame limit listener only needed for LOOPING animations (e.g. idle 0-3 wrapping back to 0).
                 // For repeat: 0 (attack, take damage, death), the animation naturally stops at the last frame.
@@ -283,6 +294,71 @@ export class ShadowManager {
                 }
             );
         }
+    }
+
+    private stopShadowAnimationForSwitch(nextAnimationKey: string): void {
+        if (!this.shadowSprite?.anims.isPlaying) {
+            return;
+        }
+
+        if (!this.shadowSprite.anims.currentAnim || !this.shadowSprite.anims.currentFrame) {
+            this.resetShadowAnimationState(nextAnimationKey);
+            return;
+        }
+
+        try {
+            this.shadowSprite.anims.stop();
+        } catch (error) {
+            console.warn(
+                `[ShadowManager] Resetting stale animation state before playing "${nextAnimationKey}"`,
+                error,
+            );
+            this.resetShadowAnimationState(nextAnimationKey);
+        }
+    }
+
+    private resetShadowAnimationState(nextAnimationKey: string): void {
+        if (!this.shadowSprite) {
+            return;
+        }
+
+        type MutableAnimationState = {
+            currentAnim?: Phaser.Animations.Animation | null;
+            currentFrame?: Phaser.Animations.AnimationFrame | null;
+            hasStarted?: boolean;
+            isPlaying?: boolean;
+            nextAnim?: Phaser.Animations.Animation | string | null;
+            stopAfterDelay?: number;
+            stopAfterRepeat?: number;
+            stopOnFrame?: Phaser.Animations.AnimationFrame | null;
+        };
+
+        const animationState = this.shadowSprite.anims as unknown as MutableAnimationState;
+        animationState.currentAnim = null;
+        animationState.currentFrame = null;
+        animationState.nextAnim = null;
+        animationState.stopOnFrame = null;
+        animationState.stopAfterDelay = 0;
+        animationState.stopAfterRepeat = 0;
+        animationState.hasStarted = false;
+        animationState.isPlaying = false;
+
+        console.warn(`[ShadowManager] Recovered stale animation state before playing "${nextAnimationKey}"`);
+    }
+
+    private setStaticFrameFromAnimation(animationKey: string, frameIndex: number): void {
+        if (!this.shadowSprite) {
+            return;
+        }
+
+        const anim = this.scene.anims.get(animationKey);
+        const frame = anim?.frames?.[frameIndex] ?? anim?.frames?.[0];
+        if (!frame?.frame) {
+            return;
+        }
+
+        this.shadowSprite.setTexture(frame.frame.texture.key, frame.frame.name);
+        this.updatePosition();
     }
 
     /**

@@ -5,7 +5,7 @@ import { InventoryManager } from './InventoryManager';
 import { HBMap } from '../game/assets/HBMap';
 import { CachedMinimap, type PivotData } from '../Types';
 import { SoundManager } from './SoundManager';
-import { MUSIC_MANAGER_KEY, SOUND_MANAGER_KEY, GAME_STATE_MANAGER_KEY, INVENTORY_MANAGER_KEY, LOOT_MANAGER_KEY, DEBUG_KEY, DISPLAY_LARGE_ITEMS_KEY, IGNORE_ZIP_KEY, LOADING_BG_KEY, ITEM_PACK_SPRITE_SHEETS_KEY, ITEM_PACK_EMITTED_TINT_KEYS_KEY, LOGIN_SCREEN_BG_KEY } from '../constants/RegistryKeys';
+import { MUSIC_MANAGER_KEY, SOUND_MANAGER_KEY, GAME_STATE_MANAGER_KEY, INVENTORY_MANAGER_KEY, LOOT_MANAGER_KEY, DEBUG_KEY, DISPLAY_LARGE_ITEMS_KEY, LOADING_BG_KEY, ITEM_PACK_SPRITE_SHEETS_KEY, ITEM_PACK_EMITTED_TINT_KEYS_KEY } from '../constants/RegistryKeys';
 import type { HBSpriteSheet } from '../game/assets/HBSprite';
 import { LootManager } from './LootManager';
 
@@ -297,28 +297,6 @@ export function getLoadingBgKey(scene: Scene): string | undefined {
 export function getLoginScreenBgKey(scene: Scene): string | undefined {
     //return getRegistryValue<string>(scene.registry, LOGIN_SCREEN_BG_KEY);
     return getRegistryValue<string>(scene.registry, LOADING_BG_KEY);
-}
-
-/**
- * Sets the ignore-zip flag in the scene's registry.
- * When true, assets are loaded individually; when false, assets.zip is used.
- * 
- * @param scene - The Phaser scene instance
- * @param ignoreZip - Whether to ignore zip loading
- */
-export function setIgnoreZip(scene: Scene, ignoreZip: boolean): void {
-    scene.registry.set(IGNORE_ZIP_KEY, ignoreZip);
-}
-
-/**
- * Gets the ignore-zip flag from the scene's registry.
- * Defaults to false (use zip loading) if not set.
- * 
- * @param scene - The Phaser scene instance
- * @returns True if zip loading should be ignored, false otherwise
- */
-export function getIgnoreZip(scene: Scene): boolean {
-    return scene.registry.get(IGNORE_ZIP_KEY) === true;
 }
 
 /**

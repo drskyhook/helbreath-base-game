@@ -2,11 +2,13 @@
 
 This project supports two methods for loading game assets:
 
-## 1. ZIP-based Loading (Default, Recommended)
+## 1. ZIP-based Loading
 
 Assets are bundled into a single `assets.zip` file for faster loading, especially over slow network connections.
 
-**🚀 Performance Optimization:** Audio files are loaded using HTML5 Audio elements (same as Phaser's normal loading), which stream and don't require upfront decoding. This keeps file sizes small (MP3) while maintaining fast loading performance.
+ZIP loading is controlled by `ENABLE_ZIP_LOADING` in `src/Config.ts`. When it is `true`, the loading scene reads `public/assets.zip`; when it is `false`, assets are loaded individually from `public/assets/`.
+
+**Performance optimization:** Audio files remain MP3s in the archive and are decoded in parallel during ZIP registration.
 
 ### How to use:
 
@@ -16,8 +18,9 @@ Assets are bundled into a single `assets.zip` file for faster loading, especiall
    ```
 
    This will:
-   - Compress all assets (including MP3 audio as-is) into `public/assets.zip`
-   - Uses compression level 1 (recommended)
+   - Delete the existing `public/assets.zip` if it exists
+   - Compress the selected client's assets (including MP3 audio as-is) into `public/assets.zip`
+   - Use compression level 1 (recommended)
 
    **Note on Compression Levels:**
    - Game assets (MP3s, binary sprites/maps) are already compressed or don't compress well
@@ -37,7 +40,7 @@ Assets are bundled into a single `assets.zip` file for faster loading, especiall
    npm run dev
    ```
 
-The game will automatically load from `assets.zip` located in the `public/` folder.
+If `ENABLE_ZIP_LOADING` is `true`, the game will automatically load from `assets.zip` located in the `public/` folder.
 
 ### How it works:
 - **0-25%**: Fetching `assets.zip` with streaming progress
@@ -49,14 +52,18 @@ The game will automatically load from `assets.zip` located in the `public/` fold
 - **Better compression** across all assets
 - **Faster loading** on slow connections
 - **Small file sizes** (MP3 compression)
-- **Fast audio loading** (HTML5 Audio, same as Phaser's normal loading)
+- **Parallel audio decode** during ZIP registration
 - **Automatic fallback** to traditional loading on error
 
 ### How it Works:
 
 **Build time (compress-assets.js):**
-1. Reads all assets including MP3 files as-is
-2. Compresses everything into a single zip file (level 1 - fast compression/decompression)
+1. Selects the client from the current working directory, or from `--client-dir=...`
+2. Reads `src/constants/Assets.ts` and related asset catalogs
+3. Reads `src/Config.ts` to honor asset-loading flags
+4. Compresses the selected assets into a single zip file (level 1 - fast compression/decompression)
+
+For `multiplayer/mp-client`, when `LOAD_MONSTER_ASSETS_ON_DEMAND` is `true`, the ZIP intentionally includes only the placeholder monster sprite and its sounds. Other monster sprites and sounds are fetched later as monsters enter view. When on-demand monster loading is `false`, all monster assets are bundled.
 
 **Runtime (LoadingScreen.ts):**
 1. Downloads zip file with streaming progress (0-25%)
@@ -69,17 +76,12 @@ The game will automatically load from `assets.zip` located in the `public/` fold
 Load assets individually, one file at a time. Useful for development, debugging, or when ZIP loading is not suitable.
 
 **When to use per-file loading:**
-- **Local development:** Set `IGNORE_ZIP_ASSETS` to `true` in `src/Config.ts` to disable ZIP loading globally. This is recommended for local development, since per-file loading can be faster—there is no decompression overhead in memory, and Phaser's native audio loading is faster when loading files directly.
+- **Local development:** Set `ENABLE_ZIP_LOADING` to `false` in `src/Config.ts` to disable ZIP loading. This can be faster for iteration because there is no decompression step and changed files are read directly.
 - **CDN limitations:** Some CDNs don't support large files (e.g. multi-megabyte `assets.zip`). In those cases, per-file loading must be used.
 
 ### How to use:
 
-**Option A:** Set `IGNORE_ZIP_ASSETS` to `true` in `src/Config.ts` (disables ZIP loading globally).
-
-**Option B:** Add `?ignoreZip=true` to the URL (runtime override when `IGNORE_ZIP_ASSETS` is `false`):
-```
-http://localhost:5173/?ignoreZip=true
-```
+Set `ENABLE_ZIP_LOADING` to `false` in `src/Config.ts`.
 
 ### How it works:
 - Each asset is loaded individually via HTTP request
@@ -98,16 +100,14 @@ If ZIP loading fails for any reason (missing file, corrupt archive, etc.), the s
 
 ### Audio Loading Performance:
 
-**ZIP-based loading (HTML5 Audio):**
-- Loading time: ~5-10ms per file (loading metadata only, actual audio streams)
-- Total audio loading: ~50-150ms for all files
+**ZIP-based loading:**
+- Audio files are stored as MP3s in `assets.zip`
+- After decompression, audio files are decoded through the Web Audio API in parallel
 - File size: Small (MP3 compression)
-- Same performance as Phaser's normal loading
 
-**Why HTML5 Audio is Fast:**
-- Only loads audio metadata, not the full file
-- Actual audio data streams on-demand when played
-- No upfront decoding required
+**Traditional loading:**
+- Phaser loads audio files directly from `public/assets/sounds` and `public/assets/music`
+- Useful during development when avoiding ZIP decompression is more convenient
 
 ## Troubleshooting
 
@@ -129,10 +129,7 @@ npm run compress-assets
 
 ### Slow loading during development:
 
-For faster iteration during development, set `IGNORE_ZIP_ASSETS` to `true` in `src/Config.ts`, or add `?ignoreZip=true` to the URL:
-```
-http://localhost:5173/?ignoreZip=true
-```
+For faster iteration during development, set `ENABLE_ZIP_LOADING` to `false` in `src/Config.ts`.
 
 Or use fast compression when regenerating the zip:
 ```bash

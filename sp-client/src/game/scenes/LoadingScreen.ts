@@ -5,12 +5,9 @@ import { HBSpriteFile } from '../assets/HBSprite';
 import { HBMap } from '../assets/HBMap';
 import { getMapNames } from '../../constants/Maps';
 import { drawAppTitle, drawVersionNumber } from '../../utils/SpriteUtils';
-import { getAssets, AssetType, getCreatePhaseTotalActivities } from '../../constants/Assets';
-import { getIgnoreZip, setIgnoreZip, getLoadingBgKey, setItemPackSpriteSheets, setItemPackEmittedTintKeys, setMap } from '../../utils/RegistryUtils';
-
-// Total number of asset loading activities in create() phase
-// Derived from the Assets collection
-const CREATE_PHASE_TOTAL_ACTIVITIES = getCreatePhaseTotalActivities();
+import { getAssets, AssetType, getCreatePhaseTotalActivities, type AssetData } from '../../constants/Assets';
+import { getLoadingBgKey, setItemPackSpriteSheets, setItemPackEmittedTintKeys, setMap } from '../../utils/RegistryUtils';
+import { ENABLE_ZIP_LOADING } from '../../Config';
 
 /**
  * Initial loading scene. Displays progress bar while loading assets (sprites, maps, music).
@@ -27,6 +24,8 @@ export class LoadingScreen extends Scene {
     private currentProgress: number = 0; // Overall progress 0-1
     private loadingStartTime!: number;
     private usingZipLoading: boolean = false;
+    private loadingAssets: AssetData[] = [];
+    private createPhaseTotalActivities: number = 0;
     
     // Timing metrics
     private phaseTimings: {
@@ -43,9 +42,12 @@ export class LoadingScreen extends Scene {
         super('LoadingScreen');
     }
 
-    public init() {
+    public init(data?: { enableZipLoading?: boolean }) {
         // Store loading start time for performance measurement
         this.loadingStartTime = Date.now();
+        this.usingZipLoading = data?.enableZipLoading ?? ENABLE_ZIP_LOADING;
+        this.loadingAssets = this.getLoadingAssets();
+        this.createPhaseTotalActivities = getCreatePhaseTotalActivities(this.loadingAssets);
         
         // Set black background as fallback before image loads
         this.cameras.main.setBackgroundColor(0x000000);
@@ -122,9 +124,6 @@ export class LoadingScreen extends Scene {
             this.progressBar.setDepth(11);
         }
 
-        // Check if we're using zip loading or traditional loading
-        this.usingZipLoading = !getIgnoreZip(this);
-        
         if (this.usingZipLoading) {
             // For zip loading, we manually control progress in create()
             // Progress phases: 0-25% fetch, 25-50% decompress, 50-100% process
@@ -158,7 +157,7 @@ export class LoadingScreen extends Scene {
     private reportCreatePhaseProgress() {
         this.createPhaseProgress++;
         // create() phase progress maps to 50-100% of total progress
-        const createPhaseProgressRatio = this.createPhaseProgress / CREATE_PHASE_TOTAL_ACTIVITIES;
+        const createPhaseProgressRatio = this.createPhaseProgress / this.createPhaseTotalActivities;
         this.currentProgress = 0.5 + (createPhaseProgressRatio * 0.5);
         this.updateProgressBar();
     }
@@ -177,14 +176,13 @@ export class LoadingScreen extends Scene {
 
         // LoadingBg is already loaded in Boot.ts and available via registry
 
-        // Only load assets individually if ignore-zip is true (backward compatibility mode)
-        if (getIgnoreZip(this)) {
-            console.log('[LoadingScreen] Using traditional asset loading (ignore-zip=true)');
+        // Only load assets individually if ZIP loading is disabled.
+        if (!this.usingZipLoading) {
+            console.log('[LoadingScreen] Using traditional asset loading (zip loading disabled)');
             const downloadStart = performance.now();
             
             // Load all assets dynamically from the Assets collection
-            const assets = getAssets();
-            assets.forEach((asset) => {
+            this.loadingAssets.forEach((asset) => {
                 switch (asset.assetType) {
                     case AssetType.MAP:
                         // Load maps as binary files
@@ -210,7 +208,7 @@ export class LoadingScreen extends Scene {
                 console.log(`[LoadingScreen] ⏱️  Download assets: ${this.phaseTimings.downloadAssets.toFixed(2)}ms`);
             });
         } else {
-            console.log('[LoadingScreen] Using zip asset loading (ignore-zip=false)');
+            console.log('[LoadingScreen] Using zip asset loading');
             // Assets will be loaded from zip in create()
         }
     }
@@ -221,9 +219,7 @@ export class LoadingScreen extends Scene {
                 await this.loadAssetsFromZip();
             } catch (error) {
                 console.error('[LoadingScreen] Failed to load from zip, falling back to traditional loading:', error);
-                // Set ignore-zip to true and reload the scene
-                setIgnoreZip(this, true);
-                this.scene.restart();
+                this.scene.restart({ enableZipLoading: false });
                 return;
             }
         }
@@ -491,8 +487,7 @@ export class LoadingScreen extends Scene {
         const normalizedPath = filePath.replace(/\\/g, '/');
         const fileName = normalizedPath.split('/').pop() || filePath;
         
-        const assets = getAssets();
-        return assets.find(asset => asset.fileName === fileName);
+        return this.loadingAssets.find(asset => asset.fileName === fileName);
     }
 
     private validateDecompressedFiles(fileNames: string[]): void {
@@ -506,8 +501,7 @@ export class LoadingScreen extends Scene {
         );
         
         // Get expected file names from Assets.ts
-        const assets = getAssets();
-        const expectedFileNames = new Set(assets.map(asset => asset.fileName));
+        const expectedFileNames = new Set(this.loadingAssets.map(asset => asset.fileName));
         
         // Check for missing files
         const missingFiles: string[] = [];
@@ -540,8 +534,7 @@ export class LoadingScreen extends Scene {
         };
         
         // Load sprites dynamically from Assets collection
-        const assets = getAssets();
-        const spriteAssets = assets.filter(
+        const spriteAssets = this.loadingAssets.filter(
             asset => asset.assetType === AssetType.TILE_SPRITE || asset.assetType === AssetType.SPRITE
         );
         
@@ -592,6 +585,10 @@ export class LoadingScreen extends Scene {
         
         this.phaseTimings.loadMaps = performance.now() - mapsStart;
         console.log(`[LoadingScreen] ⏱️  Load maps: ${this.phaseTimings.loadMaps.toFixed(2)}ms (${mapInstances.size} maps)`);
+    }
+
+    private getLoadingAssets(): AssetData[] {
+        return getAssets();
     }
 
 }
