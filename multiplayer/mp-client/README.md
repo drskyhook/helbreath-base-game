@@ -73,7 +73,7 @@ multiplayer/mp-client/src/
 
 ## Asset Loading
 
-Same two modes as single-player: per-file vs ZIP, controlled by **`ENABLE_ZIP_LOADING`** in [`src/Config.ts`](src/Config.ts), with `pnpm compress-assets` output under `public/assets.zip`. Monster assets can also be lazy-loaded with **`LOAD_MONSTER_ASSETS_ON_DEMAND`**; when enabled, only `MONSTER_PLACEHOLDER_SPRITE` and its sounds are eager-loaded or bundled, and real monster assets load when monsters enter range. Details: **[`sp-client/README.md` § Asset Loading](../../sp-client/README.md#asset-loading)** and [`sp-client/docs/ASSET_LOADING.md`](../../sp-client/docs/ASSET_LOADING.md).
+Same two modes as single-player: per-file vs ZIP, controlled by **`ENABLE_ZIP_LOADING`** in [`src/Config.ts`](src/Config.ts), with `pnpm compress-assets` output under `public/assets.zip`. Monster assets can be lazy-loaded with **`LOAD_MONSTER_ASSETS_ON_DEMAND`**; when enabled, only `MONSTER_PLACEHOLDER_SPRITE` and its sounds are eager-loaded or bundled, and real monster assets load when monsters enter range. Map and tile `.spr` packs can be lazy-loaded with **`LOAD_MAP_ASSETS_ON_DEMAND`** via [`src/utils/MapAssets.ts`](src/utils/MapAssets.ts) when `GameWorld` starts (current `.amd` + only the tile sheets that map needs). Details: **[`sp-client/README.md` § Asset Loading](../../sp-client/README.md#asset-loading)** and [`sp-client/docs/ASSET_LOADING.md`](../../sp-client/docs/ASSET_LOADING.md). For tile binary layout and the on-demand path, see [`sp-client/docs/SPRITE_FILE_FORMAT.md`](../../sp-client/docs/SPRITE_FILE_FORMAT.md).
 
 ---
 
@@ -89,7 +89,7 @@ For **wire protocol, prediction, and server authority**, use the multiplayer rep
 
 - **Server first:** Start [`multiplayer/server`](../server) before connecting; port must match the Connect dialog (default **1337**).
 - **Proto changes:** After editing `../proto/network.proto`, run `pnpm proto:generate` (or rely on `pnpm dev` / `pnpm build` which run it automatically).
-- **Faster loading / local dev:** Same as single-player: trim unused maps, enable `LOAD_MONSTER_ASSETS_ON_DEMAND`, and prefer per-file assets with `ENABLE_ZIP_LOADING = false`; see [`sp-client/README.md`](../../sp-client/README.md).
+- **Faster loading / local dev:** Same as single-player: trim unused maps, enable `LOAD_MONSTER_ASSETS_ON_DEMAND` and/or `LOAD_MAP_ASSETS_ON_DEMAND`, and prefer per-file assets with `ENABLE_ZIP_LOADING = false` so on-demand fetches to `assets/maps/` and `assets/sprites/` work; see [`sp-client/README.md`](../../sp-client/README.md).
 
 ---
 

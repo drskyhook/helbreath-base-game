@@ -27,6 +27,7 @@ import { getMusicManager, getGameStateManager, getNetworkManager, getAndRemoveIn
 import type { InitialGameWorldState } from '../../utils/RegistryUtils';
 import { cancelPlayerDialogPhaserNotificationDebouncers, playerDialogStore } from '../../ui/store/PlayerDialog.store';
 import { MapManager } from '../../utils/MapManager';
+import { prepareMapForGameWorld, shouldLoadMapAssetsOnDemand } from '../../utils/MapAssets';
 import { SoundManager } from '../../utils/SoundManager';
 import { getMonsterData } from '../../constants/Monsters';
 import { getSpriteForCatalogNpcId } from '../../constants/NPCs';
@@ -1746,17 +1747,7 @@ export class GameWorld extends Scene {
             // Defer initialization to first update() call so overlay is visible first frame
             if (!this.initializationStarted) {
                 this.drawLoadingOverlay(() => {
-                    runSafeSync('GameWorld:deferredMapLoad', () => {
-                        // Set displayedMap early so we clean up correctly even if user switches maps during load
-                        this.displayedMap = this.mapManager!.getCurrentMap();
-                        this.mapManager!.startMinimapCapture((map) => {
-                            runSafeSync('GameWorld:minimapCapture', () => {
-                                map.renderMapObjects(this, true); // Third pass (with trees)
-                                this.pendingLoadedMap = map;
-                                this.tryFinalizeMapSetup();
-                            });
-                        });
-                    });
+                    void this.runDeferredMapLoad();
                 });
                 return; // Return early to let overlay render
             }
@@ -1805,6 +1796,31 @@ export class GameWorld extends Scene {
     private drawLoadingOverlay(callback: () => void): void {
         this.initializationStarted = true;
         this.loadingOverlayController!.drawAndDeferLoad(callback);
+    }
+
+    /**
+     * When map assets load on demand, fetches the current `.amd` and tile packs before the normal minimap path.
+     */
+    private async runDeferredMapLoad(): Promise<void> {
+        try {
+            if (shouldLoadMapAssetsOnDemand()) {
+                await prepareMapForGameWorld(this, this.mapManager!.getCurrentMapName());
+            }
+        } catch (error) {
+            console.error('[GameWorld] Map on-demand load failed:', error);
+            throw error;
+        }
+
+        runSafeSync('GameWorld:deferredMapLoad', () => {
+            this.displayedMap = this.mapManager!.getCurrentMap();
+            this.mapManager!.startMinimapCapture((map) => {
+                runSafeSync('GameWorld:minimapCapture', () => {
+                    map.renderMapObjects(this, true); // Third pass (with trees)
+                    this.pendingLoadedMap = map;
+                    this.tryFinalizeMapSetup();
+                });
+            });
+        });
     }
 
     private handleLeftMouseButton(): void {

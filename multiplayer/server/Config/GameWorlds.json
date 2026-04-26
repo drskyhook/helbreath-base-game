@@ -1,5 +1,86 @@
 [
   {
+    "id": "promiseland",
+    "name": "Promiseland",
+    "map": "2ndmiddle",
+    "music": "default.mp3",
+    "workerThread": 0,
+    "teleportLocs": [
+      {
+        "locs": [
+          { "x": 135, "y": 228 },
+          { "x": 136, "y": 228 },
+          { "x": 137, "y": 228 },
+          { "x": 138, "y": 228 },
+          { "x": 139, "y": 228 },
+          { "x": 140, "y": 228 },
+          { "x": 141, "y": 228 },
+          { "x": 142, "y": 228 },
+          { "x": 143, "y": 228 },
+          { "x": 144, "y": 228 },
+          { "x": 145, "y": 228 },
+          { "x": 146, "y": 228 }
+        ],
+        "target": {
+          "worldId": "aresden",
+          "loc": { "x": 146, "y": 123 }
+        }
+      }
+    ],
+    "dwellAreas": [
+      {
+        "monsterId": 14,
+        "count": 60,
+        "area": { "x1": 115, "y1": 106, "x2": 136, "y2": 152 }
+      },
+      {
+        "monsterId": 47,
+        "count": 20,
+        "area": { "x1": 111, "y1": 196, "x2": 131, "y2": 211 }
+      },
+      {
+        "monsterId": 48,
+        "count": 40,
+        "area": { "x1": 73, "y1": 197, "x2": 109, "y2": 216 }
+      },
+      {
+        "monsterId": 60,
+        "count": 40,
+        "area": { "x1": 36, "y1": 149, "x2": 75, "y2": 193 }
+      },
+      {
+        "monsterId": 60,
+        "count": 40,
+        "area": { "x1": 35, "y1": 65, "x2": 72, "y2": 103 }
+      },
+      {
+        "monsterId": 0,
+        "count": 40,
+        "area": { "x1": 31, "y1": 27, "x2": 72, "y2": 56 }
+      },
+      {
+        "monsterId": 14,
+        "count": 60,
+        "area": { "x1": 143, "y1": 33, "x2": 165, "y2": 55 }
+      },
+      {
+        "monsterId": 47,
+        "count": 50,
+        "area": { "x1": 139, "y1": 69, "x2": 168, "y2": 84 }
+      },
+      {
+        "monsterId": 32,
+        "count": 30,
+        "area": { "x1": 192, "y1": 105, "x2": 219, "y2": 122 }
+      },
+      {
+        "monsterId": 0,
+        "count": 40,
+        "area": { "x1": 190, "y1": 173, "x2": 157, "y2": 219 }
+      }
+    ]
+  },
+  {
     "id": "aresden",
     "name": "Aresden",
     "map": "aresden",
@@ -61,6 +142,506 @@
         "count": 1,
         "area": { "x1": 138, "y1": 138, "x2": 144, "y2": 142 }
       }
+    ],
+    "teleportLocs": [
+      {
+        "locs": [
+          { "x": 144, "y": 123 },
+          { "x": 145, "y": 123 },
+          { "x": 145, "y": 122 },
+          { "x": 146, "y": 122 }
+        ],
+        "target": {
+          "worldId": "promiseland",
+          "loc": { "x": 141, "y": 227 }
+        }
+      }
     ]
+  },
+  {
+    "id": "elvine",
+    "name": "Elvine",
+    "map": "elvine",
+    "music": "elvine.mp3",
+    "workerThread": 0,
+    "dwellAreas": [
+      {
+        "monsterId": 1,
+        "count": 30,
+        "area": { "x1": 37, "y1": 206, "x2": 70, "y2": 221 }
+      },
+      {
+        "monsterId": 40,
+        "count": 30,
+        "area": { "x1": 30, "y1": 174, "x2": 67, "y2": 197 }
+      },
+      {
+        "monsterId": 12,
+        "count": 20,
+        "area": { "x1": 24, "y1": 123, "x2": 40, "y2": 141 }
+      },
+      {
+        "monsterId": 50,
+        "count": 20,
+        "area": { "x1": 47, "y1": 52, "x2": 62, "y2": 71 }
+      },
+      {
+        "monsterId": 51,
+        "count": 20,
+        "area": { "x1": 118, "y1": 27, "x2": 143, "y2": 44 }
+      },
+      {
+        "monsterId": 28,
+        "count": 40,
+        "area": { "x1": 144, "y1": 31, "x2": 171, "y2": 53 }
+      },
+      {
+        "monsterId": 12,
+        "count": 30,
+        "area": { "x1": 250, "y1": 178, "x2": 270, "y2": 198 }
+      },
+      {
+        "monsterId": 50,
+        "count": 50,
+        "area": { "x1": 231, "y1": 200, "x2": 257, "y2": 223 }
+      },
+      {
+        "monsterId": 40,
+        "count": 30,
+        "area": { "x1": 119, "y1": 231, "x2": 151, "y2": 247 }
+      },
+      {
+        "monsterId": 50,
+        "count": 50,
+        "area": { "x1": 125, "y1": 247, "x2": 160, "y2": 268 }
+      },
+      {
+        "monsterId": 1,
+        "count": 20,
+        "area": { "x1": 81, "y1": 250, "x2": 104, "y2": 264 }
+      }
+    ]
+  },
+  {
+    "id": "arena1",
+    "name": "Arena 1",
+    "map": "fightzone1",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "middleland",
+    "name": "Middleland",
+    "map": "middleland",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "druncncity",
+    "name": "Druncnian City",
+    "map": "druncncity",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arebrk11",
+    "name": "Barracks 1-1",
+    "map": "arebrk11",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arebrk12",
+    "name": "Barracks 1-2",
+    "map": "arebrk12",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arebrk21",
+    "name": "Barracks 2-1",
+    "map": "arebrk21",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arebrk22",
+    "name": "Barracks 2-2",
+    "map": "arebrk22",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arefarm",
+    "name": "Aresden Farm",
+    "map": "arefarm",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arejail",
+    "name": "Jail",
+    "map": "arejail",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "aresdend1",
+    "name": "Aresden Dungeon 1",
+    "map": "aresdend1",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "areuni",
+    "name": "Aresden Garden",
+    "map": "areuni",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvfarm",
+    "name": "Elvine Farm",
+    "map": "elvfarm",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvined1",
+    "name": "Elvine Dungeon 1",
+    "map": "elvined1",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvuni",
+    "name": "Elvine Garden",
+    "map": "elvuni",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "middled1n",
+    "name": "Middleland Dungeon North",
+    "map": "middled1n",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "middled1x",
+    "name": "Middleland Dungeon",
+    "map": "middled1x",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "abaddon",
+    "name": "Abaddon",
+    "map": "abaddon",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "infernia-a",
+    "name": "Infernia A",
+    "map": "inferniaA",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "infernia-b",
+    "name": "Infernia B",
+    "map": "inferniaB",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "icebound",
+    "name": "Icebound",
+    "map": "icebound",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "procella",
+    "name": "Procella",
+    "map": "procella",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "toh1",
+    "name": "Tower of Hell 1",
+    "map": "toh1",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "toh2",
+    "name": "Tower of Hell 2",
+    "map": "toh2",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "toh3",
+    "name": "Tower of Hell 3",
+    "map": "toh3",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arena4",
+    "name": "Arena 4",
+    "map": "fightzone4",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arena5",
+    "name": "Arena 5",
+    "map": "fightzone5",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arena6",
+    "name": "Arena 6",
+    "map": "fightzone6",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arena7",
+    "name": "Arena 7",
+    "map": "fightzone7",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arena8",
+    "name": "Arena 8",
+    "map": "fightzone8",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "huntzone1",
+    "name": "Hunt Zone 1",
+    "map": "huntzone1",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "huntzone2",
+    "name": "Hunt Zone 2",
+    "map": "huntzone2",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "huntzone3",
+    "name": "Hunt Zone 3",
+    "map": "huntzone3",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "huntzone4",
+    "name": "Hunt Zone 4",
+    "map": "huntzone4",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "dglv2",
+    "name": "Dungeon Level 2",
+    "map": "dglv2",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "dglv3",
+    "name": "Dungeon Level 3",
+    "map": "dglv3",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "dglv4",
+    "name": "Dungeon Level 4",
+    "map": "dglv4",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "bisle",
+    "name": "Bleeding Island",
+    "map": "bisle",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "btfield",
+    "name": "Battlefield",
+    "map": "btfield",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "godh",
+    "name": "God's Heldenian",
+    "map": "godh",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "hrampart",
+    "name": "Heldenian Rampart",
+    "map": "HRampart",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "maze",
+    "name": "Maze",
+    "map": "maze",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "resurr1",
+    "name": "Resurrection Zone",
+    "map": "resurr1",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "traveler",
+    "name": "Traveler Zone",
+    "map": "default",
+    "music": "default.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "hbsh6",
+    "name": "HB Sleepy Hollow 6 map (unofficial)",
+    "map": "hbsh6",
+    "music": "default.mp3",
+    "workerThread": 0
+  }, 
+  {
+    "id": "areshop",
+    "name": "Aresden Shop",
+    "map": "gshop_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arebsmith",
+    "name": "Aresden Blacksmith",
+    "map": "bsmith_1",
+    "music": "aresden.mp3",
+    "workerThread": 0,
+    "npcs": [{ "npcId": 3, "x": 48, "y": 33, "direction": 7 }]
+  },
+  {
+    "id": "arewrus",
+    "name": "Aresden Warehouse",
+    "map": "wrhus_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "aregldhall",
+    "name": "Aresden Guild Hall",
+    "map": "gldhall_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arecmdhall",
+    "name": "Aresden Command Hall",
+    "map": "cmdhall_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arecityhall",
+    "name": "Aresden City Hall",
+    "map": "cityhall_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arecath",
+    "name": "Aresden Cathedral",
+    "map": "cath_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "arewzdtwr",
+    "name": "Aresden Watch Tower",
+    "map": "wzdtwr_1",
+    "music": "aresden.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvshop",
+    "name": "Elvine Shop",
+    "map": "gshop_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvbsmith",
+    "name": "Elvine Blacksmith",
+    "map": "bsmith_1",
+    "music": "elvine.mp3",
+    "workerThread": 0,
+    "npcs": [{ "npcId": 3, "x": 48, "y": 33, "direction": 7 }]
+  },
+  {
+    "id": "elvwrus",
+    "name": "Elvine Warehouse",
+    "map": "wrhus_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvgldhall",
+    "name": "Elvine Guild Hall",
+    "map": "gldhall_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvcmdhall",
+    "name": "Elvine Command Hall",
+    "map": "cmdhall_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvcityhall",
+    "name": "Elvine City Hall",
+    "map": "cityhall_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvcath",
+    "name": "Elvine Cathedral",
+    "map": "cath_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
+  },
+  {
+    "id": "elvwzdtwr",
+    "name": "Elvine Watch Tower",
+    "map": "wzdtwr_1",
+    "music": "elvine.mp3",
+    "workerThread": 0
   }
 ]

@@ -99,7 +99,7 @@ sp-client/src/
     ├── CameraManager.ts, CastManager.ts, GameStateManager.ts
     ├── InputManager.ts, InventoryManager.ts, LootManager.ts
     ├── MapManager.ts, MusicManager.ts, ShadowManager.ts
-    ├── MonsterAssets.ts, SoundManager.ts, SoundTracker.ts, SpatialAudioUtils.ts
+    ├── MapAssets.ts, MonsterAssets.ts, SoundManager.ts, SoundTracker.ts, SpatialAudioUtils.ts
     ├── SpatialGrid.ts, SpriteUtils.ts
     ├── PlayerAppearanceManager.ts, WeatherManager.ts
     └── RegistryUtils.ts  # Phaser registry helpers
@@ -124,6 +124,8 @@ The client supports two loading modes:
 
 **Monster assets:** `LOAD_MONSTER_ASSETS_ON_DEMAND` controls whether monster sprite and sound assets are loaded up front or fetched when a monster is spawned. When enabled, only `MONSTER_PLACEHOLDER_SPRITE` and its configured sounds are included in the eager manifest/ZIP; the real monster assets are fetched and registered by `utils/MonsterAssets.ts`, then swapped onto the monster at runtime.
 
+**Map and tile assets:** `LOAD_MAP_ASSETS_ON_DEMAND` controls whether all `.amd` maps and tile `.spr` packs load during `LoadingScreen` or only when `GameWorld` opens the current map. When enabled, `utils/MapAssets.ts` fetches the map binary, loads the tile sheets that map actually needs (including treeshadow textures for trees), registers the `HBMap`, then the usual render/minimap path runs. Pair with **`ENABLE_ZIP_LOADING = false`** (or serve `assets/maps/` and `assets/sprites/` outside a zip) so those fetches succeed. `pnpm compress-assets` omits map/tile files from `assets.zip` when this flag is `true` in `Config.ts`.
+
 ---
 
 ## Dev Guides
@@ -134,7 +136,7 @@ See [ASSET_LOADING.md](./docs/ASSET_LOADING.md) for for how assets are loaded. F
 
 ## Development Tips
 
-- **Faster loading:** Comment out unused maps in `constants/Assets.ts`, or enable `LOAD_MONSTER_ASSETS_ON_DEMAND` so non-placeholder monster assets are fetched only when needed.
+- **Faster loading:** Comment out unused maps in `constants/Assets.ts`, enable `LOAD_MONSTER_ASSETS_ON_DEMAND` for monsters, and/or `LOAD_MAP_ASSETS_ON_DEMAND` so maps and tile packs load only for the active map (see [Asset Loading](#asset-loading)).
 - **Local dev:** Set `ENABLE_ZIP_LOADING` to `false` in `src/Config.ts` for quicker iteration; per-file loading is often faster on localhost.
 - **AI guidance:** Cursor rules live in `sp-client/.cursor/` and can be adapted for other AI tools.
 

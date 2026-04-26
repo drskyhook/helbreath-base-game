@@ -27,6 +27,7 @@ import { CameraManager } from '../../utils/CameraManager';
 import { getMusicManager, getGameStateManager, getLootManager, setDebugModeEnabled, setDisplayLargeItemsEnabled, setSoundManager } from '../../utils/RegistryUtils';
 import { playerDialogStore } from '../../ui/store/PlayerDialog.store';
 import { MapManager } from '../../utils/MapManager';
+import { prepareMapForGameWorld, shouldLoadMapAssetsOnDemand } from '../../utils/MapAssets';
 import { SoundManager } from '../../utils/SoundManager';
 import { getMonsterData, MONSTERS } from '../../constants/Monsters';
 import { getNPCData } from '../../constants/NPCs';
@@ -185,18 +186,7 @@ export class GameWorld extends Scene {
         // Defer initialization to first update() call so overlay is visible first frame
         if (!this.initializationStarted) {
             this.drawLoadingOverlay(() => {
-                // Set displayedMap early so we clean up correctly even if user switches maps during load
-                this.displayedMap = this.mapManager!.getCurrentMap();
-                this.mapManager!.startMinimapCapture((map) => {
-                    map.renderMapObjects(this, true); // Third pass (with trees)
-
-                    // Complete map setup (initialize game objects and setup overlay removal)
-                    // For non-minimap case, ensure zoom is still applied
-                    this.setupMap(map);
-
-                    // Emit event that map is loaded (tiles and objects are rendered)
-                    EventBus.emit(OUT_MAP_LOADED);
-                });
+                void this.runDeferredMapLoad();
             });
             return; // Return early to let overlay render
         }
@@ -399,6 +389,25 @@ export class GameWorld extends Scene {
 
         // Use delayedCall to start loading on next frame, ensuring overlay is visible
         this.time.delayedCall(0, callback);
+    }
+
+    /**
+     * When map assets load on demand, fetches the current `.amd` and tile packs before the normal minimap path.
+     */
+    private async runDeferredMapLoad(): Promise<void> {
+        if (shouldLoadMapAssetsOnDemand()) {
+            const mapFileName = getGameStateManager(this.game).getMap();
+            await prepareMapForGameWorld(this, mapFileName);
+        }
+
+        this.displayedMap = this.mapManager!.getCurrentMap();
+        this.mapManager!.startMinimapCapture((map) => {
+            map.renderMapObjects(this, true); // Third pass (with trees)
+
+            this.setupMap(map);
+
+            EventBus.emit(OUT_MAP_LOADED);
+        });
     }
 
     private handleLeftMouseButton(): void {

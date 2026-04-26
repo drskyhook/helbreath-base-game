@@ -128,6 +128,8 @@ const soundFileNamesContent = fs.readFileSync(soundFileNamesPath, 'utf-8');
 
 const loadMonsterAssetsOnDemandMatch = configContent.match(/export const LOAD_MONSTER_ASSETS_ON_DEMAND\s*=\s*(true|false)/);
 const loadMonsterAssetsOnDemand = loadMonsterAssetsOnDemandMatch?.[1] === 'true';
+const loadMapAssetsOnDemandMatch = configContent.match(/export const LOAD_MAP_ASSETS_ON_DEMAND\s*=\s*(true|false)/);
+const loadMapAssetsOnDemand = loadMapAssetsOnDemandMatch?.[1] === 'true';
 const placeholderSpriteMatch = configContent.match(/export const MONSTER_PLACEHOLDER_SPRITE\s*=\s*['"]([^'"]+)['"]/);
 const monsterPlaceholderSprite = placeholderSpriteMatch?.[1] ?? 'ghk';
 
@@ -235,6 +237,16 @@ if (assetEntries.length === 0) {
     console.error('Could not parse any assets from Assets.ts');
     console.error('Please ensure the file format is correct.');
     process.exit(1);
+}
+
+if (loadMapAssetsOnDemand) {
+    const before = assetEntries.length;
+    const filtered = assetEntries.filter((a) => a.assetType !== 'MAP' && a.assetType !== 'TILE_SPRITE');
+    assetEntries.length = 0;
+    filtered.forEach((a) => assetEntries.push(a));
+    console.log(
+        `Map on-demand assets: enabled (excluding ${before - assetEntries.length} map/tile files from zip; serve assets/maps and assets/sprites separately)`,
+    );
 }
 
 // Parse MONSTERS array to extract sprite names and sounds

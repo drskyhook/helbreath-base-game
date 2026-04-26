@@ -8,7 +8,7 @@ import { getAssets, AssetType, getCreatePhaseTotalActivities, type AssetData } f
 import { getLoadingBgKey, setItemPackSpriteSheets, setItemPackEmittedTintKeys, setMap } from '../../utils/RegistryUtils';
 import { EventBus } from '../EventBus';
 import { CURRENT_SCENE_READY } from '../../constants/EventNames';
-import { ENABLE_ZIP_LOADING } from '../../Config';
+import { ENABLE_ZIP_LOADING, LOAD_MAP_ASSETS_ON_DEMAND } from '../../Config';
 
 type LoadingScreenInitData = {
     enableZipLoading?: boolean;
@@ -165,7 +165,13 @@ export class LoadingScreen extends Scene {
     }
 
     private getLoadingAssets(): AssetData[] {
-        return getAssets();
+        const all = getAssets();
+        if (!LOAD_MAP_ASSETS_ON_DEMAND) {
+            return all;
+        }
+        return all.filter(
+            (a) => a.assetType !== AssetType.MAP && a.assetType !== AssetType.TILE_SPRITE,
+        );
     }
 
     private setProgress(progress: number) {
@@ -533,12 +539,13 @@ export class LoadingScreen extends Scene {
     }
 
     private async processAssets(): Promise<void> {
-        // Create map instances for all maps dynamically
         const mapInstances: Map<string, HBMap> = new Map();
-        getMapNames().forEach((mapData) => {
-            const mapKey = `map-${mapData.mapFile.replace('.amd', '')}`;
-            mapInstances.set(mapKey, new HBMap(mapKey));
-        });
+        if (!LOAD_MAP_ASSETS_ON_DEMAND) {
+            getMapNames().forEach((mapData) => {
+                const mapKey = `map-${mapData.mapFile.replace('.amd', '')}`;
+                mapInstances.set(mapKey, new HBMap(mapKey));
+            });
+        }
         
         // Progress callback for sprite loading
         const onSpriteLoaded = () => {
@@ -582,22 +589,21 @@ export class LoadingScreen extends Scene {
         this.phaseTimings.parseSprites = performance.now() - spritesStart;
         console.log(`[LoadingScreen] ⏱️  Parse sprites: ${this.phaseTimings.parseSprites.toFixed(2)}ms (${spriteAssets.length} sprites)`);
         
-        // Load all maps after sprites are loaded (maps need tile textures)
-        // Process maps asynchronously to allow UI updates between each map
         const mapsStart = performance.now();
-        for (const [mapKey, mapInstance] of mapInstances) {
-            mapInstance.load(this);
-            this.reportCreatePhaseProgress();
-            
-            // Store map in registry for use in GameWorld
-            setMap(this, mapKey, mapInstance);
-            
-            // Yield control back to the browser to update UI
-            await new Promise(resolve => setTimeout(resolve, 0));
+        if (!LOAD_MAP_ASSETS_ON_DEMAND) {
+            // Load all maps after sprites are loaded (maps need tile textures)
+            for (const [mapKey, mapInstance] of mapInstances) {
+                mapInstance.load(this);
+                this.reportCreatePhaseProgress();
+                setMap(this, mapKey, mapInstance);
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
         }
-        
+
         this.phaseTimings.loadMaps = performance.now() - mapsStart;
-        console.log(`[LoadingScreen] ⏱️  Load maps: ${this.phaseTimings.loadMaps.toFixed(2)}ms (${mapInstances.size} maps)`);
+        console.log(
+            `[LoadingScreen] ⏱️  Load maps: ${this.phaseTimings.loadMaps.toFixed(2)}ms (${LOAD_MAP_ASSETS_ON_DEMAND ? 0 : mapInstances.size} maps)`,
+        );
     }
 
 }

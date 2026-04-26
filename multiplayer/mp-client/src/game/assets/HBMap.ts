@@ -174,19 +174,23 @@ export class HBMap {
      * @throws Error if the map buffer is not found in cache or parsing fails
      */
     public load(scene: Scene): void {
-        // Load binary from cache using fileName
         const buffer = scene.cache.binary.get(this.fileName) as ArrayBuffer | undefined;
 
         if (!buffer) {
             throw new Error(`Missing map buffer in cache for ${this.fileName}`);
         }
 
-        // Parse the map file
-        this.parseMap(buffer);
+        this.loadFromBuffer(buffer);
 
         // Remove map file from cache to free up memory (no longer needed after parsing)
         scene.cache.binary.remove(this.fileName);
+    }
 
+    /**
+     * Parses `.amd` bytes without using Phaser's binary cache (e.g. HTTP on-demand load in GameWorld).
+     */
+    public loadFromBuffer(buffer: ArrayBuffer): void {
+        this.parseMap(buffer);
         this.loaded = true;
         console.log(`Map loaded: ${this.fileName} (${this.sizeX}x${this.sizeY}, tileSize: ${this.tileSize})`, this);
     }

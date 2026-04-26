@@ -83,6 +83,18 @@ The PNG data is a complete, valid PNG image containing the sprite sheet. Each fr
 
 8. **Cleanup**: The sprite buffer is removed from the binary cache after parsing to free memory. `ImageBitmap` is closed after texture creation.
 
+### Map tile packs: eager vs on-demand
+
+Rows in `constants/Assets.ts` with `assetType: TILE_SPRITE` and `SpriteType.Tiles` use the same `HBSpriteFile` pipeline as other sprites. By default they load in **`LoadingScreen`** with everything else (Phaser loader or `assets.zip`).
+
+When **`LOAD_MAP_ASSETS_ON_DEMAND`** is `true` in `src/Config.ts`:
+
+- **`LoadingScreen`** omits all `MAP` and `TILE_SPRITE` entries from the eager manifest, so no tile `.spr` binaries load at boot.
+- **`pnpm compress-assets`** (when run from this client) drops those files from `assets.zip` if the flag matches `Config.ts`, consistent with the smaller manifest.
+- **`utils/MapAssets.ts`** runs when **`GameWorld`** starts: it `fetch`es the current `.amd`, parses it with `HBMap.loadFromBuffer`, scans tile data for global sprite indices (ground + map objects), adds **tree shadow** indices (`treeIndex + 50` for tree sprites 100–145, matching `GameAsset` tree shadows), resolves the minimal set of tile `.spr` files, then for each pack `fetch('assets/sprites/<file>.spr')`, `cache.binary.add`, and `new HBSpriteFile(...).load(scene)` — same decode/texture path as above.
+
+You need working HTTP URLs for **`assets/maps/*.amd`** and **`assets/sprites/*.spr`** for whatever the map references. That aligns with **`ENABLE_ZIP_LOADING = false`** for local dev, or with hosting map/tile files outside a trimmed zip.
+
 ---
 
 ## Texture Naming

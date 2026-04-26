@@ -89,6 +89,14 @@ export const DEFAULT_ANIMATION_FRAME_RATE = 10;
 export const LOAD_MONSTER_ASSETS_ON_DEMAND = true;
 
 /**
+ * When true, initial loading skips all `.amd` maps and tile `.spr` packs; the current map
+ * and only the tile sheets that map needs are fetched when the GameWorld scene starts.
+ * Requires HTTP paths `assets/maps/*` and `assets/sprites/*` (natural fit with `ENABLE_ZIP_LOADING = false`).
+ * ZIP output from `tools/compress-assets.js` omits map/tile entries when this matches Config.
+ */
+export const LOAD_MAP_ASSETS_ON_DEMAND = true;
+
+/**
  * Monster sprite used while a concrete monster's on-demand assets are still loading.
  */
 export const MONSTER_PLACEHOLDER_SPRITE = 'ghk';
