@@ -1661,6 +1661,13 @@ export class GameAsset {
             return;
         }
 
+        // Lazy load can finish after this layer’s sprite was destroyed (despawn / teardown); Phaser’s
+        // setTexture requires an attached scene.
+        if (!this.sprite.scene || !this.sprite.active) {
+            this.pendingLazyPlayerItemAppearance = false;
+            return;
+        }
+
         const textureKey = `sprite-${this.spriteName}-${this.spriteSheetIndex}`;
         if (!this.scene.textures.exists(textureKey)) {
             console.error(`[GameAsset] Missing texture after lazy item load: ${textureKey}`);
