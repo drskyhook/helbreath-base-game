@@ -70,6 +70,14 @@ export interface ConnectToServerPayload {
 
 /** Emitted when the WebSocket connection is closed (server shutdown, network loss, etc.) */
 export const SOCKET_DISCONNECTED = 'socket-disconnected';
+/**
+ * InitialState: gender-resolved equipped item appearance basenames to prefetch lazily.
+ * LoginScreen queues on `game.registry`; GameWorld drains on create (parallel with map load).
+ */
+export const PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED = 'player-item-appearance-prefetch-requested';
+export interface PlayerItemAppearancePrefetchEventData {
+    spriteNames: string[];
+}
 export const INITIAL_GAME_WORLD_STATE_RECEIVED = 'initial-game-world-state-received';
 export const RESET_POSITION_RECEIVED = 'reset-position-received';
 /** Self only: server confirmed admin teleport. Payload: { x: number; y: number } */

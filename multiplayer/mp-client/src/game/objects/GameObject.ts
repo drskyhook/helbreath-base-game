@@ -5,6 +5,7 @@ import { convertWorldPosToPixelPos, Direction, getDirectionOffset, getNextDirect
 import { SoundManager } from '../../utils/SoundManager';
 import { SoundTracker } from '../../utils/SoundTracker';
 import { DEPTH_MULTIPLIER, KNOCKBACK_DURATION_MS } from '../../Config';
+import { isPlayerItemAppearanceLazyEligible } from '../../utils/ItemAssets';
 import { HBMap, TILE_SIZE } from '../assets/HBMap';
 import type { ShadowManager } from '../../utils/ShadowManager';
 
@@ -144,10 +145,15 @@ export abstract class GameObject {
 
         // Create GameAssets at the pixel position
         for (const assetConfig of config.assets) {
+            const pendingLazyPlayerItemAppearance =
+                !assetConfig.mapObject &&
+                assetConfig.spriteSheetIndex !== undefined &&
+                isPlayerItemAppearanceLazyEligible(scene, assetConfig.spriteName);
             const asset = new GameAsset(scene, {
                 ...assetConfig,
                 x: pixelX,
                 y: pixelY,
+                ...(pendingLazyPlayerItemAppearance ? { pendingLazyPlayerItemAppearance: true } : {}),
             });
             
             // Set depth based on world position Y (world Y coordinate * DEPTH_MULTIPLIER)

@@ -18,6 +18,7 @@ import {
     ITEM_PACK_EMITTED_TINT_KEYS_KEY,
     PLAYER_POSITION_KEY,
     INITIAL_GAME_WORLD_STATE_KEY,
+    PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY,
 } from '../constants/RegistryKeys';
 import type { HBSpriteSheet } from '../game/assets/HBSprite';
 import { NetworkManager } from './NetworkManager';
@@ -189,6 +190,12 @@ export function getMap(scene: Scene, mapName: string): HBMap {
     }
     
     return map;
+}
+
+/** Same keying as `getMap`, but no throw (e.g. before lazy map registration). */
+export function getMapIfPresent(scene: Scene, mapName: string): HBMap | undefined {
+    const mapKey = `map-${mapName.replace('.amd', '')}`;
+    return getRegistryValue<HBMap>(scene.registry, mapKey);
 }
 
 /**
@@ -466,4 +473,28 @@ export function getAndRemoveInitialGameWorldState(game: Game): InitialGameWorldS
  */
 export function setInitialGameWorldState(game: Game, data: InitialGameWorldState): void {
     game.registry.set(INITIAL_GAME_WORLD_STATE_KEY, data);
+}
+
+/** Merge unique equipped appearance basenames until GameWorld drains them (InitialState prefetch). */
+export function appendPendingPlayerItemAppearancePrefetch(game: Game, spriteNames: string[]): void {
+    if (!spriteNames.length) {
+        return;
+    }
+    const existing = getRegistryValue<string[]>(game.registry, PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY) ?? [];
+    const merged = [...new Set([...existing, ...spriteNames])];
+    game.registry.set(PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY, merged);
+}
+
+/** Remove and return queued prefetch basenames (caller starts loads on a stable scene). */
+export function takePendingPlayerItemAppearancePrefetch(game: Game): string[] {
+    const pending = getRegistryValue<string[]>(game.registry, PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY);
+    if (pending?.length) {
+        game.registry.remove(PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY);
+        return pending;
+    }
+    return [];
+}
+
+export function clearPendingPlayerItemAppearancePrefetch(game: Game): void {
+    game.registry.remove(PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY);
 }

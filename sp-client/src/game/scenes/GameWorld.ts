@@ -14,6 +14,7 @@ import {
     DEPTH_MULTIPLIER,
     FRAMES_UNTIL_OVERLAY_REMOVAL,
     GAME_STATS_UPDATE_INTERVAL_MS,
+    LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND,
     LOADING_OVERLAY_DEPTH,
     LOADING_TEXT_DEPTH,
     MAP_OBJECT_COLLISION_ALPHA,
@@ -28,6 +29,7 @@ import { getMusicManager, getGameStateManager, getLootManager, setDebugModeEnabl
 import { playerDialogStore } from '../../ui/store/PlayerDialog.store';
 import { MapManager } from '../../utils/MapManager';
 import { prepareMapForGameWorld, shouldLoadMapAssetsOnDemand } from '../../utils/MapAssets';
+import { collectEquippedItemAppearanceSpriteBasenamesForPrefetch, loadPlayerItemAppearanceOnDemand } from '../../utils/ItemAssets';
 import { SoundManager } from '../../utils/SoundManager';
 import { getMonsterData, MONSTERS } from '../../constants/Monsters';
 import { getNPCData } from '../../constants/NPCs';
@@ -395,6 +397,15 @@ export class GameWorld extends Scene {
      * When map assets load on demand, fetches the current `.amd` and tile packs before the normal minimap path.
      */
     private async runDeferredMapLoad(): Promise<void> {
+        if (LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+            const gsm = getGameStateManager(this.game);
+            const { equippedItems } = gsm.getInventoryState();
+            const basenames = collectEquippedItemAppearanceSpriteBasenamesForPrefetch(equippedItems, gsm.getGender());
+            for (const name of basenames) {
+                void loadPlayerItemAppearanceOnDemand(this, name);
+            }
+        }
+
         if (shouldLoadMapAssetsOnDemand()) {
             const mapFileName = getGameStateManager(this.game).getMap();
             await prepareMapForGameWorld(this, mapFileName);

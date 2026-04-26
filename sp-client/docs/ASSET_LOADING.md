@@ -65,6 +65,16 @@ If `ENABLE_ZIP_LOADING` is `true`, the game will automatically load from `assets
 
 For `multiplayer/mp-client`, when `LOAD_MONSTER_ASSETS_ON_DEMAND` is `true`, the ZIP intentionally includes only the placeholder monster sprite and its sounds. Other monster sprites and sounds are fetched later as monsters enter view. When on-demand monster loading is `false`, all monster assets are bundled.
 
+The same pattern applies to **maps and tile packs** when `LOAD_MAP_ASSETS_ON_DEMAND` is `true`, and to **player equipped-item appearance `.spr` files** when `LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND` is `true` (single-player and multiplayer clients): those entries are omitted from the ZIP and loaded over HTTP when needed.
+
+### Lazy loading and ZIP optimization
+
+When one or more of these on-demand flags are enabled, `compress-assets.js` leaves out large portions of the catalog from `assets.zip`. The archive becomes **much smaller**, and most game bytes are fetched later as **individual files** (`assets/maps/`, `assets/sprites/`, etc.).
+
+In that setup, **ZIP optimization no longer delivers the same benefits** you get when the zip holds the full game: you are not shipping one big compressed bundle of maps, monsters, tiles, and equipment sprites anymore, so advantages like “one download” and “compression across hundreds of assets” mostly apply only to the **remaining** eager assets (shared UI sprites, music, effects, and whatever is still in the manifest).
+
+**When a small zip might still help:** if you pay **per HTTP request** or **per file** on your CDN, bundling the *leftover* eager assets into one `assets.zip` can still be a **minor** optimization (fewer round-trips for the initial boot payload). That tradeoff depends on traffic patterns and pricing. Many teams pair lazy loading with **`ENABLE_ZIP_LOADING = false`** and serve `public/assets/` as static files so on-demand fetches work straightforwardly.
+
 **Runtime (LoadingScreen.ts):**
 1. Downloads zip file with streaming progress (0-25%)
 2. Decompresses with fflate (25-35%) - very fast at level 1

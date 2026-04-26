@@ -1,14 +1,24 @@
 import { Scene } from 'phaser';
 import { drawAppTitle } from '../../utils/SpriteUtils';
-import { createGameStateManager, getGameStateManager, getInventoryManager, getLoginScreenBgKey, setInitialGameWorldState, setNetworkManager } from '../../utils/RegistryUtils';
+import {
+    appendPendingPlayerItemAppearancePrefetch,
+    clearPendingPlayerItemAppearancePrefetch,
+    createGameStateManager,
+    getGameStateManager,
+    getInventoryManager,
+    getLoginScreenBgKey,
+    setInitialGameWorldState,
+    setNetworkManager,
+} from '../../utils/RegistryUtils';
 import {
     CURRENT_SCENE_READY,
     INITIAL_GAME_WORLD_STATE_RECEIVED,
     IN_UI_CONNECT_TO_SERVER,
     OUT_UI_SET_SELECTED_MAP,
+    PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED,
     SOCKET_DISCONNECTED,
 } from '../../constants/EventNames';
-import type { ConnectToServerPayload } from '../../constants/EventNames';
+import type { ConnectToServerPayload, PlayerItemAppearancePrefetchEventData } from '../../constants/EventNames';
 import { EventBus } from '../EventBus';
 import { NetworkManager } from '../../utils/NetworkManager';
 import type { InitialGameWorldStateEventData } from '../../Types';
@@ -26,6 +36,7 @@ export class LoginScreen extends Scene {
     /** When set, login is waiting for initial state after TCP connect; auth failure closes the socket first. */
     private loginPendingDisconnectHandler: (() => void) | undefined;
     private connectToServerHandler: ((payload: ConnectToServerPayload) => void) | undefined;
+    private prefetchPlayerItemAppearanceHandler: ((payload: PlayerItemAppearancePrefetchEventData) => void) | undefined;
 
     constructor() {
         super('LoginScreen');
@@ -66,6 +77,7 @@ export class LoginScreen extends Scene {
             this.clearPendingInitialGameWorldStateListener();
             this.clearLoginPendingDisconnectListener();
             this.clearConnectToServerListener();
+            this.clearPrefetchPlayerItemAppearanceListener();
             this.isConnecting = false;
             setConnectingDialogOpen(false);
             setConnectDialogOpen(false);
@@ -79,12 +91,13 @@ export class LoginScreen extends Scene {
         const gsm = getGameStateManager(this.game);
         openConnectDialogForLogin(gsm.getCharacterName() ?? '');
 
-        const handleConnectToServer = async (payload: ConnectToServerPayload) => {
+            const handleConnectToServer = async (payload: ConnectToServerPayload) => {
             if (this.isConnecting) {
                 return;
             }
 
             this.isConnecting = true;
+            clearPendingPlayerItemAppearancePrefetch(this.game);
             this.clearPendingInitialGameWorldStateListener();
             setConnectingDialogOpen(true);
 
@@ -169,6 +182,12 @@ export class LoginScreen extends Scene {
         this.connectToServerHandler = handleConnectToServer;
         EventBus.on(IN_UI_CONNECT_TO_SERVER, handleConnectToServer);
 
+        const queuePrefetch = (prefetch: PlayerItemAppearancePrefetchEventData) => {
+            appendPendingPlayerItemAppearancePrefetch(this.game, prefetch.spriteNames);
+        };
+        this.prefetchPlayerItemAppearanceHandler = queuePrefetch;
+        EventBus.on(PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED, queuePrefetch);
+
         EventBus.emit(CURRENT_SCENE_READY, this);
     }
 
@@ -197,5 +216,14 @@ export class LoginScreen extends Scene {
 
         EventBus.off(SOCKET_DISCONNECTED, this.loginPendingDisconnectHandler);
         this.loginPendingDisconnectHandler = undefined;
+    }
+
+    private clearPrefetchPlayerItemAppearanceListener(): void {
+        if (!this.prefetchPlayerItemAppearanceHandler) {
+            return;
+        }
+
+        EventBus.off(PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED, this.prefetchPlayerItemAppearanceHandler);
+        this.prefetchPlayerItemAppearanceHandler = undefined;
     }
 }

@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { PLAYER_ITEM_APPEARANCE_PENDING_TEXTURE } from '../../Config';
 import { LOADING_BG_KEY, LOGIN_SCREEN_BG_KEY } from '../../constants/RegistryKeys';
 import { setDebugModeEnabled, setDisplayLargeItemsEnabled } from '../../utils/RegistryUtils';
 
@@ -20,6 +21,12 @@ export class Boot extends Scene {
     public create() {
         setDebugModeEnabled(this, false);
         setDisplayLargeItemsEnabled(this, false);
+
+        const pendingG = this.make.graphics({ x: 0, y: 0 });
+        pendingG.fillStyle(0x000000, 0);
+        pendingG.fillRect(0, 0, 1, 1);
+        pendingG.generateTexture(PLAYER_ITEM_APPEARANCE_PENDING_TEXTURE, 1, 1);
+        pendingG.destroy();
 
         this.registry.set(LOADING_BG_KEY, 'loading-bg');
         this.registry.set(LOGIN_SCREEN_BG_KEY, 'login-screen-bg');

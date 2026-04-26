@@ -12,3 +12,5 @@ export const ITEM_PACK_SPRITE_SHEETS_KEY = 'item-pack-sprite-sheets';
 export const ITEM_PACK_EMITTED_TINT_KEYS_KEY = 'item-pack-emitted-tint-keys';
 export const INITIAL_GAME_WORLD_STATE_KEY = 'initial-game-world-state';
 export const PLAYER_POSITION_KEY = 'player-position';
+/** Basenames queued at InitialState; GameWorld drains before map load (lazy equipped `.spr`). */
+export const PENDING_PLAYER_ITEM_APPEARANCE_PREFETCH_KEY = 'pending-player-item-appearance-prefetch';

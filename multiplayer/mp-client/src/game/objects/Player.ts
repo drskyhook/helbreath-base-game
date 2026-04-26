@@ -266,7 +266,14 @@ export class Player extends GameObject {
         if (!isLocalPlayer) {
             this.autoSwitchToIdle = false;
         }
-        this.appearanceManager = new PlayerAppearanceManager(this.assets, initialGender, resolvedGear, assetIndices);
+        this.appearanceManager = new PlayerAppearanceManager(
+            this.assets,
+            initialGender,
+            resolvedGear,
+            assetIndices,
+            scene,
+            () => this.switchPlayerState(this.currentState, true),
+        );
         this.soundManager = soundManager;
         this.hp = 1000;
         this.maxHp = 1000;

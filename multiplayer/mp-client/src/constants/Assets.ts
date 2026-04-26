@@ -19,7 +19,11 @@ export enum AssetType {
 }
 
 import { SpriteType } from '../game/assets/HBSprite';
-import { LOAD_MONSTER_ASSETS_ON_DEMAND, MONSTER_PLACEHOLDER_SPRITE } from '../Config';
+import {
+    LOAD_MONSTER_ASSETS_ON_DEMAND,
+    LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND,
+    MONSTER_PLACEHOLDER_SPRITE,
+} from '../Config';
 import { getMonsterData, MONSTERS, type MonsterData, type MonsterStateConfig } from './Monsters';
 import { NPC_SPRITE_NAMES } from './NPCs';
 import { EFFECTS } from './Effects';
@@ -248,6 +252,40 @@ export function getMonsterAssets(spriteName: string): AssetData[] {
 }
 
 /**
+ * All equipped appearance sprite basenames referenced by the item catalog (male and female).
+ * Used for lazy-load eligibility and ZIP filtering; runtime loads only gender-resolved names per player.
+ */
+export function getItemEquippedAppearanceSpriteNames(): ReadonlySet<string> {
+    const equippedSpriteNames = new Set<string>();
+    ITEMS.forEach((item) => {
+        if (item.equippedSpriteMale) {
+            equippedSpriteNames.add(item.equippedSpriteMale);
+        }
+        if (item.equippedSpriteFemale) {
+            equippedSpriteNames.add(item.equippedSpriteFemale);
+        }
+    });
+    return equippedSpriteNames;
+}
+
+/**
+ * Resolve load metadata for one equipped appearance `.spr` (static {@link ASSETS} row or synthesized Weapons row).
+ */
+export function getPlayerItemAppearanceAssetData(spriteName: string): AssetData {
+    const key = `sprite-${spriteName}`;
+    const row = ASSETS.find((a) => a.key === key && a.assetType === AssetType.SPRITE);
+    if (row) {
+        return row;
+    }
+    return {
+        key,
+        fileName: `${spriteName}.spr`,
+        assetType: AssetType.SPRITE,
+        spriteType: SpriteType.Weapons,
+    };
+}
+
+/**
  * Get complete list of assets including dynamically generated monster assets.
  * This function combines the static ASSETS array with assets inferred from the MONSTERS array.
  *
@@ -356,17 +394,19 @@ export function getAssets(options?: GetAssetsOptions): AssetData[] {
             consumptionSounds.add(item.consumptionSound);
         }
     });
-    equippedSpriteNames.forEach((spriteName) => {
-        // Skip if already in base ASSETS (e.g. mbabhammer)
-        if (!assets.some((a) => a.key === `sprite-${spriteName}`)) {
-            assets.push({
-                key: `sprite-${spriteName}`,
-                fileName: `${spriteName}.spr`,
-                assetType: AssetType.SPRITE,
-                spriteType: SpriteType.Weapons
-            });
-        }
-    });
+    if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+        equippedSpriteNames.forEach((spriteName) => {
+            // Skip if already in base ASSETS (e.g. mbabhammer)
+            if (!assets.some((a) => a.key === `sprite-${spriteName}`)) {
+                assets.push({
+                    key: `sprite-${spriteName}`,
+                    fileName: `${spriteName}.spr`,
+                    assetType: AssetType.SPRITE,
+                    spriteType: SpriteType.Weapons
+                });
+            }
+        });
+    }
 
     // Add consumption sounds from consumable ITEMS
     consumptionSounds.forEach((soundKey) => {
@@ -378,7 +418,22 @@ export function getAssets(options?: GetAssetsOptions): AssetData[] {
             });
         }
     });
-    
+
+    if (LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+        const lazyNames = equippedSpriteNames;
+        return assets.filter((a) => {
+            if (a.assetType !== AssetType.SPRITE) {
+                return true;
+            }
+            const prefix = 'sprite-';
+            if (!a.key.startsWith(prefix)) {
+                return true;
+            }
+            const basename = a.key.slice(prefix.length);
+            return !lazyNames.has(basename);
+        });
+    }
+
     return assets;
 }
 

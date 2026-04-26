@@ -130,6 +130,10 @@ const loadMonsterAssetsOnDemandMatch = configContent.match(/export const LOAD_MO
 const loadMonsterAssetsOnDemand = loadMonsterAssetsOnDemandMatch?.[1] === 'true';
 const loadMapAssetsOnDemandMatch = configContent.match(/export const LOAD_MAP_ASSETS_ON_DEMAND\s*=\s*(true|false)/);
 const loadMapAssetsOnDemand = loadMapAssetsOnDemandMatch?.[1] === 'true';
+const loadPlayerItemAppearanceAssetsOnDemandMatch = configContent.match(
+    /export const LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND\s*=\s*(true|false)/,
+);
+const loadPlayerItemAppearanceAssetsOnDemand = loadPlayerItemAppearanceAssetsOnDemandMatch?.[1] === 'true';
 const placeholderSpriteMatch = configContent.match(/export const MONSTER_PLACEHOLDER_SPRITE\s*=\s*['"]([^'"]+)['"]/);
 const monsterPlaceholderSprite = placeholderSpriteMatch?.[1] ?? 'ghk';
 
@@ -459,6 +463,11 @@ console.log(`Found ${effectSounds.size} unique effect sounds from Effects.ts`);
 console.log(`Found ${npcSprites.size} unique NPC sprites from NPCs.ts`);
 console.log(`Found ${equippedSprites.size} unique equipped sprites from Items.ts`);
 console.log(`Found ${consumptionSounds.size} unique consumption sounds from Items.ts`);
+if (loadPlayerItemAppearanceAssetsOnDemand) {
+    console.log(
+        'Player item appearance on-demand: enabled (equipped item .spr files excluded from zip for this client Config)',
+    );
+}
 
 // Add monster sprites to asset entries (with .spr extension)
 bundledMonsterSprites.forEach(spriteName => {
@@ -509,15 +518,31 @@ npcSprites.forEach(spriteName => {
 });
 
 // Add equipped sprites from Items.ts (skip if already in assetEntries)
-equippedSprites.forEach(spriteName => {
-    if (!assetEntries.some(a => a.key === `sprite-${spriteName}`)) {
-        assetEntries.push({
-            key: `sprite-${spriteName}`,
-            fileName: `${spriteName}.spr`,
-            assetType: 'SPRITE'
-        });
-    }
-});
+if (!loadPlayerItemAppearanceAssetsOnDemand) {
+    equippedSprites.forEach(spriteName => {
+        if (!assetEntries.some(a => a.key === `sprite-${spriteName}`)) {
+            assetEntries.push({
+                key: `sprite-${spriteName}`,
+                fileName: `${spriteName}.spr`,
+                assetType: 'SPRITE'
+            });
+        }
+    });
+} else {
+    const before = assetEntries.length;
+    const filtered = assetEntries.filter((a) => {
+        if (a.assetType !== 'SPRITE' || !a.key.startsWith('sprite-')) {
+            return true;
+        }
+        const basename = a.key.slice('sprite-'.length);
+        return !equippedSprites.has(basename);
+    });
+    assetEntries.length = 0;
+    filtered.forEach((a) => assetEntries.push(a));
+    console.log(
+        `Player item appearance on-demand: removed ${before - assetEntries.length} equipped item sprite entries from zip list`,
+    );
+}
 
 // Add consumption sounds from Items.ts (skip if already in assetEntries)
 consumptionSounds.forEach(soundKey => {

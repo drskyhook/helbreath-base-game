@@ -60,6 +60,7 @@ import {
     WeatherMode as WeatherModeProto,
 } from '../proto/generated/network';
 import { EventBus, type ToastRequestedEvent } from '../game/EventBus';
+import { LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND } from '../Config';
 import { runSafeSync } from './SafeEntry';
 import {
     CAST_AOE_SPELL_RECEIVED,
@@ -99,6 +100,7 @@ import {
     OUT_UI_SET_SPELLS,
     OUT_UI_SET_STUN_DURATION_MS,
     OUT_UI_SET_UNDERWEAR_COLOR,
+    PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED,
     PLAYER_APPEARANCE_CHANGED_RECEIVED,
     PLAYER_ATTACKED_MONSTER_RECEIVED,
     PLAYER_ATTACKED_PLAYER_RECEIVED,
@@ -201,6 +203,7 @@ import {
     type InventoryItem,
 } from '../constants/Items';
 import type { WeatherMode } from '../ui/store/MapDialog.store';
+import { collectEquippedItemAppearanceSpriteBasenamesForPrefetch } from './ItemAssets';
 
 function appearanceGenderToClient(g: PlayerGender): Gender {
     return g === PlayerGender.PLAYER_GENDER_FEMALE ? Gender.FEMALE : Gender.MALE;
@@ -1376,6 +1379,16 @@ export class NetworkManager {
             equippedItems: equippedItemsFromEntries(data.equippedItems),
         };
         EventBus.emit(SERVER_INVENTORY_SNAPSHOT_RECEIVED, this.latestInventorySnapshot);
+        if (LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+            const prefetchGender = appearanceGenderToClient(data.gender);
+            const spriteNames = collectEquippedItemAppearanceSpriteBasenamesForPrefetch(
+                this.latestInventorySnapshot.equippedItems,
+                prefetchGender,
+            );
+            if (spriteNames.length > 0) {
+                EventBus.emit(PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED, { spriteNames });
+            }
+        }
         if (data.spells.length > 0) {
             this.spells = data.spells.map((spell) => {
                 const entry: SpellEntry = {

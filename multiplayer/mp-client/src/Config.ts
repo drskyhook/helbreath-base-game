@@ -129,6 +129,20 @@ export const LOAD_MONSTER_ASSETS_ON_DEMAND = true;
 export const LOAD_MAP_ASSETS_ON_DEMAND = true;
 
 /**
+ * When true, item equipped appearance `.spr` files (from `Items.ts` `equippedSpriteMale` /
+ * `equippedSpriteFemale`) are not preloaded; each player's gender-resolved sprite name is fetched
+ * when that layer is needed. Requires HTTP `assets/sprites/*` when ZIP loading is off.
+ * ZIP output from `tools/compress-assets.js` omits those sprites when this matches Config.
+ */
+export const LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND = true;
+
+/**
+ * Phaser texture key for a 1×1 transparent placeholder used while a lazy item appearance `.spr` loads.
+ * Registered in {@link Boot}.
+ */
+export const PLAYER_ITEM_APPEARANCE_PENDING_TEXTURE = 'player-item-appearance-pending';
+
+/**
  * Monster sprite used while a concrete monster's on-demand assets are still loading.
  */
 export const MONSTER_PLACEHOLDER_SPRITE = 'ghk';

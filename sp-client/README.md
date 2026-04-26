@@ -126,6 +126,10 @@ The client supports two loading modes:
 
 **Map and tile assets:** `LOAD_MAP_ASSETS_ON_DEMAND` controls whether all `.amd` maps and tile `.spr` packs load during `LoadingScreen` or only when `GameWorld` opens the current map. When enabled, `utils/MapAssets.ts` fetches the map binary, loads the tile sheets that map actually needs (including treeshadow textures for trees), registers the `HBMap`, then the usual render/minimap path runs. Pair with **`ENABLE_ZIP_LOADING = false`** (or serve `assets/maps/` and `assets/sprites/` outside a zip) so those fetches succeed. `pnpm compress-assets` omits map/tile files from `assets.zip` when this flag is `true` in `Config.ts`.
 
+**Player equipment appearance:** `LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND` controls whether equipped-item `.spr` layers (from the item catalog) are in the eager manifest/ZIP or fetched when needed (`utils/ItemAssets.ts`). When enabled, `pnpm compress-assets` omits those sprites from `assets.zip`. Single-player prefetch uses `GameStateManager` inventory + gender; multiplayer also prefetches from the server snapshot when joining.
+
+**ZIP vs lazy loading:** With monsters, maps/tiles, and/or player equipment loading on demand, the generated **`assets.zip` is much smaller** and most content loads as separate HTTP files. **ZIP optimization then stops being a major advantage** (you are no longer bundling the bulk of the game into one archive). It can still be a **small** win if your CDN charges **per file or per request**, since one tiny zip may mean fewer initial downloads than pulling many eager assets individually. Often, lazy loading is paired with **`ENABLE_ZIP_LOADING = false`** and static `public/assets/` hosting. See [`docs/ASSET_LOADING.md`](./docs/ASSET_LOADING.md).
+
 ---
 
 ## Dev Guides

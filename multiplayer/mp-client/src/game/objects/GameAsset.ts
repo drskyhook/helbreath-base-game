@@ -4,7 +4,13 @@ import { canvasToScreenPosition, CELL_CENTER_PIXEL_OFFSET, convertPixelPosToWorl
 import { GameAssetVisualEffect, getFrameNameFromSpriteFrame } from '../../utils/GameAssetVisualEffect';
 import { EventBus } from '../EventBus';
 import type { PivotFrame } from '../../Types';
-import { HIGH_DEPTH, SPRITES_WITH_SHADOWS } from '../../Config';
+import {
+    HIGH_DEPTH,
+    LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND,
+    PLAYER_ITEM_APPEARANCE_PENDING_TEXTURE,
+    SPRITES_WITH_SHADOWS,
+} from '../../Config';
+import { getItemEquippedAppearanceSpriteNames } from '../../constants/Assets';
 import { getPivotData, isDebugModeEnabled } from '../../utils/RegistryUtils';
 import { isTreeSpriteIndex } from '../../utils/SpriteUtils';
 import { IN_DEBUG_MODE_CHANGE, OUT_UI_HOVER_SPRITE_FRAME_DEBUG } from '../../constants/EventNames';
@@ -62,6 +68,9 @@ export class GameAsset {
 
     /** The sprite sheet index within the sprite file */
     private spriteSheetIndex?: number;
+
+    /** Equipped item layer waiting for lazy `.spr` load; invisible placeholder until promoted. */
+    private pendingLazyPlayerItemAppearance = false;
 
     /** Shadow manager for rendering shadow beneath the asset (when enabled) */
     private shadowManager: ShadowManager | undefined = undefined;
@@ -124,22 +133,28 @@ export class GameAsset {
         let textureKey: string;
         let animationKey: string;
 
+        const usePendingItemPlaceholder = config.pendingLazyPlayerItemAppearance === true;
+
         if (config.mapObject) {
             // Map objects: Phaser texture key is the basename (e.g. `map-tile-123`), not `sprite-*`.
             textureKey = config.spriteName;
             animationKey = config.spriteName;
+        } else if (usePendingItemPlaceholder) {
+            textureKey = PLAYER_ITEM_APPEARANCE_PENDING_TEXTURE;
+            animationKey = textureKey;
+            this.pendingLazyPlayerItemAppearance = true;
         } else {
             textureKey = `sprite-${config.spriteName}-${config.spriteSheetIndex}`;
             animationKey = textureKey;
         }
 
         // Check if texture exists
-        if (!scene.textures.exists(textureKey)) {
+        if (!usePendingItemPlaceholder && !scene.textures.exists(textureKey)) {
             throw new Error(`Texture "${textureKey}" does not exist`);
         }
 
         // Check if frame index exists in texture (if frameIndex is specified)
-        if (config.frameIndex !== undefined) {
+        if (!usePendingItemPlaceholder && config.frameIndex !== undefined) {
             const texture = scene.textures.get(textureKey);
             if (!texture.has(String(config.frameIndex))) {
                 throw new Error(`Frame index ${config.frameIndex} does not exist in texture "${textureKey}"`);
@@ -162,17 +177,19 @@ export class GameAsset {
         this.onAnimationFrameChangeCallback = config.onAnimationFrameChange;
 
         // Retrieve pivot data from global registry
-        const pivotData = getPivotData(scene, textureKey, config.spriteName, config.mapObject ?? false);
+        if (!usePendingItemPlaceholder) {
+            const pivotData = getPivotData(scene, textureKey, config.spriteName, config.mapObject ?? false);
 
-        if (config.mapObject) {
-            // For map objects, the pivot data is stored as a single sprite sheet (index 0)
-            if (pivotData && pivotData.spriteSheetPivots[0]) {
-                this.spriteSheetPivots = pivotData.spriteSheetPivots[0];
-            }
-        } else {
-            // For regular sprites, use the sprite sheet index
-            if (pivotData && config.spriteSheetIndex !== undefined && pivotData.spriteSheetPivots[config.spriteSheetIndex]) {
-                this.spriteSheetPivots = pivotData.spriteSheetPivots[config.spriteSheetIndex];
+            if (config.mapObject) {
+                // For map objects, the pivot data is stored as a single sprite sheet (index 0)
+                if (pivotData && pivotData.spriteSheetPivots[0]) {
+                    this.spriteSheetPivots = pivotData.spriteSheetPivots[0];
+                }
+            } else {
+                // For regular sprites, use the sprite sheet index
+                if (pivotData && config.spriteSheetIndex !== undefined && pivotData.spriteSheetPivots[config.spriteSheetIndex]) {
+                    this.spriteSheetPivots = pivotData.spriteSheetPivots[config.spriteSheetIndex];
+                }
             }
         }
 
@@ -195,6 +212,10 @@ export class GameAsset {
 
         if (config.frameIndex !== undefined) {
             this.applyPivotOffset(config.frameIndex);
+        }
+
+        if (usePendingItemPlaceholder) {
+            this.sprite.setVisible(false);
         }
 
         if (config.alpha !== undefined) {
@@ -239,7 +260,7 @@ export class GameAsset {
         scene.registry.events.on(IN_DEBUG_MODE_CHANGE, this.debugModeChangeHandler);
 
         // Play animation if it exists
-        if (config.frameIndex === undefined) {
+        if (!usePendingItemPlaceholder && config.frameIndex === undefined) {
             if (scene.anims.exists(animationKey)) {
                 // Constructor animations are typically looping (no repeat specified means default/infinite)
                 this.isAnimationLooping = true;
@@ -254,7 +275,9 @@ export class GameAsset {
         }
 
         // Create shadow for sprites that have shadows enabled
-        this.drawShadowIfNecessary(config);
+        if (!usePendingItemPlaceholder) {
+            this.drawShadowIfNecessary(config);
+        }
 
         this._constructionComplete = true;
     }
@@ -797,6 +820,9 @@ export class GameAsset {
      * @returns The relative frame index (0-7) or undefined
      */
     public getCurrentRelativeFrame(): number | undefined {
+        if (this.pendingLazyPlayerItemAppearance) {
+            return undefined;
+        }
         if (!this.sprite.anims?.isPlaying || this.directionStartFrame === undefined) {
             return undefined;
         }
@@ -831,6 +857,9 @@ export class GameAsset {
      */
     public playAnimationWithDirection(animationKey: string, direction: number, frameRate = 10, relativeFrame?: number, repeat?: number, framesPerDirection?: number, animationType?: AnimationType, animationFrameStartIndex?: number, isLooping?: boolean): void {
         if (!this.sprite || !this.sprite.anims) {
+            return;
+        }
+        if (this.pendingLazyPlayerItemAppearance) {
             return;
         }
         try {
@@ -1263,6 +1292,63 @@ export class GameAsset {
     public getSpriteName(): string {
         return this.spriteName;
     }
+
+    /** True while this layer waits for a lazy equipped-item `.spr` fetch. */
+    public isPendingLazyPlayerItemAppearance(): boolean {
+        return this.pendingLazyPlayerItemAppearance;
+    }
+
+    /**
+     * Swaps placeholder texture after `loadPlayerItemAppearanceOnDemand` registers the real sheet.
+     */
+    public promotePendingPlayerItemAppearance(): void {
+        if (!this.pendingLazyPlayerItemAppearance || this.spriteSheetIndex === undefined) {
+            return;
+        }
+
+        const textureKey = `sprite-${this.spriteName}-${this.spriteSheetIndex}`;
+        if (!this.scene.textures.exists(textureKey)) {
+            console.error(`[GameAsset] Missing texture after lazy item load: ${textureKey}`);
+            return;
+        }
+
+        this.pendingLazyPlayerItemAppearance = false;
+
+        const pivotData = getPivotData(this.scene, textureKey, this.spriteName, false);
+        if (pivotData && pivotData.spriteSheetPivots[this.spriteSheetIndex] !== undefined) {
+            this.spriteSheetPivots = pivotData.spriteSheetPivots[this.spriteSheetIndex];
+        } else {
+            this.spriteSheetPivots = undefined;
+        }
+
+        const startFrame = this.directionStartFrame ?? 0;
+        this.sprite.setTexture(textureKey, startFrame);
+        this.applyPivotOffset(startFrame);
+        this.visualEffects.syncOverlayFramesAfterAnimationPlay();
+    }
+
+    /**
+     * When equipping a different item whose `.spr` is not loaded, hide and show placeholder until fetch completes.
+     */
+    public retargetPlayerItemAppearanceToPending(scene: Scene): void {
+        if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND || !getItemEquippedAppearanceSpriteNames().has(this.spriteName)) {
+            return;
+        }
+        if (scene.textures.exists(`sprite-${this.spriteName}-0`)) {
+            if (this.pendingLazyPlayerItemAppearance) {
+                this.promotePendingPlayerItemAppearance();
+            }
+            return;
+        }
+
+        this.pendingLazyPlayerItemAppearance = true;
+        if (this.sprite.anims.isPlaying) {
+            this.sprite.anims.stop();
+        }
+        this.sprite.setTexture(PLAYER_ITEM_APPEARANCE_PENDING_TEXTURE, 0);
+        this.spriteSheetPivots = undefined;
+        this.sprite.setVisible(false);
+    }
     
     /**
      * Changes the sprite name for subsequent animations.
@@ -1329,4 +1415,6 @@ export type GameAssetConfig = {
     isLooping?: boolean;
     onAnimationFrameChange?: (relativeFrameIndex: number) => void;
     effects?: Effect[];
+    /** When true, use invisible placeholder until equipped item `.spr` is lazy-loaded. */
+    pendingLazyPlayerItemAppearance?: boolean;
 };

@@ -1,10 +1,16 @@
+import type { Scene } from 'phaser';
 import type { GameAssetConfig } from '../game/objects/GameAsset';
 import { AnimationType, GameAsset } from '../game/objects/GameAsset';
 import type { Direction } from './CoordinateUtils';
 import { Gender, SkinColor } from '../Types';
-import { DEFAULT_ANIMATION_FRAME_RATE, DEPTH_MULTIPLIER } from '../Config';
+import { DEFAULT_ANIMATION_FRAME_RATE, DEPTH_MULTIPLIER, LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND } from '../Config';
 import { calculateFrameRateFromDuration } from './AnimationUtils';
+import { getItemEquippedAppearanceSpriteNames } from '../constants/Assets';
 import { getItemByEquippedSprite, getItemById, ITEMS, ItemTypes, mergeItemEffects, WEAPON_SPRITE_OVERWRITES, type Effect } from '../constants/Items';
+import {
+    arePlayerItemAppearanceLoaded,
+    loadPlayerItemAppearanceOnDemand,
+} from './ItemAssets';
 import type { ShadowManager } from './ShadowManager';
 
 export enum PlayerState {
@@ -263,13 +269,25 @@ export class PlayerAppearanceManager {
     private isChilled: boolean = false;
     private isBerserked: boolean = false;
 
+    private readonly scene: Scene;
+
+    /** Refreshes visuals after a lazy item `.spr` finishes loading (e.g. re-run current state animations). */
+    private readonly onLazyItemAppearanceLoaded?: () => void;
+
+    /** Per-sprite fetch: one completion handler promotes every pending layer using that basename. */
+    private readonly lazyItemAppearanceLoadsStarted = new Set<string>();
+
     public constructor(
         assets: GameAsset[],
         initialGender: Gender,
         resolvedGear: GearConfig,
         assetIndices: PlayerAssetIndices,
+        scene: Scene,
+        onLazyItemAppearanceLoaded?: () => void,
     ) {
         this.assets = assets;
+        this.scene = scene;
+        this.onLazyItemAppearanceLoaded = onLazyItemAppearanceLoaded;
         this.gender = initialGender;
         this.humanSpriteName = resolvedGear.human;
         this.armor = resolvedGear.armor;
@@ -298,7 +316,71 @@ export class PlayerAppearanceManager {
         this.underwearColorIndex = resolvedGear.underwearColorIndex ?? 0;
         this.hairStyleIndex = resolvedGear.hairStyleIndex ?? 0;
         this.updateAccessoryOffset();
+        this.syncDefaultGearFromRenderedAssets();
         this.applyInitialVisibility();
+        this.kickOffAllPendingItemAppearanceLoads();
+    }
+
+    /**
+     * `buildAssetConfigs` fills default armor/weapon/etc. from the item catalog when inventory slots are empty,
+     * but `resolveGearFromEquippedItems` leaves those fields undefined. Align manager state with what is actually
+     * on each {@link GameAsset} so visibility, lazy loads, and animation config stay consistent.
+     */
+    private syncDefaultGearFromRenderedAssets(): void {
+        if (this.weaponAssetIndex >= 0 && this.weapon === undefined) {
+            const w = this.assets[this.weaponAssetIndex].getSpriteName();
+            this.weapon = w;
+            this.weaponStartSpriteSheetIndex = getItemByEquippedSprite(w)?.startSpriteSheetIndex;
+        }
+        if (this.shieldAssetIndex >= 0 && this.shield === undefined) {
+            const s = this.assets[this.shieldAssetIndex].getSpriteName();
+            this.shield = s;
+            this.shieldStartSpriteSheetIndex = getItemByEquippedSprite(s)?.startSpriteSheetIndex;
+        }
+        if (this.armorAssetIndex >= 0 && this.armor === undefined) {
+            this.armor = this.assets[this.armorAssetIndex].getSpriteName();
+        }
+        if (this.hauberkAssetIndex >= 0 && this.hauberk === undefined) {
+            this.hauberk = this.assets[this.hauberkAssetIndex].getSpriteName();
+        }
+        if (this.leggingsAssetIndex >= 0 && this.leggings === undefined) {
+            this.leggings = this.assets[this.leggingsAssetIndex].getSpriteName();
+        }
+        if (this.bootsAssetIndex >= 0 && this.boots === undefined) {
+            this.boots = this.assets[this.bootsAssetIndex].getSpriteName();
+        }
+        if (this.helmAssetIndex >= 0 && this.helm === undefined) {
+            this.helm = this.assets[this.helmAssetIndex].getSpriteName();
+        }
+        if (this.capeAssetIndex >= 0 && this.cape === undefined) {
+            this.cape = this.assets[this.capeAssetIndex].getSpriteName();
+        }
+        if (this.accessoryAssetIndex >= 0 && this.accessory === undefined) {
+            this.accessory = this.assets[this.accessoryAssetIndex].getSpriteName();
+        }
+        this.updateAccessoryOffset();
+    }
+
+    /** Start HTTP fetch for every equipped-appearance layer still on the placeholder texture. */
+    private kickOffAllPendingItemAppearanceLoads(): void {
+        if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+            return;
+        }
+        const seen = new Set<string>();
+        for (const asset of this.assets) {
+            if (!asset.isPendingLazyPlayerItemAppearance()) {
+                continue;
+            }
+            const name = asset.getSpriteName();
+            if (!getItemEquippedAppearanceSpriteNames().has(name)) {
+                continue;
+            }
+            if (seen.has(name)) {
+                continue;
+            }
+            seen.add(name);
+            this.scheduleLazyItemAppearanceIfNeeded(name, asset);
+        }
     }
 
     public static getHumanSpriteName(gender: Gender, skinColor: SkinColor = SkinColor.Light): string {
@@ -309,12 +391,12 @@ export class PlayerAppearanceManager {
         return spriteMap[gender][skinColor];
     }
 
-    public static resolveGearFromInventory(
+    public static resolveGearFromEquippedItems(
         gear: GearConfig,
-        inventoryManager: { equippedItems: EquippedItems },
+        equippedItems: EquippedItems,
         gender: Gender,
     ): GearConfig {
-        const weaponItem = inventoryManager.equippedItems[ItemTypes.WEAPON];
+        const weaponItem = equippedItems[ItemTypes.WEAPON];
         const weaponDef = weaponItem ? getItemById(weaponItem.itemId) : undefined;
         const weapon = gear.weapon ?? (weaponDef
             ? (gender === Gender.MALE ? weaponDef.equippedSpriteMale : weaponDef.equippedSpriteFemale)
@@ -323,7 +405,7 @@ export class PlayerAppearanceManager {
             ?? weaponDef?.startSpriteSheetIndex
             ?? (weapon ? getItemByEquippedSprite(weapon)?.startSpriteSheetIndex : undefined);
 
-        const shieldItem = inventoryManager.equippedItems[ItemTypes.SHIELD];
+        const shieldItem = equippedItems[ItemTypes.SHIELD];
         const shieldDef = shieldItem ? getItemById(shieldItem.itemId) : undefined;
         const shield = gear.shield ?? (shieldDef
             ? (gender === Gender.MALE ? shieldDef.equippedSpriteMale : shieldDef.equippedSpriteFemale)
@@ -332,43 +414,43 @@ export class PlayerAppearanceManager {
             ?? shieldDef?.startSpriteSheetIndex
             ?? (shield ? getItemByEquippedSprite(shield)?.startSpriteSheetIndex : undefined);
 
-        const armorItem = inventoryManager.equippedItems[ItemTypes.ARMOR];
+        const armorItem = equippedItems[ItemTypes.ARMOR];
         const armorDef = armorItem ? getItemById(armorItem.itemId) : undefined;
         const armor = gear.armor ?? (armorDef
             ? (gender === Gender.MALE ? armorDef.equippedSpriteMale : armorDef.equippedSpriteFemale)
             : undefined);
 
-        const hauberkItem = inventoryManager.equippedItems[ItemTypes.HAUBERK];
+        const hauberkItem = equippedItems[ItemTypes.HAUBERK];
         const hauberkDef = hauberkItem ? getItemById(hauberkItem.itemId) : undefined;
         const hauberk = gear.hauberk ?? (hauberkDef
             ? (gender === Gender.MALE ? hauberkDef.equippedSpriteMale : hauberkDef.equippedSpriteFemale)
             : undefined);
 
-        const leggingsItem = inventoryManager.equippedItems[ItemTypes.LEGGINGS];
+        const leggingsItem = equippedItems[ItemTypes.LEGGINGS];
         const leggingsDef = leggingsItem ? getItemById(leggingsItem.itemId) : undefined;
         const leggings = gear.leggings ?? (leggingsDef
             ? (gender === Gender.MALE ? leggingsDef.equippedSpriteMale : leggingsDef.equippedSpriteFemale)
             : undefined);
 
-        const bootsItem = inventoryManager.equippedItems[ItemTypes.BOOTS];
+        const bootsItem = equippedItems[ItemTypes.BOOTS];
         const bootsDef = bootsItem ? getItemById(bootsItem.itemId) : undefined;
         const boots = gear.boots ?? (bootsDef
             ? (gender === Gender.MALE ? bootsDef.equippedSpriteMale : bootsDef.equippedSpriteFemale)
             : undefined);
 
-        const helmItem = inventoryManager.equippedItems[ItemTypes.HELMET];
+        const helmItem = equippedItems[ItemTypes.HELMET];
         const helmDef = helmItem ? getItemById(helmItem.itemId) : undefined;
         const helm = gear.helm ?? (helmDef
             ? (gender === Gender.MALE ? helmDef.equippedSpriteMale : helmDef.equippedSpriteFemale)
             : undefined);
 
-        const capeItem = inventoryManager.equippedItems[ItemTypes.CAPE];
+        const capeItem = equippedItems[ItemTypes.CAPE];
         const capeDef = capeItem ? getItemById(capeItem.itemId) : undefined;
         const cape = gear.cape ?? (capeDef
             ? (gender === Gender.MALE ? capeDef.equippedSpriteMale : capeDef.equippedSpriteFemale)
             : undefined);
 
-        const accessoryItem = inventoryManager.equippedItems[ItemTypes.ACCESSORY];
+        const accessoryItem = equippedItems[ItemTypes.ACCESSORY];
         const accessoryDef = accessoryItem ? getItemById(accessoryItem.itemId) : undefined;
         const accessory = gear.accessory ?? (accessoryDef
             ? (gender === Gender.MALE ? accessoryDef.equippedSpriteMale : accessoryDef.equippedSpriteFemale)
@@ -376,6 +458,14 @@ export class PlayerAppearanceManager {
 
         const underwear = gear.underwear ?? (gender === Gender.MALE ? 'mpt' : 'wpt');
         return { ...gear, weapon, weaponStartSpriteSheetIndex, shield, shieldStartSpriteSheetIndex, armor, hauberk, leggings, boots, helm, cape, accessory, underwear };
+    }
+
+    public static resolveGearFromInventory(
+        gear: GearConfig,
+        inventoryManager: { equippedItems: EquippedItems },
+        gender: Gender,
+    ): GearConfig {
+        return this.resolveGearFromEquippedItems(gear, inventoryManager.equippedItems, gender);
     }
 
     public static buildAssetConfigs(direction: Direction, state: PlayerState, gear: GearConfig): BuildPlayerAssetConfigsResult {
@@ -608,7 +698,6 @@ export class PlayerAppearanceManager {
         if (this.hairAssetIndex >= 0) {
             const hairSprite = gender === Gender.MALE ? 'mhr' : 'whr';
             this.assets[this.hairAssetIndex].setSpriteName(hairSprite);
-            this.assets[this.hairAssetIndex].setVisible(this.hairStyleIndex !== 2);
         }
         if (this.underwearAssetIndex >= 0) {
             this.assets[this.underwearAssetIndex].setSpriteName(gender === Gender.MALE ? 'mpt' : 'wpt');
@@ -627,12 +716,15 @@ export class PlayerAppearanceManager {
         this.applyEquipItem(ItemTypes.HELMET, equippedItems[ItemTypes.HELMET]?.itemId, equippedItems[ItemTypes.HELMET]?.effectOverrides);
         this.applyEquipItem(ItemTypes.CAPE, equippedItems[ItemTypes.CAPE]?.itemId, equippedItems[ItemTypes.CAPE]?.effectOverrides);
         this.applyEquipItem(ItemTypes.ACCESSORY, equippedItems[ItemTypes.ACCESSORY]?.itemId, equippedItems[ItemTypes.ACCESSORY]?.effectOverrides);
+        this.syncHairVisibility();
+        this.kickOffAllPendingItemAppearanceLoads();
         this.applyChilledToAllAssets();
         this.applyBerserkToEligibleAssets();
     }
 
     public handleEquip(itemType: ItemTypes, itemId: number | undefined, effectOverrides?: Effect[]): void {
         this.applyEquipItem(itemType, itemId, effectOverrides);
+        this.kickOffAllPendingItemAppearanceLoads();
     }
 
     public updateDepth(worldY: number, direction: Direction, currentState: PlayerState): void {
@@ -752,11 +844,21 @@ export class PlayerAppearanceManager {
                 asset.setSpriteName(spriteName);
             }
 
+            if (slot === 'weapon' && this.scheduleLazyItemAppearanceIfNeeded(spriteName, asset)) {
+                asset.setVisible(false);
+                continue;
+            }
+
             const shouldHideArmaments = newState === PlayerState.Die ||
                 newState === PlayerState.Cast ||
                 newState === PlayerState.PickUp ||
                 newState === PlayerState.BowStance;
             if (shouldHideArmaments && (slot === 'weapon' || slot === 'shield')) {
+                asset.setVisible(false);
+                continue;
+            }
+
+            if (asset.isPendingLazyPlayerItemAppearance()) {
                 asset.setVisible(false);
                 continue;
             }
@@ -811,6 +913,56 @@ export class PlayerAppearanceManager {
         this.applyBerserkToEligibleAssets();
     }
 
+    /**
+     * When lazy item appearance is enabled and the `.spr` is missing, starts fetch and keeps the layer hidden
+     * until load completes. Returns true if load was deferred (caller must not force visible yet).
+     */
+    private scheduleLazyItemAppearanceIfNeeded(sprite: string, asset: GameAsset): boolean {
+        if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+            return false;
+        }
+        if (!getItemEquippedAppearanceSpriteNames().has(sprite)) {
+            return false;
+        }
+        if (arePlayerItemAppearanceLoaded(this.scene, sprite)) {
+            if (this.assets.some((a) => a.isPendingLazyPlayerItemAppearance() && a.getSpriteName() === sprite)) {
+                this.flushPendingLazyItemPromotionForSprite(sprite);
+            }
+            return false;
+        }
+        if (!asset.isPendingLazyPlayerItemAppearance()) {
+            asset.retargetPlayerItemAppearanceToPending(this.scene);
+        }
+        if (!this.lazyItemAppearanceLoadsStarted.has(sprite)) {
+            this.lazyItemAppearanceLoadsStarted.add(sprite);
+            loadPlayerItemAppearanceOnDemand(this.scene, sprite)
+                .then(() => {
+                    this.lazyItemAppearanceLoadsStarted.delete(sprite);
+                    this.flushPendingLazyItemPromotionForSprite(sprite);
+                })
+                .catch((err) => {
+                    this.lazyItemAppearanceLoadsStarted.delete(sprite);
+                    console.error(`[PlayerItemAppearanceLoader] Failed to load equipped appearance '${sprite}'`, err);
+                });
+        }
+        return true;
+    }
+
+    /**
+     * After `HBSpriteFile.load` resolves, Phaser may not expose new animations until the next frame.
+     * Defer promotion and appearance refresh so `scene.anims.exists` sees keys like `sprite-mbabhammer-10`.
+     */
+    private flushPendingLazyItemPromotionForSprite(sprite: string): void {
+        this.scene.time.delayedCall(0, () => {
+            for (const a of this.assets) {
+                if (a.isPendingLazyPlayerItemAppearance() && a.getSpriteName() === sprite) {
+                    a.promotePendingPlayerItemAppearance();
+                }
+            }
+            this.onLazyItemAppearanceLoaded?.();
+        });
+    }
+
     private applyWeaponEquip(itemId: number | undefined, effectOverrides?: Effect[]): void {
         if (itemId === undefined) {
             this.weapon = undefined;
@@ -836,6 +988,9 @@ export class PlayerAppearanceManager {
             const weaponAsset = this.assets[this.weaponAssetIndex];
             weaponAsset.setSpriteName(sprite);
             weaponAsset.setItemEffects(mergeItemEffects(itemDef.effects, effectOverrides));
+            if (this.scheduleLazyItemAppearanceIfNeeded(sprite, weaponAsset)) {
+                return;
+            }
             weaponAsset.setVisible(true);
         }
     }
@@ -865,6 +1020,9 @@ export class PlayerAppearanceManager {
             const shieldAsset = this.assets[this.shieldAssetIndex];
             shieldAsset.setSpriteName(sprite);
             shieldAsset.setItemEffects(mergeItemEffects(itemDef.effects, effectOverrides));
+            if (this.scheduleLazyItemAppearanceIfNeeded(sprite, shieldAsset)) {
+                return;
+            }
             shieldAsset.setVisible(true);
         }
     }
@@ -876,6 +1034,9 @@ export class PlayerAppearanceManager {
                 const asset = this.assets[assetIndex];
                 asset.setItemEffects(undefined);
                 asset.setVisible(false);
+            }
+            if (slot === 'helm') {
+                this.syncHairVisibility();
             }
             return;
         }
@@ -892,7 +1053,16 @@ export class PlayerAppearanceManager {
             const asset = this.assets[assetIndex];
             asset.setSpriteName(sprite);
             asset.setItemEffects(mergeItemEffects(itemDef.effects, effectOverrides));
+            if (this.scheduleLazyItemAppearanceIfNeeded(sprite, asset)) {
+                if (slot === 'helm') {
+                    this.syncHairVisibility();
+                }
+                return;
+            }
             asset.setVisible(true);
+        }
+        if (slot === 'helm') {
+            this.syncHairVisibility();
         }
     }
 
@@ -922,6 +1092,9 @@ export class PlayerAppearanceManager {
             const accessoryAsset = this.assets[this.accessoryAssetIndex];
             accessoryAsset.setSpriteName(sprite);
             accessoryAsset.setItemEffects(mergeItemEffects(itemDef.effects, effectOverrides));
+            if (this.scheduleLazyItemAppearanceIfNeeded(sprite, accessoryAsset)) {
+                return;
+            }
             accessoryAsset.setVisible(true);
         }
     }
@@ -970,9 +1143,18 @@ export class PlayerAppearanceManager {
         if (this.accessoryAssetIndex >= 0 && !this.accessory) {
             this.assets[this.accessoryAssetIndex].setVisible(false);
         }
-        if (this.hairAssetIndex >= 0 && this.hairStyleIndex === 2) {
-            this.assets[this.hairAssetIndex].setVisible(false);
+        this.syncHairVisibility();
+    }
+
+    /**
+     * Hair layer off for style index 2 (bald) or when a helm is equipped (helm covers hair).
+     */
+    private syncHairVisibility(): void {
+        if (this.hairAssetIndex < 0) {
+            return;
         }
+        const visible = this.hairStyleIndex !== 2 && this.helm === undefined;
+        this.assets[this.hairAssetIndex].setVisible(visible);
     }
 
     private isSlotVisible(slot: GearSlot | undefined): boolean {
@@ -996,7 +1178,7 @@ export class PlayerAppearanceManager {
             case 'accessory':
                 return this.accessory !== undefined;
             case 'hair':
-                return this.hairStyleIndex !== 2;
+                return this.hairStyleIndex !== 2 && this.helm === undefined;
             default:
                 return true;
         }

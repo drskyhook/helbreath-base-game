@@ -8,6 +8,7 @@ import { SoundTracker } from '../../utils/SoundTracker';
 import { DEFAULT_MOVEMENT_SPEED, DEPTH_MULTIPLIER, KNOCKBACK_DURATION_MS } from '../../Config';
 import { HBMap } from '../assets/HBMap';
 import type { ShadowManager } from '../../utils/ShadowManager';
+import { isPlayerItemAppearanceLazyEligible } from '../../utils/ItemAssets';
 
 export enum GameObjectState {
     Idle = 0,
@@ -165,10 +166,15 @@ export abstract class GameObject {
 
         // Create GameAssets at the pixel position
         for (const assetConfig of config.assets) {
+            const pendingLazyPlayerItemAppearance =
+                !assetConfig.mapObject &&
+                assetConfig.spriteSheetIndex !== undefined &&
+                isPlayerItemAppearanceLazyEligible(scene, assetConfig.spriteName);
             const asset = new GameAsset(scene, {
                 ...assetConfig,
                 x: pixelX,
                 y: pixelY,
+                ...(pendingLazyPlayerItemAppearance ? { pendingLazyPlayerItemAppearance: true } : {}),
             });
             
             // Set depth based on world position Y (world Y coordinate * DEPTH_MULTIPLIER)

@@ -17,17 +17,31 @@ import { canvasToScreenPosition, convertWorldPosToPixelPos, convertPixelPosToWor
 import {
     DEPTH_MULTIPLIER,
     GAME_STATS_UPDATE_INTERVAL_MS,
+    LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND,
     MONSTER_HOVER_OVERLAY_ANCHOR_OFFSET_Y,
     MONSTER_PLACEHOLDER_SPRITE,
     PLAYER_HOVER_OVERLAY_ANCHOR_OFFSET_Y,
 } from '../../Config';
 import { InputManager } from '../../utils/InputManager';
 import { CameraManager } from '../../utils/CameraManager';
-import { getMusicManager, getGameStateManager, getNetworkManager, getAndRemoveInitialGameWorldState, setDebugModeEnabled, setDisplayLargeItemsEnabled, setInitialGameWorldState, setPlayerPosition, setSoundManager } from '../../utils/RegistryUtils';
+import {
+    getMusicManager,
+    getGameStateManager,
+    getNetworkManager,
+    getAndRemoveInitialGameWorldState,
+    setDebugModeEnabled,
+    setDisplayLargeItemsEnabled,
+    setInitialGameWorldState,
+    setPlayerPosition,
+    setSoundManager,
+    takePendingPlayerItemAppearancePrefetch,
+    getMapIfPresent,
+} from '../../utils/RegistryUtils';
 import type { InitialGameWorldState } from '../../utils/RegistryUtils';
 import { cancelPlayerDialogPhaserNotificationDebouncers, playerDialogStore } from '../../ui/store/PlayerDialog.store';
 import { MapManager } from '../../utils/MapManager';
 import { prepareMapForGameWorld, shouldLoadMapAssetsOnDemand } from '../../utils/MapAssets';
+import { loadPlayerItemAppearanceOnDemand } from '../../utils/ItemAssets';
 import { SoundManager } from '../../utils/SoundManager';
 import { getMonsterData } from '../../constants/Monsters';
 import { getSpriteForCatalogNpcId } from '../../constants/NPCs';
@@ -35,6 +49,7 @@ import {
     CURRENT_SCENE_READY,
     INITIAL_GAME_WORLD_STATE_RECEIVED,
     PLAYER_POSITION_CHANGED,
+    PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED,
     TILE_OCCUPANCY_REAPPLY_REQUESTED,
     MONSTER_ENTERED_RANGE_RECEIVED,
     MONSTER_ATTACKED_MONSTER_RECEIVED,
@@ -142,6 +157,7 @@ import {
     OUT_UI_SET_SELECTED_MAP,
     OUT_MAP_LOADED,
     OUT_WEATHER_SYNCED,
+    type PlayerItemAppearancePrefetchEventData,
 } from '../../constants/EventNames';
 import {
     AttackType,
@@ -312,6 +328,15 @@ export class GameWorld extends Scene {
         }
     };
 
+    private readonly playerItemAppearancePrefetchHandler = (payload: PlayerItemAppearancePrefetchEventData) => {
+        if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+            return;
+        }
+        for (const name of payload.spriteNames) {
+            void loadPlayerItemAppearanceOnDemand(this, name);
+        }
+    };
+
     constructor() {
         super('GameWorld');
         this.soundManager = new SoundManager(this);
@@ -362,6 +387,7 @@ export class GameWorld extends Scene {
             this.setupMonsterEventListeners();
             this.setupInputManager();
             this.setupCameraStatsUpdateInterval();
+            EventBus.on(PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED, this.playerItemAppearancePrefetchHandler);
 
             this.events.once('shutdown', () => {
                 runSafeSync('GameWorld:shutdownEvent', () => this.shutdown());
@@ -372,6 +398,12 @@ export class GameWorld extends Scene {
     public create() {
         runSafeSync('GameWorld:create', () => {
             this.cameras.main.setBackgroundColor('#000');
+            if (LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+                const pending = takePendingPlayerItemAppearancePrefetch(this.game);
+                for (const name of pending) {
+                    void loadPlayerItemAppearanceOnDemand(this, name);
+                }
+            }
             EventBus.emit(CURRENT_SCENE_READY, this);
         });
     }
@@ -1616,7 +1648,13 @@ export class GameWorld extends Scene {
             return;
         }
         try {
-            const currentMap = this.getCurrentMap();
+            const mapName = this.mapManager.getCurrentMapName();
+            const currentMap = getMapIfPresent(this, mapName);
+            if (!currentMap) {
+                // Teleport locs often arrive in init before lazy `prepareMapForGameWorld` registers the map;
+                // `setupMap` calls this again once the HBMap exists.
+                return;
+            }
             currentMap.setServerTeleportSourceCells(getTeleportSourceCellsFromLocSets(this.lastTeleportLocSets));
             if (mapDialogStore.state.showServerTeleportCells) {
                 currentMap.enableServerTeleportCellsHighlight(this);
@@ -1625,8 +1663,8 @@ export class GameWorld extends Scene {
             }
         } catch (error) {
             console.warn(
-                `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Could not sync server teleport cells (map may not be registered yet):`,
-                error
+                `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Could not sync server teleport cells:`,
+                error,
             );
         }
     }
@@ -3310,6 +3348,7 @@ export class GameWorld extends Scene {
             EventBus.off(IN_UI_CHANGE_HAIR_STYLE, this.syncPlayerAppearanceHandler);
             EventBus.off(IN_UI_REQUEST_PLAYER_LOGOUT);
             EventBus.off(SOCKET_DISCONNECTED);
+            EventBus.off(PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED, this.playerItemAppearancePrefetchHandler);
             EventBus.off(IN_UI_PLAYER_RESURRECT);
             EventBus.off(IN_UI_REQUEST_SERVER_RESURRECT);
             EventBus.off(PLAYER_DIED_RECEIVED);
