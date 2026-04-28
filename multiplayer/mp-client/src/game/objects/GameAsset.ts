@@ -11,6 +11,10 @@ import {
     SPRITES_WITH_SHADOWS,
 } from '../../Config';
 import { getItemEquippedAppearanceSpriteNames } from '../../constants/Assets';
+import {
+    arePlayerItemAppearanceLoaded,
+    isPlayerItemAppearanceLoadInFlight,
+} from '../../utils/ItemAssets';
 import { getPivotData, isDebugModeEnabled } from '../../utils/RegistryUtils';
 import { isTreeSpriteIndex } from '../../utils/SpriteUtils';
 import { IN_DEBUG_MODE_CHANGE, OUT_UI_HOVER_SPRITE_FRAME_DEBUG } from '../../constants/EventNames';
@@ -269,7 +273,7 @@ export class GameAsset {
                     startFrame: this.directionStartFrame ?? 0,
                     frameRate: config.frameRate ?? 10
                 });
-            } else {
+            } else if (!this.shouldSuppressMissingOnDemandItemAnimationWarn(animationKey)) {
                 console.warn(`Animation key "${animationKey}" does not exist. Sprite created but not animating.`);
             }
         }
@@ -289,6 +293,28 @@ export class GameAsset {
             textureFrame: frameIndex,
             frame: { name: String(frameIndex) } as Phaser.Textures.Frame
         } as Phaser.Animations.AnimationFrame;
+    }
+
+    /**
+     * Avoids console noise while equipped-item `.spr` is still fetching or Phaser has not registered
+     * animations for a texture that already exists (see deferred refresh in {@link PlayerAppearanceManager}).
+     */
+    private shouldSuppressMissingOnDemandItemAnimationWarn(animationKey: string): boolean {
+        if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND) {
+            return false;
+        }
+        const match = animationKey.match(/^sprite-(.+)-(\d+)$/);
+        if (!match) {
+            return false;
+        }
+        const basename = match[1];
+        if (!getItemEquippedAppearanceSpriteNames().has(basename)) {
+            return false;
+        }
+        if (!arePlayerItemAppearanceLoaded(this.scene, basename) || isPlayerItemAppearanceLoadInFlight(basename)) {
+            return true;
+        }
+        return this.scene.textures.exists(animationKey);
     }
 
     /**
@@ -864,6 +890,9 @@ export class GameAsset {
         }
         try {
             if (!this.scene.anims.exists(animationKey)) {
+                if (this.shouldSuppressMissingOnDemandItemAnimationWarn(animationKey)) {
+                    return;
+                }
                 console.warn(`Animation key "${animationKey}" does not exist`);
                 return;
             }

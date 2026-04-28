@@ -844,16 +844,16 @@ export class PlayerAppearanceManager {
                 asset.setSpriteName(spriteName);
             }
 
-            if (slot === 'weapon' && this.scheduleLazyItemAppearanceIfNeeded(spriteName, asset)) {
-                asset.setVisible(false);
-                continue;
-            }
-
             const shouldHideArmaments = newState === PlayerState.Die ||
                 newState === PlayerState.Cast ||
                 newState === PlayerState.PickUp ||
                 newState === PlayerState.BowStance;
             if (shouldHideArmaments && (slot === 'weapon' || slot === 'shield')) {
+                asset.setVisible(false);
+                continue;
+            }
+
+            if (this.isLazyPlayerItemAppearanceSlot(slot) && this.scheduleLazyItemAppearanceIfNeeded(spriteName, asset)) {
                 asset.setVisible(false);
                 continue;
             }
@@ -959,8 +959,26 @@ export class PlayerAppearanceManager {
                     a.promotePendingPlayerItemAppearance();
                 }
             }
-            this.onLazyItemAppearanceLoaded?.();
+            // Phaser may not expose newly registered animations until after this frame; refresh once more.
+            this.scene.time.delayedCall(0, () => {
+                this.onLazyItemAppearanceLoaded?.();
+            });
         });
+    }
+
+    /** Gear slots that may use `.spr` on-demand loading (matches equip handlers). */
+    private isLazyPlayerItemAppearanceSlot(slot: GearSlot | undefined): boolean {
+        return (
+            slot === 'weapon' ||
+            slot === 'shield' ||
+            slot === 'armor' ||
+            slot === 'hauberk' ||
+            slot === 'leggings' ||
+            slot === 'boots' ||
+            slot === 'helm' ||
+            slot === 'cape' ||
+            slot === 'accessory'
+        );
     }
 
     private applyWeaponEquip(itemId: number | undefined, effectOverrides?: Effect[]): void {

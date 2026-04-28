@@ -70,6 +70,11 @@ export function arePlayerItemAppearanceLoaded(scene: Scene, spriteName: string):
     return asset.assetType === AssetType.SPRITE && scene.textures.exists(`${asset.key}-0`);
 }
 
+/** True while `loadPlayerItemAppearanceOnDemand` has an unresolved promise for this basename. */
+export function isPlayerItemAppearanceLoadInFlight(spriteName: string): boolean {
+    return playerItemAppearanceLoadPromises.has(spriteName);
+}
+
 /** Fetches and registers one equipped item appearance `.spr` (shared promise per basename). */
 export function loadPlayerItemAppearanceOnDemand(scene: Scene, spriteName: string): Promise<void> {
     if (!LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND || arePlayerItemAppearanceLoaded(scene, spriteName)) {
@@ -88,8 +93,10 @@ export function loadPlayerItemAppearanceOnDemand(scene: Scene, spriteName: strin
             console.log(`[PlayerItemAppearanceLoader] Loaded item appearance ${spriteName}`);
         })
         .catch((error) => {
-            playerItemAppearanceLoadPromises.delete(spriteName);
             throw error;
+        })
+        .finally(() => {
+            playerItemAppearanceLoadPromises.delete(spriteName);
         });
 
     playerItemAppearanceLoadPromises.set(spriteName, promise);
