@@ -27,18 +27,6 @@ export function shouldLoadPlayerItemAppearanceOnDemand(): boolean {
 }
 
 /**
- * True when this basename appears in the item catalog as an equipped appearance and the first
- * sheet texture is not registered yet.
- */
-export function isPlayerItemAppearanceLazyEligible(scene: Scene, spriteName: string): boolean {
-    return (
-        LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND &&
-        getItemEquippedAppearanceSpriteNames().has(spriteName) &&
-        !scene.textures.exists(`sprite-${spriteName}-0`)
-    );
-}
-
-/**
  * Gender-resolved equipped appearance basenames for standard gear slots (matches
  * `PlayerAppearanceManager.resolveGearFromEquippedItems`).
  */
@@ -64,15 +52,32 @@ export function collectEquippedItemAppearanceSpriteBasenamesForPrefetch(
     return [...new Set(out)];
 }
 
-/** True when the `.spr` for this gender-resolved equipped sprite basename is registered. */
-export function arePlayerItemAppearanceLoaded(scene: Scene, spriteName: string): boolean {
-    const asset = getPlayerItemAppearanceAssetData(spriteName);
-    return asset.assetType === AssetType.SPRITE && scene.textures.exists(`${asset.key}-0`);
-}
-
 /** True while `loadPlayerItemAppearanceOnDemand` has an unresolved promise for this basename. */
 export function isPlayerItemAppearanceLoadInFlight(spriteName: string): boolean {
     return playerItemAppearanceLoadPromises.has(spriteName);
+}
+
+/**
+ * True when the `.spr` for this basename has finished registering with Phaser (not merely sheet 0).
+ * During `HBSpriteFile.load`, sheet 0 can appear before higher indices; treat that window as not loaded.
+ */
+export function arePlayerItemAppearanceLoaded(scene: Scene, spriteName: string): boolean {
+    const asset = getPlayerItemAppearanceAssetData(spriteName);
+    if (asset.assetType !== AssetType.SPRITE || !scene.textures.exists(`${asset.key}-0`)) {
+        return false;
+    }
+    return !isPlayerItemAppearanceLoadInFlight(spriteName);
+}
+
+/**
+ * True when {@link GameAsset} should use the pending placeholder at construction instead of a concrete sheet texture.
+ */
+export function isPlayerItemAppearanceLazyEligible(scene: Scene, spriteName: string): boolean {
+    return (
+        LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND &&
+        getItemEquippedAppearanceSpriteNames().has(spriteName) &&
+        !arePlayerItemAppearanceLoaded(scene, spriteName)
+    );
 }
 
 /** Fetches and registers one equipped item appearance `.spr` (shared promise per basename). */
