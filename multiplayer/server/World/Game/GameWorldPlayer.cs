@@ -239,11 +239,22 @@ public class GameWorldPlayer : GameWorldActionableEntity {
     }
 
     public void SetMovementSpeedMs(int ms) {
-        movementSpeedMs = Math.Clamp(ms, 100, 500);
+        var clamped = Math.Clamp(ms, 100, 500);
+        if (movementSpeedMs == clamped) {
+            return;
+        }
+
+        movementSpeedMs = clamped;
+        InvalidateMovementCadenceBaselineAfterEffectiveSpeedChange();
     }
 
     public void SetRunningMode(bool value) {
+        if (runningMode == value) {
+            return;
+        }
+
         runningMode = value;
+        InvalidateMovementCadenceBaselineAfterEffectiveSpeedChange();
     }
 
     public void SetAttackMode(bool value) {
@@ -437,6 +448,24 @@ public class GameWorldPlayer : GameWorldActionableEntity {
         return Math.Max(0, baseMs - baseMs * antiHackTimingLagFactor - GetCappedPingVariance());
     }
 
+    /// <summary>
+    /// Expected minimum wall-clock gap (ms) between accepted movement steps for the player's current effective speed and lag slack.
+    /// Exposed for diagnostics (<see cref="movementSpeedViolationCheckConfig.Verbose"/>).
+    /// </summary>
+    public double GetMovementCadenceMinRequiredMs() => ComputeMinRequiredTimeMs(MovementSpeedMs);
+
+    /// <summary>
+    /// Clears the last-movement timestamp so the next accepted step gets <c>deltaMs == 0</c> and skips cadence comparison.
+    /// Required when <see cref="MovementSpeedMs"/> semantics change without a matching client gap (run/walk toggle, base speed change, or temporary movement-speed modifiers).
+    /// </summary>
+    private void InvalidateMovementCadenceBaselineAfterEffectiveSpeedChange() {
+        lastMovementRequestMs = 0;
+    }
+
+    protected override void OnTemporaryEffectMovementSpeedModifierSumChanged() {
+        InvalidateMovementCadenceBaselineAfterEffectiveSpeedChange();
+    }
+
     /// <summary>True while <paramref name="nowUtc"/> is before pickup lockout ends; clears expired state.</summary>
     public bool IsPickupActionBlocking(DateTimeOffset nowUtc) {
         if (!pickupDurationUntil.HasValue) {
@@ -562,20 +591,29 @@ public class GameWorldPlayer : GameWorldActionableEntity {
     }
 
     /// <summary>
-    /// Records a movement speed violation when deltaMs is below the allowed minimum.
-    /// If the player exceeds the violation limit, requests disconnect and returns false.
+    /// Returns false when <paramref name="deltaMs"/> is below the allowed minimum cadence too often (sliding window); caller applies paralysis.
+    /// Otherwise returns true (accepted cadence, or forgiven within window).
     /// </summary>
     public bool CheckMovementSpeedViolation(long deltaMs) {
-        if (deltaMs >= ComputeMinRequiredTimeMs(MovementSpeedMs)) {
+        var minRequiredMs = GetMovementCadenceMinRequiredMs();
+        if (deltaMs >= minRequiredMs) {
             return true;
         }
 
         using var lease = movementSpeedViolations.AttemptAcquire(1);
         if (lease.IsAcquired) {
             if (movementSpeedViolationCheckConfig.Verbose) {
-                Console.WriteLine($"[GameWorldPlayer:{PlayerId}] Movement speed violation detected. deltaMs={deltaMs}");
+                Console.WriteLine(
+                    $"[GameWorldPlayer:{PlayerId}] Movement speed violation forgiven (sliding window). " +
+                    $"deltaMs={deltaMs} minRequiredMs={minRequiredMs:F1} effectiveMovementMs={MovementSpeedMs} runningMode={runningMode} baseMovementMs={movementSpeedMs}");
             }
             return true;
+        }
+
+        if (movementSpeedViolationCheckConfig.Verbose) {
+            Console.WriteLine(
+                $"[GameWorldPlayer:{PlayerId}] Movement speed violation limit exhausted → paralysis. " +
+                $"deltaMs={deltaMs} minRequiredMs={minRequiredMs:F1} effectiveMovementMs={MovementSpeedMs} runningMode={runningMode} baseMovementMs={movementSpeedMs}");
         }
 
         return false;

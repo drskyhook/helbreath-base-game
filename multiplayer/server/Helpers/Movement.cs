@@ -326,7 +326,9 @@ public static class Movement {
         if (deltaMs > 0 && !playerConnection.CheckMovementSpeedViolation(deltaMs)) {
             var paralysisSeconds = wr.Settings.MovementSpeedViolationsChecker.ParalysisDuration;
             if (wr.Settings.MovementSpeedViolationsChecker.Verbose) {
-                Console.WriteLine($"[GameWorld:{wr.WorldId}] Erratic player movement speed detected for player {playerConnection.PlayerId}. Sending warning and applying {paralysisSeconds}s paralysis.");
+                Console.WriteLine(
+                    $"[GameWorld:{wr.WorldId}] Erratic player movement speed → paralysis {paralysisSeconds}s. player={playerConnection.PlayerId} " +
+                    $"deltaMs={deltaMs} minRequiredMs={playerConnection.GetMovementCadenceMinRequiredMs():F1} effectiveMovementMs={playerConnection.MovementSpeedMs} runningMode={playerConnection.RunningMode}");
             }
             playerConnection.SetServerForcedParalysisUntil(now.AddSeconds(paralysisSeconds));
             NetworkManager.SendToPlayer(playerConnection, NetworkManager.CreatePlayerParalyzed(paralysisSeconds));

@@ -544,12 +544,8 @@ export class GameWorld extends Scene {
         subscribeSafe('GameWorld', IN_UI_CHANGE_RUN_MODE, (enabled: boolean) => {
             if (this.player) {
                 const cur = this.player.getMovementSpeedMs();
-                if (enabled) {
-                    this.player.setMovementSpeed(Math.max(100, Math.round(cur / 2)));
-                } else {
-                    this.player.setMovementSpeed(Math.min(1000, cur * 2));
-                }
-                this.player.setRunMode(enabled);
+                const nextMs = enabled ? Math.max(100, Math.round(cur / 2)) : Math.min(1000, cur * 2);
+                this.player.setRunModeAndMovementSpeed(enabled, nextMs);
             }
             if (serverDialogStore.state.syncWithServer) {
                 getNetworkManager(this.game)?.requestPlayerMovementStateChange(enabled);
@@ -2806,8 +2802,7 @@ export class GameWorld extends Scene {
             }
             this.playersById.set(data.playerId, otherPlayer);
         } else {
-            otherPlayer.setMovementSpeed(movementSpeedMs);
-            otherPlayer.setRunMode(runningMode);
+            otherPlayer.setRunModeAndMovementSpeed(runningMode, movementSpeedMs);
             otherPlayer.setAttackMode(data.attackMode);
         }
 
@@ -2999,8 +2994,7 @@ export class GameWorld extends Scene {
             if (!this.player) {
                 return;
             }
-            this.player.setMovementSpeed(data.movementSpeedMs);
-            this.player.setRunMode(data.runningMode);
+            this.player.setRunModeAndMovementSpeed(data.runningMode, data.movementSpeedMs);
             return;
         }
 
@@ -3009,8 +3003,7 @@ export class GameWorld extends Scene {
             return;
         }
 
-        otherPlayer.setMovementSpeed(data.movementSpeedMs);
-        otherPlayer.setRunMode(data.runningMode);
+        otherPlayer.setRunModeAndMovementSpeed(data.runningMode, data.movementSpeedMs);
     }
 
     private handlePlayerAttackModeChanged(data: PlayerAttackModeChangedEventData): void {

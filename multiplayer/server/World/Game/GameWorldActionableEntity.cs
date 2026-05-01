@@ -66,9 +66,18 @@ public abstract class GameWorldActionableEntity : GameWorldEntity {
             c += kv.Value.CastSpeedModifier;
         }
 
+        var prevMovementSum = temporaryEffectMovementSpeedModifierSum;
         temporaryEffectMovementSpeedModifierSum = m;
         temporaryEffectAttackSpeedModifierSum = a;
         temporaryEffectCastSpeedModifierSum = c;
+
+        if (Math.Abs(prevMovementSum - m) > 1e-9) {
+            OnTemporaryEffectMovementSpeedModifierSumChanged();
+        }
+    }
+
+    /// <summary>Called after <see cref="temporaryEffectMovementSpeedModifierSum"/> changes. Players override to reset movement cadence.</summary>
+    protected virtual void OnTemporaryEffectMovementSpeedModifierSumChanged() {
     }
 
     /// <summary>Removes a temporary effect and cancels its expiry timer; optionally notifies viewers.</summary>

@@ -569,8 +569,10 @@ export class Player extends GameObject {
                 );
                 if (!wasInMovementState || movementTypeChanged) {
                     this.stopMovementSounds();
-                    this.playMovementLoopSoundFromMovementConfig();
                 }
+                // Always refresh loop timing (SoundTracker updates rate when interval unchanged but ms changed).
+                // Needed for same-state movement steps (Run→Run / walk→walk) after step duration or run/walk toggle.
+                this.playMovementLoopSoundFromMovementConfig();
                 break;
             }
             case PlayerState.Cast:
@@ -1186,7 +1188,8 @@ export class Player extends GameObject {
 
     /**
      * Gets movement config: state, duration, frame rate, sound key, and sound interval.
-     * Frame rate is derived from movement duration so the animation completes when the next cell is reached.
+     * Sprite frame rate uses the active step duration while mid-move so the cycle finishes at cell arrival.
+     * Footstep loop interval uses {@link movementSpeedMs} so run/walk toggles and speed changes apply immediately.
      */
     private getMovementConfig(): {
         state: PlayerState;
@@ -1195,23 +1198,23 @@ export class Player extends GameObject {
         soundKey: string;
         soundIntervalMs: number;
     } {
-        const stepMs = this.moving ? this.activeStepDurationMs : this.movementSpeedMs;
-        const frameRate = calculateFrameRateFromDuration(this.RUNNING_FRAME_COUNT, stepMs);
+        const stepMsForAnim = this.moving ? this.activeStepDurationMs : this.movementSpeedMs;
+        const frameRate = calculateFrameRateFromDuration(this.RUNNING_FRAME_COUNT, stepMsForAnim);
+        const soundFrameRate = calculateFrameRateFromDuration(this.RUNNING_FRAME_COUNT, this.movementSpeedMs);
+        const soundIntervalMs = calculateAnimationDuration(this.RUNNING_FRAME_COUNT, soundFrameRate) / 2;
         if (this.runMode) {
-            const soundIntervalMs = calculateAnimationDuration(this.RUNNING_FRAME_COUNT, frameRate) / 2;
             return {
                 state: PlayerState.Run,
-                movementSpeedMs: stepMs,
+                movementSpeedMs: stepMsForAnim,
                 frameRate,
                 soundKey: PLAYER_RUNNING,
                 soundIntervalMs,
             };
         }
-        const soundIntervalMs = calculateAnimationDuration(this.RUNNING_FRAME_COUNT, frameRate) / 2;
         const walkState = this.attackMode ? PlayerState.WalkCombatMode : PlayerState.WalkPeaceMode;
         return {
             state: walkState,
-            movementSpeedMs: stepMs,
+            movementSpeedMs: stepMsForAnim,
             frameRate,
             soundKey: PLAYER_WALKING,
             soundIntervalMs,
@@ -1224,6 +1227,19 @@ export class Player extends GameObject {
      */
     public setRunMode(enabled: boolean): void {
         this.runMode = enabled;
+        if (this.isInMovementState()) {
+            this.switchToMovement(true);
+        }
+    }
+
+    /**
+     * Sets run/walk mode and effective per-tile duration together (UI toggle, server movement-state sync).
+     * Single refresh avoids transient mismatch if {@link setMovementSpeed} and {@link setRunMode} run separately.
+     */
+    public setRunModeAndMovementSpeed(enabled: boolean, effectiveMovementSpeedMs: number): void {
+        const clampedMs = Phaser.Math.Clamp(effectiveMovementSpeedMs, 100, 1000);
+        this.runMode = enabled;
+        this.movementSpeedMs = clampedMs;
         if (this.isInMovementState()) {
             this.switchToMovement(true);
         }
@@ -2625,7 +2641,7 @@ export class Player extends GameObject {
      * Implements abstract method from GameObject to switch state.
      * When switching to Idle after reaching a cell with a queued cast, executes the cast instead.
      */
-    protected override switchState(state: GameObjectState, forceUpdate: boolean = false): void {
+    protected override switchState(state: GameObjectState, _forceUpdate: boolean = false): void {
         switch (state) {
             case GameObjectState.Idle:
                 if (this.queuedCastSpellId !== undefined) {
@@ -2640,10 +2656,13 @@ export class Player extends GameObject {
                 }
                 break;
             case GameObjectState.Move:
+                // Always refresh movement appearance each step: same PlayerState (e.g. Run→Run) when
+                // direction unchanged would otherwise skip applyStateAppearance, leaving animation FPS
+                // tied to the previous step (e.g. after run/walk toggle updates movementSpeedMs).
                 if (this.dashMode) {
-                    this.switchPlayerState(PlayerState.MeleeAttack, forceUpdate);
+                    this.switchPlayerState(PlayerState.MeleeAttack, true);
                 } else {
-                    this.switchToMovement(forceUpdate);
+                    this.switchToMovement(true);
                 }
                 break;
         }
@@ -2768,7 +2787,6 @@ export class Player extends GameObject {
         this.movementSpeedMs = clampedMs;
         if (this.isInMovementState()) {
             this.switchToMovement(true);
-            this.playMovementLoopSoundFromMovementConfig();
         }
     }
 
