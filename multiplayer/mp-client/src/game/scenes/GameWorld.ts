@@ -2228,59 +2228,67 @@ export class GameWorld extends Scene {
             return;
         }
 
-        const monster = new Monster(this, {
-            x: data.x,
-            y: data.y,
-            spriteName: visualSpriteName,
-            displayName: data.name,
-            direction: facing,
-            soundManager: this.soundManager,
-            map,
-            states: visualTemplate.states,
-            movementSpeedMs: data.movementSpeedMs,
-            attackSpeedMs: data.attackSpeedMs,
-            playerX: this.player.getWorldX(),
-            playerY: this.player.getWorldY(),
-            attackType: data.attackType as AttackType,
-            allegiance: data.allegiance as MonsterAllegiance,
-            hp: data.hp,
-            maxHp: data.maxHp,
-            attackDamage: data.attackDamage,
-            monsterId: data.monsterId,
-            temporalCoefficient: monsterTemplate.temporalCoefficient,
-            shadow: visualTemplate.shadow,
-            opacity: monsterTemplate.opacity,
-            height: monsterTemplate.height,
-            dead: data.dead,
-            state: data.state,
-        });
-        monster.setRemoteIdleContinuationGraceMs(serverDialogStore.state.gracePeriod);
-        monster.syncActiveTemporaryEffects(data.activeTemporaryEffects ?? []);
-        if (this.player && this.player.getAttackTarget() === monster && monster.hasInvisibilityBuff()) {
-            this.player.clearAttackTarget();
-        }
-        this.monsters.push(monster);
+        try {
+            const monster = new Monster(this, {
+                x: data.x,
+                y: data.y,
+                spriteName: visualSpriteName,
+                displayName: data.name,
+                direction: facing,
+                soundManager: this.soundManager,
+                map,
+                states: visualTemplate.states,
+                movementSpeedMs: data.movementSpeedMs,
+                attackSpeedMs: data.attackSpeedMs,
+                playerX: this.player.getWorldX(),
+                playerY: this.player.getWorldY(),
+                attackType: data.attackType as AttackType,
+                allegiance: data.allegiance as MonsterAllegiance,
+                hp: data.hp,
+                maxHp: data.maxHp,
+                attackDamage: data.attackDamage,
+                monsterId: data.monsterId,
+                temporalCoefficient: monsterTemplate.temporalCoefficient,
+                shadow: visualTemplate.shadow,
+                opacity: monsterTemplate.opacity,
+                height: monsterTemplate.height,
+                dead: data.dead,
+                state: data.state,
+            });
+            monster.setRemoteIdleContinuationGraceMs(serverDialogStore.state.gracePeriod);
+            monster.syncActiveTemporaryEffects(data.activeTemporaryEffects ?? []);
+            if (this.player && this.player.getAttackTarget() === monster && monster.hasInvisibilityBuff()) {
+                this.player.clearAttackTarget();
+            }
+            this.monsters.push(monster);
 
-        if (!concreteAssetsReady) {
-            loadMonsterAssetsOnDemand(this, data.sprite)
-                .then(() => {
-                    const currentMonster = this.monsters.find((entry) => entry.getMonsterId() === data.monsterId);
-                    if (!currentMonster) {
-                        return;
-                    }
-                    currentMonster.applyLoadedMonsterAssets({
-                        spriteName: data.sprite,
-                        states: monsterTemplate.states,
-                        shadow: monsterTemplate.shadow,
-                        height: monsterTemplate.height,
+            if (!concreteAssetsReady) {
+                loadMonsterAssetsOnDemand(this, data.sprite)
+                    .then(() => {
+                        const currentMonster = this.monsters.find((entry) => entry.getMonsterId() === data.monsterId);
+                        if (!currentMonster) {
+                            return;
+                        }
+                        currentMonster.applyLoadedMonsterAssets({
+                            spriteName: data.sprite,
+                            states: monsterTemplate.states,
+                            shadow: monsterTemplate.shadow,
+                            height: monsterTemplate.height,
+                        });
+                    })
+                    .catch((error) => {
+                        console.error(
+                            `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Failed to lazy-load monster assets for '${data.sprite}' (id=${data.monsterId})`,
+                            error,
+                        );
                     });
-                })
-                .catch((error) => {
-                    console.error(
-                        `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Failed to lazy-load monster assets for '${data.sprite}' (id=${data.monsterId})`,
-                        error,
-                    );
-                });
+            }
+
+        } catch (error) {
+            console.error(
+                `[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Failed to spawn monster '${data.sprite}' (id=${data.monsterId})`,
+                error,
+            );
         }
     }
 

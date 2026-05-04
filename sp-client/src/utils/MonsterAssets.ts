@@ -12,9 +12,18 @@ export function shouldLoadMonsterAssetsOnDemand(): boolean {
     return LOAD_MONSTER_ASSETS_ON_DEMAND;
 }
 
-/** Returns true when every sprite and sound required by this monster is available in Phaser caches. */
+/** True while {@link loadMonsterAssetsOnDemand} has an unresolved promise for this monster basename. */
+export function isMonsterAssetLoadInFlight(spriteName: string): boolean {
+    return monsterAssetLoadPromises.has(spriteName);
+}
+
+/**
+ * Returns true when every sprite and sound required by this monster is available in Phaser caches.
+ * During {@link HBSpriteFile.load}, sheet 0 can be registered before higher indices; while the load
+ * promise is unresolved, this returns false so callers keep the placeholder until the `.spr` is fully registered.
+ */
 export function areMonsterAssetsLoaded(scene: Scene, spriteName: string): boolean {
-    return getMonsterAssets(spriteName).every((asset) => {
+    const assetsRegistered = getMonsterAssets(spriteName).every((asset) => {
         switch (asset.assetType) {
             case AssetType.SPRITE:
                 return scene.textures.exists(`${asset.key}-0`);
@@ -24,6 +33,7 @@ export function areMonsterAssetsLoaded(scene: Scene, spriteName: string): boolea
                 return true;
         }
     });
+    return assetsRegistered && !isMonsterAssetLoadInFlight(spriteName);
 }
 
 /** Fetches, decodes, and registers one monster's sprite/sound assets for lazy rendering. */
@@ -42,8 +52,10 @@ export function loadMonsterAssetsOnDemand(scene: Scene, spriteName: string): Pro
             console.log(`[MonsterAssetLoader] Loaded monster assets for ${spriteName}`);
         })
         .catch((error) => {
-            monsterAssetLoadPromises.delete(spriteName);
             throw error;
+        })
+        .finally(() => {
+            monsterAssetLoadPromises.delete(spriteName);
         });
 
     monsterAssetLoadPromises.set(spriteName, promise);

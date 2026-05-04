@@ -842,57 +842,64 @@ export class GameWorld extends Scene {
             }
 
             // Create new monster at the movable location
-            const monster = new Monster(this, {
-                x: movableLocation.x,
-                y: movableLocation.y,
-                spriteName: visualSpriteName,
-                displayName: monsterData.name,
-                direction: data.direction,
-                hp: data.health,
-                maxHp: data.health,
-                attackDamage: data.damage,
-                soundManager: this.soundManager,
-                map,
-                states: visualTemplate.states,
-                movementSpeed: data.movementSpeed,
-                attackSpeed: data.attackSpeed,
-                player: this.player,
-                playerIsDead: this.player?.getIsDead() ?? false,
-                followDistance: data.followDistance,
-                attackDistance: data.attackDistance,
-                attackType: data.attackType,
-                corpseDecayTime: visualTemplate.corpseDecayTime,
-                monsterId,
-                temporalCoefficient: visualTemplate.temporalCoefficient,
-                shadow: visualTemplate.shadow,
-                opacity: visualTemplate.opacity,
-                height: visualTemplate.height,
-                bowAttack: visualTemplate.bowAttack,
-                transparency: data.transparency,
-                chilledEffect: data.chilledEffect,
-                berserkedEffect: data.berserkedEffect,
-            });
+            try {
+                const monster = new Monster(this, {
+                    x: movableLocation.x,
+                    y: movableLocation.y,
+                    spriteName: visualSpriteName,
+                    displayName: monsterData.name,
+                    direction: data.direction,
+                    hp: data.health,
+                    maxHp: data.health,
+                    attackDamage: data.damage,
+                    soundManager: this.soundManager,
+                    map,
+                    states: visualTemplate.states,
+                    movementSpeed: data.movementSpeed,
+                    attackSpeed: data.attackSpeed,
+                    player: this.player,
+                    playerIsDead: this.player?.getIsDead() ?? false,
+                    followDistance: data.followDistance,
+                    attackDistance: data.attackDistance,
+                    attackType: data.attackType,
+                    corpseDecayTime: visualTemplate.corpseDecayTime,
+                    monsterId,
+                    temporalCoefficient: visualTemplate.temporalCoefficient,
+                    shadow: visualTemplate.shadow,
+                    opacity: visualTemplate.opacity,
+                    height: visualTemplate.height,
+                    bowAttack: visualTemplate.bowAttack,
+                    transparency: data.transparency,
+                    chilledEffect: data.chilledEffect,
+                    berserkedEffect: data.berserkedEffect,
+                });
 
-            this.monsters.push(monster);
-            if (!concreteAssetsReady) {
-                loadMonsterAssetsOnDemand(this, data.spriteName)
-                    .then(() => {
-                        const currentMonster = this.monsters.find((entry) => entry.getMonsterId() === monsterId);
-                        if (!currentMonster) {
-                            return;
-                        }
-                        currentMonster.applyLoadedMonsterAssets({
-                            spriteName: data.spriteName,
-                            states: monsterData.states,
-                            shadow: monsterData.shadow,
-                            height: monsterData.height,
+                this.monsters.push(monster);
+                if (!concreteAssetsReady) {
+                    loadMonsterAssetsOnDemand(this, data.spriteName)
+                        .then(() => {
+                            const currentMonster = this.monsters.find((entry) => entry.getMonsterId() === monsterId);
+                            if (!currentMonster) {
+                                return;
+                            }
+                            currentMonster.applyLoadedMonsterAssets({
+                                spriteName: data.spriteName,
+                                states: monsterData.states,
+                                shadow: monsterData.shadow,
+                                height: monsterData.height,
+                            });
+                        })
+                        .catch((error) => {
+                            console.error(`[GameWorld] Failed to lazy-load monster assets for '${data.spriteName}' (id=${monsterId})`, error);
                         });
-                    })
-                    .catch((error) => {
-                        console.error(`[GameWorld] Failed to lazy-load monster assets for '${data.spriteName}' (id=${monsterId})`, error);
-                    });
+                }
+                console.log(`[GameWorld] Summoned ${data.spriteName} (ID: ${monsterId}) at (${movableLocation.x}, ${movableLocation.y}) with speed ${data.movementSpeed}, attack speed ${data.attackSpeed}, follow distance ${data.followDistance}, attack distance ${data.attackDistance}`);
+            } catch (error) {
+                console.error(
+                    `[GameWorld] Failed to summon monster '${data.spriteName}' (id=${monsterId})`,
+                    error,
+                );
             }
-            console.log(`[GameWorld] Summoned ${data.spriteName} (ID: ${monsterId}) at (${movableLocation.x}, ${movableLocation.y}) with speed ${data.movementSpeed}, attack speed ${data.attackSpeed}, follow distance ${data.followDistance}, attack distance ${data.attackDistance}`);
         });
 
         // Listen for summon NPC events from React
