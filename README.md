@@ -44,6 +44,7 @@ Play the live demos here:
 Projects that extend this codebase or took inspiration from it:
 
 - **[Helbreath.xyz](https://www.helbreath.xyz/)** — browser-based Helbreath MMORPG ([source on GitHub](https://github.com/juanrossi/helbreath))
+- **[Mobile mini game](https://doepiccoding.com/)**
 
 ## What This Is / Is Not
 
