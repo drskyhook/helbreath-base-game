@@ -15,8 +15,6 @@ import {
     FRAMES_UNTIL_OVERLAY_REMOVAL,
     GAME_STATS_UPDATE_INTERVAL_MS,
     LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND,
-    LOADING_OVERLAY_DEPTH,
-    LOADING_TEXT_DEPTH,
     MAP_OBJECT_COLLISION_ALPHA,
     MAP_OBJECT_COLLISION_GRID_RADIUS_CELLS,
     MAP_OBJECT_COLLISION_RADIUS_CELLS,
@@ -80,7 +78,9 @@ import {
     OUT_UI_HOVER_GROUND_ITEM_INFO,
     OUT_UI_HOVER_MONSTER,
     OUT_UI_SET_SELECTED_MUSIC,
-    OUT_MAP_LOADED
+    OUT_MAP_LOADED,
+    NATIVE_OVERLAY_MAP_LOADING_HIDDEN,
+    NATIVE_OVERLAY_MAP_LOADING_SHOWN,
 } from '../../constants/EventNames';
 import { AttackType, CastSpellEvent, Gender, MonsterAttackPlayerEvent, MonsterHoverInfo, SummonMonsterEvent, SummonNPCEvent } from '../../Types';
 import type { Effect } from '../../constants/Items';
@@ -113,10 +113,6 @@ export class GameWorld extends Scene {
     private inputManager: InputManager | undefined = undefined;
     /** Set of map objects that are currently colliding with the player */
     private collidingMapObjects: Set<GameAsset> = new Set();
-    /** Loading overlay rectangle - cleaned up after objects are loaded */
-    private loadingOverlay: Phaser.GameObjects.Rectangle | undefined = undefined;
-    /** Loading text - cleaned up after objects are loaded */
-    private loadingText: Phaser.GameObjects.Text | undefined = undefined;
     /** Whether scene initialization has started (deferred to first update) */
     private initializationStarted = false;
     /** Counter for frames to wait before removing overlay after camera restoration */
@@ -255,14 +251,7 @@ export class GameWorld extends Scene {
         }
         this.groundItems = [];
 
-        if (this.loadingOverlay) {
-            this.loadingOverlay.destroy();
-            this.loadingOverlay = undefined;
-        }
-        if (this.loadingText) {
-            this.loadingText.destroy();
-            this.loadingText = undefined;
-        }
+        this.hideNativeOverlayMapLoading();
 
         this.weatherManager?.destroy();
         this.weatherManager = undefined;
@@ -331,65 +320,26 @@ export class GameWorld extends Scene {
         this.mapManager = undefined;
     }
 
-    private handleOverlayUpdate(): void {
-        // Keep overlay on top every frame while it exists
-        if (this.loadingOverlay && this.loadingText) {
-            this.children.bringToTop(this.loadingOverlay);
-            this.children.bringToTop(this.loadingText);
-        }
+    private showNativeOverlayMapLoading(): void {
+        EventBus.emit(NATIVE_OVERLAY_MAP_LOADING_SHOWN, { text: 'Loading map...' });
+    }
 
-        // Check if we need to remove the overlay after waiting for frames
+    private hideNativeOverlayMapLoading(): void {
+        EventBus.emit(NATIVE_OVERLAY_MAP_LOADING_HIDDEN);
+    }
+
+    private handleOverlayUpdate(): void {
         if (this.framesUntilOverlayRemoval > 0) {
             this.framesUntilOverlayRemoval--;
             if (this.framesUntilOverlayRemoval === 0) {
-                // Remove loading overlay after waiting for frames
-                if (this.loadingOverlay) {
-                    this.loadingOverlay.destroy();
-                    this.loadingOverlay = undefined;
-                }
-                if (this.loadingText) {
-                    this.loadingText.destroy();
-                    this.loadingText = undefined;
-                }
+                this.hideNativeOverlayMapLoading();
             }
         }
     }
 
     private drawLoadingOverlay(callback: () => void): void {
-        // Create loading overlay FIRST, before any rendering
-        // Black overlay covering entire screen - fixed to camera viewport
-        this.loadingOverlay = this.add.rectangle(
-            this.scale.width / 2,
-            this.scale.height / 2,
-            this.scale.width,
-            this.scale.height,
-            0x000000,
-            1.0
-        );
-        this.loadingOverlay.setScrollFactor(0, 0);
-        this.loadingOverlay.setDepth(LOADING_OVERLAY_DEPTH);
-
-        // Loading text in RPG UI style - fixed to camera viewport
-        this.loadingText = this.add.text(
-            this.scale.width / 2,
-            this.scale.height / 2,
-            'Loading map...',
-            {
-                fontFamily: 'Georgia, serif',
-                fontSize: '20px',
-                color: '#f4e4c1',
-                fontStyle: 'bold',
-            }
-        );
-        this.loadingText.setOrigin(0.5, 0.5);
-        this.loadingText.setShadow(1, 1, '#1a0f0a', 2, true);
-        this.loadingText.setScrollFactor(0, 0);
-        this.loadingText.setDepth(LOADING_TEXT_DEPTH);
-
-        // Mark as started but defer actual loading to next frame so overlay renders first
         this.initializationStarted = true;
-
-        // Use delayedCall to start loading on next frame, ensuring overlay is visible
+        this.showNativeOverlayMapLoading();
         this.time.delayedCall(0, callback);
     }
 
@@ -617,25 +567,21 @@ export class GameWorld extends Scene {
     }
 
     private setupMapManager(): void {
-        let savedOverlayVisible = false;
-        let savedTextVisible = false;
+        let mapLoadingWasVisible = false;
         this.mapManager = new MapManager({
             scene: this,
             playMapMusic: this.playMapMusic,
             onBeforeSnapshot: () => {
-                savedOverlayVisible = this.loadingOverlay?.visible ?? false;
-                savedTextVisible = this.loadingText?.visible ?? false;
-                this.loadingOverlay?.setVisible(false);
-                this.loadingText?.setVisible(false);
+                mapLoadingWasVisible = this.loadingMap;
+                if (mapLoadingWasVisible) {
+                    this.hideNativeOverlayMapLoading();
+                }
             },
             onAfterSnapshot: () => {
-                if (this.loadingOverlay && savedOverlayVisible) {
-                    this.loadingOverlay.setVisible(true);
+                if (mapLoadingWasVisible) {
+                    this.showNativeOverlayMapLoading();
                 }
-                if (this.loadingText && savedTextVisible) {
-                    this.loadingText.setVisible(true);
-                }
-            }
+            },
         });
     }
 

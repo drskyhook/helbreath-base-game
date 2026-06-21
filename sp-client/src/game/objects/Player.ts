@@ -4,7 +4,7 @@ import { Direction, findMovableLocation, getDistance, getDirectionOffset, getNex
 import type { HBMap } from '../assets/HBMap';
 import type { Monster } from './Monster';
 import { ShadowManager } from '../../utils/ShadowManager';
-import { DEFAULT_MOVEMENT_SPEED, DEFAULT_PLAYER_ATTACK_RANGE, DEFAULT_PLAYER_ATTACK_SPEED, HIGH_DEPTH, PLAYER_HEALTH_BAR_HEIGHT, PLAYER_HEALTH_BAR_WIDTH, PLAYER_STUNLOCK_DURATION_MS } from '../../Config';
+import { DEFAULT_MOVEMENT_SPEED, DEFAULT_PLAYER_ATTACK_RANGE, DEFAULT_PLAYER_ATTACK_SPEED, PLAYER_HEALTH_BAR_HEIGHT, PLAYER_HEALTH_BAR_WIDTH, PLAYER_STUNLOCK_DURATION_MS } from '../../Config';
 import { TILE_SIZE } from '../assets/HBMap';
 import { CriticalStrikeProjectile } from '../effects/CriticalStrikeProjectile';
 import { ArrowProjectile } from '../effects/ArrowProjectile';
@@ -19,7 +19,7 @@ import { mapDialogStore } from '../../ui/store/MapDialog.store';
 import { playerDialogStore } from '../../ui/store/PlayerDialog.store';
 import { PLAYER_RUNNING, PLAYER_WALKING, PLAYER_MELEE_ATTACK, PLAYER_TAKE_UNARMED_DAMAGE, PLAYER_CAST, MALE_CRITICAL_ATTACK, FEMALE_CRITICAL_ATTACK, MALE_DEATH, FEMALE_DEATH } from '../../constants/SoundFileNames';
 import { EventBus } from '../EventBus';
-import { PLAYER_POSITION_CHANGED, OUT_UI_PLAYER_DIED, OUT_UI_CAST_STARTED, OUT_UI_CAST_READY, OUT_UI_CAST_REMOVED, PLAYER_CONFIRM_SPELL_TARGET, EQUIP_ITEM, IN_UI_CHANGE_GENDER, IN_UI_CHANGE_SKIN_COLOR, IN_UI_CHANGE_UNDERWEAR_COLOR, IN_UI_CHANGE_HAIR_STYLE, ITEM_PICKUP_ATTEMPTED } from '../../constants/EventNames';
+import { PLAYER_POSITION_CHANGED, OUT_UI_PLAYER_DIED, OUT_UI_CAST_STARTED, OUT_UI_CAST_READY, OUT_UI_CAST_REMOVED, PLAYER_CONFIRM_SPELL_TARGET, EQUIP_ITEM, IN_UI_CHANGE_GENDER, IN_UI_CHANGE_SKIN_COLOR, IN_UI_CHANGE_UNDERWEAR_COLOR, IN_UI_CHANGE_HAIR_STYLE, ITEM_PICKUP_ATTEMPTED, NATIVE_OVERLAY_HEALTH_BAR_HIDDEN, NATIVE_OVERLAY_HEALTH_BAR_UPDATED } from '../../constants/EventNames';
 import { AttackType, Gender, SkinColor } from '../../Types';
 import { calculateAnimationDuration, calculateFrameRateFromDuration } from '../../utils/AnimationUtils';
 import { FloatingText } from '../effects/FloatingText';
@@ -118,9 +118,6 @@ export class Player extends GameObject {
     /** Whether the player is dead (in Die state) */
     private isDead: boolean = false;
 
-    /** Health bar graphics - 30px wide, 2 cells above player when alive */
-    private healthBarGraphics: Phaser.GameObjects.Graphics;
-
     /** Accumulator for STAR_TWINKLE spawn interval (ms). Spawns sparkles above player when equipped. */
     private starTwinkleAccumulatorMs: number = 0;
 
@@ -199,9 +196,6 @@ export class Player extends GameObject {
 
         // Load GameStateManager from registry
         this.gameStateManager = getGameStateManager(this.scene.game);
-
-        // Create health bar (20px wide, 2 cells above player when alive)
-        this.healthBarGraphics = this.scene.add.graphics().setVisible(false);
 
         // Listen for gender change from UI
         this.genderChangeHandler = (gender: Gender) => {
@@ -1229,7 +1223,7 @@ export class Player extends GameObject {
      */
     public override update(delta: number): void {
         if (this.isDead) {
-            this.healthBarGraphics.setVisible(false);
+            EventBus.emit(NATIVE_OVERLAY_HEALTH_BAR_HIDDEN);
             const accessoryAssetIndex = this.appearanceManager.getAccessoryAssetIndex();
             if (accessoryAssetIndex >= 0 &&
                 this.appearanceManager.hasAccessory() &&
@@ -1414,29 +1408,27 @@ export class Player extends GameObject {
     }
 
     /**
-     * Renders the health bar 2 cells above the player.
+     * Renders the health bar anchored to the camera viewport center (local player only).
      */
     private updateHealthBar(): void {
-        const centerX = this.getAnimatedPixelX();
-        const centerY = this.getAnimatedPixelY() - 2 * TILE_SIZE - 10;
-        const left = centerX - PLAYER_HEALTH_BAR_WIDTH / 2;
+        const camera = this.scene.cameras.main;
+        const zoom = camera.zoom || 1;
+        const hpRatio = Phaser.Math.Clamp(this.hp / this.maxHp, 0, 1);
 
-        this.healthBarGraphics.setVisible(true);
-        this.healthBarGraphics.setDepth(HIGH_DEPTH);
-        this.healthBarGraphics.clear();
+        EventBus.emit(NATIVE_OVERLAY_HEALTH_BAR_UPDATED, {
+            centerX: Math.round(camera.x + camera.width / 2),
+            centerY: Math.round(camera.y + camera.height / 2 - (2 * TILE_SIZE + 10) * zoom),
+            width: PLAYER_HEALTH_BAR_WIDTH * zoom,
+            height: PLAYER_HEALTH_BAR_HEIGHT * zoom,
+            hpRatio,
+            trackColor: '#333333',
+            fillColor: '#ff0000',
+            borderColor: '#660000',
+        });
+    }
 
-        // Background (dark)
-        this.healthBarGraphics.fillStyle(0x333333, 1);
-        this.healthBarGraphics.fillRect(left, centerY - PLAYER_HEALTH_BAR_HEIGHT / 2, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT);
-
-        // Fill (red, proportional to hp/maxHp)
-        const fillWidth = Math.max(0, PLAYER_HEALTH_BAR_WIDTH * (this.hp / this.maxHp));
-        this.healthBarGraphics.fillStyle(0xff0000, 1);
-        this.healthBarGraphics.fillRect(left, centerY - PLAYER_HEALTH_BAR_HEIGHT / 2, fillWidth, PLAYER_HEALTH_BAR_HEIGHT);
-
-        // Dark red border
-        this.healthBarGraphics.lineStyle(1, 0x660000, 1);
-        this.healthBarGraphics.strokeRect(left, centerY - PLAYER_HEALTH_BAR_HEIGHT / 2, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT);
+    private hideHealthBar(): void {
+        EventBus.emit(NATIVE_OVERLAY_HEALTH_BAR_HIDDEN);
     }
 
     /**
@@ -1540,7 +1532,7 @@ export class Player extends GameObject {
             EventBus.off(IN_UI_CHANGE_HAIR_STYLE, this.hairStyleChangeHandler);
         }
         this.destroyCastingCircleEffect();
-        this.healthBarGraphics.destroy();
+        this.hideHealthBar();
         super.destroy();
     }
 }

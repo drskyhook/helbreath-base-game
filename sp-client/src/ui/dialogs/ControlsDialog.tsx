@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { useStore } from '@tanstack/react-store';
 import { DraggableDialog } from './DraggableDialog';
 import { RpgButton } from '../components/RpgButton';
@@ -13,10 +12,11 @@ import { toggleMonsterDialog, setMonsterDialogOpen } from '../store/MonsterDialo
 import { toggleNPCDialog, setNPCDialogOpen } from '../store/NPCDialog.store';
 import { toggleEffectDialog, setEffectDialogOpen } from '../store/EffectDialog.store';
 import { toggleCastDialog, setCastDialogOpen } from '../store/CastDialog.store';
-import { controlsDialogStore, setIsFullscreen, setControlsDialogOpen } from '../store/ControlsDialog.store';
+import { controlsDialogStore, setControlsDialogOpen } from '../store/ControlsDialog.store';
 import { togglePlayerDialog, setPlayerDialogOpen } from '../store/PlayerDialog.store';
 import { toggleInventoryDialog, setInventoryDialogOpen } from '../store/InventoryDialog.store';
 import { toggleItemDialog, setItemDialogOpen } from '../store/ItemDialog.store';
+import { togglePhaserFullscreen } from '../../utils/RendererUtils';
 interface ControlsDialogProps {
     position: { x: number; y: number };
     phaserRef: React.RefObject<IRefPhaserGame | null>;
@@ -32,78 +32,9 @@ export function ControlsDialog({
 }: ControlsDialogProps) {
     const isFullscreen = useStore(controlsDialogStore, (state) => state.isFullscreen);
     const minimapAvailable = useStore(minimapDialogStore, (state) => state.minimapAvailable);
-    const fullscreenResizeHandler = useRef<(() => void) | undefined>(undefined);
-    const fullscreenHandlersBound = useRef(false);
 
     const toggleFullscreen = () => {
-        const game = phaserRef.current?.game;
-
-        if (!game) {
-            return;
-        }
-
-        const container = document.getElementById('game-container');
-        const canvas = game.canvas;
-        const baseWidth = Number(game.config.width);
-        const baseHeight = Number(game.config.height);
-
-        const applyFullscreenScale = () => {
-            const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight);
-            canvas.style.width = `${baseWidth}px`;
-            canvas.style.height = `${baseHeight}px`;
-            canvas.style.position = 'absolute';
-            canvas.style.left = '50%';
-            canvas.style.top = '50%';
-            canvas.style.margin = '0';
-            canvas.style.transformOrigin = 'center center';
-            canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
-        };
-
-        const clearFullscreenScale = () => {
-            container?.classList.remove('fullscreen');
-            canvas.classList.remove('fullscreen');
-            canvas.style.removeProperty('width');
-            canvas.style.removeProperty('height');
-            canvas.style.removeProperty('position');
-            canvas.style.removeProperty('left');
-            canvas.style.removeProperty('top');
-            canvas.style.removeProperty('margin');
-            canvas.style.removeProperty('transform');
-            canvas.style.removeProperty('transform-origin');
-            if (fullscreenResizeHandler.current) {
-                window.removeEventListener('resize', fullscreenResizeHandler.current);
-                fullscreenResizeHandler.current = undefined;
-            }
-        };
-
-        if (!fullscreenHandlersBound.current) {
-            game.scale.on('enterfullscreen', () => {
-                container?.classList.add('fullscreen');
-                canvas.classList.add('fullscreen');
-                applyFullscreenScale();
-                fullscreenResizeHandler.current = applyFullscreenScale;
-                window.addEventListener('resize', applyFullscreenScale);
-                setIsFullscreen(true);
-            });
-
-            game.scale.on('leavefullscreen', () => {
-                clearFullscreenScale();
-                setIsFullscreen(false);
-            });
-
-            fullscreenHandlersBound.current = true;
-        }
-
-        if (game.scale.isFullscreen) {
-            game.scale.stopFullscreen();
-            clearFullscreenScale();
-        } else {
-            if (container) {
-                game.scale.startFullscreen(container);
-            } else {
-                game.scale.startFullscreen();
-            }
-        }
+        togglePhaserFullscreen(phaserRef.current?.game);
     };
 
     const handleLogOut = () => {

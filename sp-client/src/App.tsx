@@ -586,6 +586,7 @@ function App()
                     <CameraDialog
                         position={cameraDialogPosition}
                         onClose={() => setCameraDialogOpen(false)}
+                        phaserRef={phaserRef}
                         zIndex={cameraDialogZIndex}
                         onBringToFront={() => bringDialogToFront('camera-dialog')}
                     />

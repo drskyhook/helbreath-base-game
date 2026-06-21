@@ -23,7 +23,8 @@ const config = {
     },
     scale: {
         mode: Scale.NONE,
-        autoCenter: Scale.CENTER_BOTH
+        autoCenter: Scale.CENTER_BOTH,
+        fullscreenTarget: 'game-wrapper',
     },
     pipeline: { FXAAPostFX } as unknown as Phaser.Types.Core.PipelineConfig,
     scene: [

@@ -2,6 +2,9 @@ import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
 import StartGame from './game/main';
 import { EventBus } from './game/EventBus';
 import { CURRENT_SCENE_READY } from './constants/EventNames';
+import { NativeOverlayCanvas } from './ui/overlays/NativeOverlayCanvas';
+import { applyGameWindowSizePercent } from './utils/RendererUtils';
+import { getGameWindowSizePercent } from './ui/store/CameraDialog.store';
 
 export interface IRefPhaserGame
 {
@@ -24,6 +27,7 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(function PhaserGame
         {
 
             game.current = StartGame("game-container");
+            applyGameWindowSizePercent(getGameWindowSizePercent(), game.current);
 
             if (typeof ref === 'function')
             {
@@ -162,7 +166,10 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(function PhaserGame
     }, [currentActiveScene, ref]);
 
     return (
-        <div id="game-container"></div>
+        <div id="game-wrapper">
+            <div id="game-container"></div>
+            <NativeOverlayCanvas gameRef={game} />
+        </div>
     );
 
 });

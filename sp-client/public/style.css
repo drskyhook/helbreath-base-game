@@ -75,9 +75,128 @@ body::before {
     align-items: center;
 }
 
-#game-container {
+#game-wrapper {
     width: 100%;
     height: 100%;
+    position: relative;
+}
+
+#game-wrapper.fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+}
+
+#game-container {
+    --game-window-scale: 1;
+    --game-canvas-base-width: 1024px;
+    --game-canvas-base-height: 576px;
+    --game-canvas-display-width: 1024px;
+    --game-canvas-display-height: 576px;
+    width: 100%;
+    height: 100%;
+}
+
+.native-overlay-background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 8999;
+    pointer-events: none;
+    object-fit: cover;
+    user-select: none;
+}
+
+.native-overlay-loading-progress {
+    position: absolute;
+    z-index: 9001;
+    pointer-events: none;
+    box-sizing: content-box;
+    border: 2px solid #704214;
+    background: #2d1810;
+    overflow: hidden;
+}
+
+.native-overlay-loading-progress-fill {
+    height: 100%;
+    background: #d4af37;
+}
+
+.native-overlay-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 9000;
+    pointer-events: none;
+}
+
+.native-overlay-login-button {
+    position: absolute;
+    z-index: 9002;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 2px solid #704214;
+    border-radius: 0;
+    background: #8b5a2b;
+    color: #f4e4c1;
+    font-family: Georgia, serif;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px #1a0f0a;
+    cursor: pointer;
+}
+
+.native-overlay-login-title {
+    position: absolute;
+    z-index: 9002;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.native-overlay-login-title__main {
+    margin: 0;
+    font-family: Georgia, serif;
+    font-weight: 700;
+    color: #d4af37;
+    text-shadow: 2px 2px 3px #1a0f0a;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.native-overlay-login-title__subtitle {
+    margin: 0;
+    font-family: Georgia, serif;
+    font-weight: 400;
+    color: #d4af37;
+    text-shadow: 1px 1px 2px #1a0f0a;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.native-overlay-login-button:hover {
+    border-color: #d4af37;
+    color: #f4d03f;
+}
+
+.native-overlay-login-button:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+}
+
+#game-container:not(.fullscreen) canvas {
+    width: var(--game-canvas-display-width);
+    width: calc(var(--game-canvas-base-width) * var(--game-window-scale));
+    height: var(--game-canvas-display-height);
+    height: calc(var(--game-canvas-base-height) * var(--game-window-scale));
 }
 
 #game-container canvas {

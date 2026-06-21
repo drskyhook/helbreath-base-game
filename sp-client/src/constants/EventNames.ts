@@ -165,3 +165,29 @@ export const OUT_UI_MINIMAP_CAPTURED = 'ui-minimap-captured';
 export const OUT_UI_MINIMAP_LOADING = 'ui-minimap-loading';
 export const OUT_UI_PLAYER_DIED = 'player-died';
 export const OUT_MAP_LOADED = 'map-loaded';
+
+/** Native overlay: floating damage/spell text rendered above Phaser at device resolution. */
+export const NATIVE_OVERLAY_FLOATING_TEXT_REQUESTED = 'native-overlay-floating-text-requested';
+
+/** Native overlay: player HP bar updated/hidden. */
+export const NATIVE_OVERLAY_HEALTH_BAR_UPDATED = 'native-overlay-health-bar-updated';
+export const NATIVE_OVERLAY_HEALTH_BAR_HIDDEN = 'native-overlay-health-bar-hidden';
+
+/** Native overlay: asset loading screen background and progress. */
+export const NATIVE_OVERLAY_LOADING_SCREEN_SHOWN = 'native-overlay-loading-screen-shown';
+export const NATIVE_OVERLAY_LOADING_SCREEN_PROGRESS = 'native-overlay-loading-screen-progress';
+export const NATIVE_OVERLAY_LOADING_SCREEN_HIDDEN = 'native-overlay-loading-screen-hidden';
+
+/** Native overlay: login screen background image. */
+export const NATIVE_OVERLAY_LOGIN_BACKGROUND_SHOWN = 'native-overlay-login-background-shown';
+export const NATIVE_OVERLAY_LOGIN_BACKGROUND_HIDDEN = 'native-overlay-login-background-hidden';
+
+/** Emitted when the native overlay Log in button is clicked on the login screen. */
+export const NATIVE_OVERLAY_LOGIN_REQUESTED = 'native-overlay-login-requested';
+
+/** Native overlay: in-game map loading fullscreen message. */
+export const NATIVE_OVERLAY_MAP_LOADING_SHOWN = 'native-overlay-map-loading-shown';
+export const NATIVE_OVERLAY_MAP_LOADING_HIDDEN = 'native-overlay-map-loading-hidden';
+
+/** Native overlay: request bounds resync after CSS scale or fullscreen layout change. */
+export const NATIVE_OVERLAY_RESIZE_REQUESTED = 'native-overlay-resize-requested';

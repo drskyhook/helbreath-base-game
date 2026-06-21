@@ -7,12 +7,15 @@ import { RpgHorizontalSeparator } from '../components/RpgHorizontalSeparator';
 import { RpgSlider } from '../components/RpgSlider';
 import { EventBus } from '../../game/EventBus';
 import { convertPixelPosToWorldPos } from '../../utils/CoordinateUtils';
-import { cameraDialogStore, setCameraZoom, setFollowPlayer, setCameraShake, setPostProcessing } from '../store/CameraDialog.store';
+import { cameraDialogStore, setCameraZoom, setFollowPlayer, setCameraShake, setPostProcessing, setGameWindowSizePercent, MIN_GAME_WINDOW_SIZE_PERCENT, MAX_GAME_WINDOW_SIZE_PERCENT } from '../store/CameraDialog.store';
 import { IN_UI_CAMERA_MOVE_UP, IN_UI_CAMERA_MOVE_DOWN, IN_UI_CAMERA_MOVE_LEFT, IN_UI_CAMERA_MOVE_RIGHT } from '../../constants/EventNames';
+import { applyGameWindowSizePercent } from '../../utils/RendererUtils';
+import type { IRefPhaserGame } from '../../PhaserGame';
 
 interface CameraDialogProps {
     position: { x: number; y: number };
     onClose: () => void;
+    phaserRef: React.RefObject<IRefPhaserGame | null>;
     zIndex?: number;
     onBringToFront?: () => void;
 }
@@ -20,6 +23,7 @@ interface CameraDialogProps {
 export function CameraDialog({
     position,
     onClose,
+    phaserRef,
     zIndex,
     onBringToFront,
 }: CameraDialogProps) {
@@ -31,6 +35,7 @@ export function CameraDialog({
     const followPlayer = useStore(cameraDialogStore, (state) => state.followPlayer);
     const cameraShake = useStore(cameraDialogStore, (state) => state.cameraShake);
     const postProcessing = useStore(cameraDialogStore, (state) => state.postProcessing);
+    const gameWindowSizePercent = useStore(cameraDialogStore, (state) => state.gameWindowSizePercent);
 
     // Camera movement handlers with continuous scrolling support
     const cameraIntervalRef = useRef<number | undefined>(undefined);
@@ -89,6 +94,11 @@ export function CameraDialog({
                 setPostProcessing(value);
                 break;
         }
+    };
+
+    const handleGameWindowSizeChange = (value: number[]) => {
+        const savedPercent = setGameWindowSizePercent(value[0]);
+        applyGameWindowSizePercent(savedPercent, phaserRef.current?.game);
     };
 
     return (
@@ -248,6 +258,19 @@ export function CameraDialog({
                     <option value="none">None</option>
                     <option value="fxaa">FXAA</option>
                 </select>
+            </div>
+            
+            <RpgHorizontalSeparator />
+            
+            <div className="rpg-section-title">Game window size: {gameWindowSizePercent}%</div>
+            <div className="rpg-zoom-container">
+                <RpgSlider
+                    value={[gameWindowSizePercent]}
+                    onValueChange={handleGameWindowSizeChange}
+                    min={MIN_GAME_WINDOW_SIZE_PERCENT}
+                    max={MAX_GAME_WINDOW_SIZE_PERCENT}
+                    step={1}
+                />
             </div>
             
             <RpgHorizontalSeparator />
