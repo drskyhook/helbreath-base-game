@@ -13,6 +13,31 @@ import {
 
 export type PostProcessingMode = 'none' | 'fxaa';
 
+export const MIN_GAME_WINDOW_SIZE_PERCENT = 100;
+export const MAX_GAME_WINDOW_SIZE_PERCENT = 200;
+export const DEFAULT_GAME_WINDOW_SIZE_PERCENT = 100;
+
+const GAME_WINDOW_SIZE_STORAGE_KEY = 'mp-client-game-window-size-percent';
+
+function clampGameWindowSizePercent(percent: number): number {
+    return Math.min(MAX_GAME_WINDOW_SIZE_PERCENT, Math.max(MIN_GAME_WINDOW_SIZE_PERCENT, Math.round(percent)));
+}
+
+function loadGameWindowSizePercent(): number {
+    try {
+        const stored = localStorage.getItem(GAME_WINDOW_SIZE_STORAGE_KEY);
+        if (stored !== null) {
+            const parsed = Number.parseInt(stored, 10);
+            if (Number.isFinite(parsed)) {
+                return clampGameWindowSizePercent(parsed);
+            }
+        }
+    } catch (error) {
+        console.warn('[CameraDialog.store] Failed to load game window size:', error);
+    }
+    return DEFAULT_GAME_WINDOW_SIZE_PERCENT;
+}
+
 export interface PlayerPosition {
     sceneX: number | undefined; 
     sceneY: number | undefined; 
@@ -29,6 +54,7 @@ interface CameraDialogState {
     followPlayer: boolean;
     cameraShake: boolean;
     postProcessing: PostProcessingMode;
+    gameWindowSizePercent: number;
 }
 
 const initialState: CameraDialogState = {
@@ -45,6 +71,7 @@ const initialState: CameraDialogState = {
     followPlayer: true,
     cameraShake: true,
     postProcessing: 'none',
+    gameWindowSizePercent: loadGameWindowSizePercent(),
 };
 
 const { store: cameraDialogStore, toggle: toggleCameraDialog, setOpen: setCameraDialogOpen } =
@@ -81,6 +108,21 @@ export const setPostProcessing = (mode: PostProcessingMode, notifyPhaser = true)
     if (notifyPhaser) {
         EventBus.emit(IN_UI_CHANGE_POST_PROCESSING, mode);
     }
+};
+
+export const getGameWindowSizePercent = (): number => {
+    return cameraDialogStore.state.gameWindowSizePercent;
+};
+
+export const setGameWindowSizePercent = (percent: number): number => {
+    const clamped = clampGameWindowSizePercent(percent);
+    cameraDialogStore.setState((state) => ({ ...state, gameWindowSizePercent: clamped }));
+    try {
+        localStorage.setItem(GAME_WINDOW_SIZE_STORAGE_KEY, String(clamped));
+    } catch (error) {
+        console.warn('[CameraDialog.store] Failed to save game window size:', error);
+    }
+    return clamped;
 };
 
 // Initialize EventBus listeners to update state when emitted from Phaser

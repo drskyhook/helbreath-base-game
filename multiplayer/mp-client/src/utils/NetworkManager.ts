@@ -137,8 +137,8 @@ import {
     SPELL_CAST_CANCELLED_RECEIVED,
     SPELL_CAST_FAILED_RECEIVED,
     SPELL_CAST_STARTED_RECEIVED,
-    TOAST_DISMISS_LOGOUT_COUNTDOWN,
     TOAST_REQUESTED,
+    OUT_UI_LOGOUT_COUNTDOWN_CHANGED,
     TEMPORARY_EFFECT_APPLIED_FOR_PLAYER_RECEIVED,
     TEMPORARY_EFFECT_EXPIRED_FOR_PLAYER_RECEIVED,
     TEMPORARY_EFFECT_APPLIED_FOR_MONSTER_RECEIVED,
@@ -938,12 +938,16 @@ export class NetworkManager {
     }
 
     private clearLogoutCountdown(): void {
-        EventBus.emit(TOAST_DISMISS_LOGOUT_COUNTDOWN);
         if (this.logoutIntervalId) {
             clearInterval(this.logoutIntervalId);
             this.logoutIntervalId = undefined;
         }
-        setLogoutSecondsRemaining(undefined);
+        this.syncLogoutCountdownUi(undefined);
+    }
+
+    private syncLogoutCountdownUi(secondsRemaining: number | undefined): void {
+        setLogoutSecondsRemaining(secondsRemaining);
+        EventBus.emit(OUT_UI_LOGOUT_COUNTDOWN_CHANGED, { secondsLeft: secondsRemaining });
     }
 
     public cancelLogout(): void {
@@ -2476,19 +2480,12 @@ export class NetworkManager {
     private handleLogoutResponse(data: { wait: number }): void {
         const waitSeconds = data.wait;
         if (waitSeconds > 0) {
-            const toastEvent: ToastRequestedEvent = {
-                message: `Logging out in ${waitSeconds} seconds.`,
-                severity: 'info',
-                autoClose: waitSeconds * 1000,
-                trackForLogoutDismiss: true,
-            };
-            EventBus.emit(TOAST_REQUESTED, toastEvent);
             let remaining = waitSeconds;
-            setLogoutSecondsRemaining(remaining);
+            this.syncLogoutCountdownUi(remaining);
             this.logoutIntervalId = setInterval(() => {
                 runSafeSync('NetworkManager:logoutCountdown', () => {
                     remaining -= 1;
-                    setLogoutSecondsRemaining(remaining > 0 ? remaining : undefined);
+                    this.syncLogoutCountdownUi(remaining > 0 ? remaining : undefined);
                     if (remaining <= 0) {
                         this.clearLogoutCountdown();
                         this.logoutPending = false;

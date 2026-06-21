@@ -156,6 +156,12 @@ import {
     OUT_UI_SET_SELECTED_MUSIC,
     OUT_UI_SET_SELECTED_MAP,
     OUT_MAP_LOADED,
+    OUT_UI_LOGOUT_COUNTDOWN_CHANGED,
+    NATIVE_OVERLAY_HEALTH_BAR_HIDDEN,
+    NATIVE_OVERLAY_LOGOUT_COUNTDOWN_HIDDEN,
+    NATIVE_OVERLAY_LOGOUT_COUNTDOWN_UPDATED,
+    NATIVE_OVERLAY_MAP_LOADING_HIDDEN,
+    NATIVE_OVERLAY_MAP_LOADING_SHOWN,
     OUT_WEATHER_SYNCED,
     type PlayerItemAppearancePrefetchEventData,
 } from '../../constants/EventNames';
@@ -220,7 +226,6 @@ import { setDeathDialogOpen } from '../../ui/store/DeathDialog.store';
 import { mapDialogStore, syncWeather, type WeatherMode } from '../../ui/store/MapDialog.store';
 import { serverDialogStore } from '../../ui/store/ServerDialog.store';
 import { performLogoutCleanup } from '../../utils/LogoutUtils';
-import { LoadingOverlayController } from '../../utils/LoadingOverlayController';
 import {
     getGroundItemUnderPointer,
     getMonsterUnderWorldPixel,
@@ -266,8 +271,19 @@ export class GameWorld extends Scene {
     private inputManager: InputManager | undefined = undefined;
     /** Set of map objects that are currently colliding with the player */
     private collidingMapObjects: Set<GameAsset> = new Set();
-    /** Full-screen loading UI during map load and minimap capture. */
-    private loadingOverlayController: LoadingOverlayController | undefined = undefined;
+    private logoutCountdownSeconds: number | undefined = undefined;
+
+    private readonly logoutCountdownChangedHandler = (payload: { secondsLeft?: number }): void => {
+        runSafeSync('GameWorld:logoutCountdownChanged', () => {
+            const secondsLeft = payload.secondsLeft;
+            if (secondsLeft === undefined || secondsLeft <= 0) {
+                this.hideLogoutCountdownOverlay();
+            } else {
+                this.showOrUpdateLogoutCountdownOverlay(secondsLeft);
+            }
+        });
+    };
+
     /** Whether scene initialization has started (deferred to first update) */
     private initializationStarted = false;
     /** Map manager - handles map loading, rendering, and minimap capture */
@@ -364,8 +380,6 @@ export class GameWorld extends Scene {
             this.initializationStarted = false;
             this.loadingMap = true;
 
-            this.loadingOverlayController = new LoadingOverlayController(this);
-
             this.weatherManager = new WeatherManager(this, this.soundManager);
             const snapshotWeather = this.initialGameWorldState?.weather;
             const weather = snapshotWeather ?? mapDialogStore.state.weather;
@@ -387,6 +401,7 @@ export class GameWorld extends Scene {
             this.setupMonsterEventListeners();
             this.setupInputManager();
             this.setupCameraStatsUpdateInterval();
+            EventBus.on(OUT_UI_LOGOUT_COUNTDOWN_CHANGED, this.logoutCountdownChangedHandler);
             EventBus.on(PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED, this.playerItemAppearancePrefetchHandler);
 
             this.events.once('shutdown', () => {
@@ -409,31 +424,11 @@ export class GameWorld extends Scene {
     }
 
     private setupMapManager(): void {
-        let savedOverlayVisible = false;
-        let savedTextVisible = false;
         this.mapManager = new MapManager({
             scene: this,
             initialMapName: this.initialGameWorldState?.mapName,
             initialMusicFile: this.initialGameWorldState?.musicFile,
             playMapMusic: this.playMapMusic,
-            onBeforeSnapshot: () => {
-                const overlay = this.loadingOverlayController?.getOverlay();
-                const text = this.loadingOverlayController?.getText();
-                savedOverlayVisible = overlay?.visible ?? false;
-                savedTextVisible = text?.visible ?? false;
-                overlay?.setVisible(false);
-                text?.setVisible(false);
-            },
-            onAfterSnapshot: () => {
-                const overlay = this.loadingOverlayController?.getOverlay();
-                const text = this.loadingOverlayController?.getText();
-                if (overlay && savedOverlayVisible) {
-                    overlay.setVisible(true);
-                }
-                if (text && savedTextVisible) {
-                    text.setVisible(true);
-                }
-            }
         });
     }
 
@@ -1052,7 +1047,7 @@ export class GameWorld extends Scene {
         this.inputManager = new InputManager({
             scene: this,
             isEnabled: () => !this.loadingMap,
-            acceptLeftMouseDown: () => this.loadingOverlayController?.getOverlay() === undefined,
+            acceptLeftMouseDown: () => !this.loadingMap,
             onPointerMove: (worldPixelX, worldPixelY) => {
                 this.getCurrentMap().updateHoverCell(this, worldPixelX, worldPixelY);
             },
@@ -1607,12 +1602,9 @@ export class GameWorld extends Scene {
         this.cameraManager?.setZoom(cameraZoom);
         console.log(`[GameWorld${this.gameWorldId ? `:${this.gameWorldId}` : ''}] Applied saved camera zoom after minimap snapshot:`, savedCameraZoom, '% =', cameraZoom);
 
-        // Defer overlay removal using frame-based approach
-        // Wait many frames after camera restoration to ensure no flash is visible
-        this.loadingOverlayController?.scheduleRemovalAfterMapReady();
-
         // Map has been fully loaded
         this.loadingMap = false;
+        this.hideNativeOverlayMapLoading();
         this.syncMonstersFromNetworkState();
         this.syncNpcsFromNetworkState();
         this.syncGroundStatesFromNetworkState();
@@ -1823,13 +1815,36 @@ export class GameWorld extends Scene {
     }
 
     private handleOverlayUpdate(): void {
-        this.loadingOverlayController?.bringToTop();
-        this.loadingOverlayController?.tickRemovalCountdown();
+        if (this.loadingMap) {
+            this.showNativeOverlayMapLoading();
+        }
     }
 
     private drawLoadingOverlay(callback: () => void): void {
         this.initializationStarted = true;
-        this.loadingOverlayController!.drawAndDeferLoad(callback);
+        this.showNativeOverlayMapLoading();
+        this.time.delayedCall(0, callback);
+    }
+
+    private showNativeOverlayMapLoading(): void {
+        EventBus.emit(NATIVE_OVERLAY_MAP_LOADING_SHOWN, { text: 'Loading map...' });
+        EventBus.emit(NATIVE_OVERLAY_HEALTH_BAR_HIDDEN);
+    }
+
+    private hideNativeOverlayMapLoading(): void {
+        EventBus.emit(NATIVE_OVERLAY_MAP_LOADING_HIDDEN);
+    }
+
+    private hideLogoutCountdownOverlay(): void {
+        this.logoutCountdownSeconds = undefined;
+        EventBus.emit(NATIVE_OVERLAY_LOGOUT_COUNTDOWN_HIDDEN);
+    }
+
+    private showOrUpdateLogoutCountdownOverlay(secondsLeft: number): void {
+        this.logoutCountdownSeconds = secondsLeft;
+        EventBus.emit(NATIVE_OVERLAY_LOGOUT_COUNTDOWN_UPDATED, {
+            text: `Logging out in ${secondsLeft} seconds.`,
+        });
     }
 
     /**
@@ -3239,6 +3254,8 @@ export class GameWorld extends Scene {
 
     public shutdown() {
         runSafeSync('GameWorld:shutdown', () => {
+            EventBus.off(OUT_UI_LOGOUT_COUNTDOWN_CHANGED, this.logoutCountdownChangedHandler);
+            this.hideLogoutCountdownOverlay();
             EventBus.emit(OUT_UI_HOVER_GROUND_ITEM, false);
             EventBus.emit(OUT_UI_HOVER_GROUND_ITEM_INFO, undefined);
             EventBus.emit(OUT_UI_HOVER_MONSTER, undefined);
@@ -3295,8 +3312,8 @@ export class GameWorld extends Scene {
             }
             this.groundEffectsById.clear();
 
-            this.loadingOverlayController?.destroyImmediate();
-            this.loadingOverlayController = undefined;
+            this.hideNativeOverlayMapLoading();
+            this.hideLogoutCountdownOverlay();
 
             this.weatherManager?.destroy();
             this.weatherManager = undefined;

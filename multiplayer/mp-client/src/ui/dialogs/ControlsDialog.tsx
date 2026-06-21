@@ -1,8 +1,8 @@
-import { useRef } from 'react';
 import { useStore } from '@tanstack/react-store';
 import { DraggableDialog } from './DraggableDialog';
 import { RpgButton } from '../components/RpgButton';
 import type { IRefPhaserGame } from '../../PhaserGame';
+import { togglePhaserFullscreen } from '../../utils/RendererUtils';
 import { toggleMapDialog } from '../store/MapDialog.store';
 import { toggleServerDialog } from '../store/ServerDialog.store';
 import { togglePerformanceDialog } from '../store/PerformanceDialog.store';
@@ -14,7 +14,7 @@ import { toggleMonsterDialog } from '../store/MonsterDialog.store';
 import { toggleNPCDialog } from '../store/NPCDialog.store';
 import { toggleEffectDialog } from '../store/EffectDialog.store';
 import { toggleCastDialog } from '../store/CastDialog.store';
-import { controlsDialogStore, setIsFullscreen } from '../store/ControlsDialog.store';
+import { controlsDialogStore } from '../store/ControlsDialog.store';
 import { togglePlayerDialog } from '../store/PlayerDialog.store';
 import { toggleInventoryDialog } from '../store/InventoryDialog.store';
 import { toggleItemDialog } from '../store/ItemDialog.store';
@@ -37,97 +37,9 @@ export function ControlsDialog({
     const minimapAvailable = useStore(minimapDialogStore, (state) => state.minimapAvailable);
     const logoutSecondsRemaining = useStore(controlsDialogStore, (state) => state.logoutSecondsRemaining);
     const syncWithServer = useStore(serverDialogStore, (state) => state.syncWithServer);
-    const fullscreenResizeHandler = useRef<(() => void) | undefined>(undefined);
-    const fullscreenHandlersBound = useRef(false);
-    const fullscreenRefreshFrame = useRef<number | undefined>(undefined);
 
     const toggleFullscreen = () => {
-        const game = phaserRef.current?.game;
-
-        if (!game) {
-            return;
-        }
-
-        const wrapper = document.getElementById('game-wrapper');
-        const container = document.getElementById('game-container');
-        const canvas = game.canvas;
-        const baseWidth = Number(game.config.width);
-        const baseHeight = Number(game.config.height);
-        const scheduleScaleRefresh = () => {
-            if (fullscreenRefreshFrame.current !== undefined) {
-                window.cancelAnimationFrame(fullscreenRefreshFrame.current);
-            }
-
-            // Phaser refreshes its cached canvas bounds before our fullscreen CSS transform
-            // is applied, so we resync after layout updates to keep pointer math aligned.
-            fullscreenRefreshFrame.current = window.requestAnimationFrame(() => {
-                fullscreenRefreshFrame.current = undefined;
-                game.scale.refresh();
-            });
-        };
-
-        const applyFullscreenScale = () => {
-            const fullscreenWidth = wrapper?.clientWidth ?? window.innerWidth;
-            const fullscreenHeight = wrapper?.clientHeight ?? window.innerHeight;
-            const scale = Math.min(fullscreenWidth / baseWidth, fullscreenHeight / baseHeight);
-            canvas.style.width = `${baseWidth}px`;
-            canvas.style.height = `${baseHeight}px`;
-            canvas.style.position = 'absolute';
-            canvas.style.left = '50%';
-            canvas.style.top = '50%';
-            canvas.style.margin = '0';
-            canvas.style.transformOrigin = 'center center';
-            canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
-            scheduleScaleRefresh();
-        };
-
-        const clearFullscreenScale = () => {
-            wrapper?.classList.remove('fullscreen');
-            container?.classList.remove('fullscreen');
-            canvas.classList.remove('fullscreen');
-            canvas.style.removeProperty('width');
-            canvas.style.removeProperty('height');
-            canvas.style.removeProperty('position');
-            canvas.style.removeProperty('left');
-            canvas.style.removeProperty('top');
-            canvas.style.removeProperty('margin');
-            canvas.style.removeProperty('transform');
-            canvas.style.removeProperty('transform-origin');
-            if (fullscreenRefreshFrame.current !== undefined) {
-                window.cancelAnimationFrame(fullscreenRefreshFrame.current);
-                fullscreenRefreshFrame.current = undefined;
-            }
-            if (fullscreenResizeHandler.current) {
-                window.removeEventListener('resize', fullscreenResizeHandler.current);
-                fullscreenResizeHandler.current = undefined;
-            }
-            scheduleScaleRefresh();
-        };
-
-        if (!fullscreenHandlersBound.current) {
-            game.scale.on('enterfullscreen', () => {
-                wrapper?.classList.add('fullscreen');
-                container?.classList.add('fullscreen');
-                canvas.classList.add('fullscreen');
-                applyFullscreenScale();
-                fullscreenResizeHandler.current = applyFullscreenScale;
-                window.addEventListener('resize', applyFullscreenScale);
-                setIsFullscreen(true);
-            });
-
-            game.scale.on('leavefullscreen', () => {
-                clearFullscreenScale();
-                setIsFullscreen(false);
-            });
-
-            fullscreenHandlersBound.current = true;
-        }
-
-        if (game.scale.isFullscreen) {
-            game.scale.stopFullscreen();
-        } else {
-            game.scale.startFullscreen();
-        }
+        togglePhaserFullscreen(phaserRef.current?.game);
     };
 
     const handleLogOut = () => {

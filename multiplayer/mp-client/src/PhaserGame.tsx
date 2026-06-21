@@ -4,7 +4,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import StartGame from './game/main';
 import { EventBus } from './game/EventBus';
 import { CURRENT_SCENE_READY, IN_UI_SUPPRESS_POINTER_INPUT } from './constants/EventNames';
+import { NativeOverlayCanvas } from './ui/overlays/NativeOverlayCanvas';
 import { setWindowFocused } from './utils/RegistryUtils';
+import { applyGameWindowSizePercent } from './utils/RendererUtils';
+import { getGameWindowSizePercent } from './ui/store/CameraDialog.store';
 import './ui/rpg-ui.css';
 
 /**
@@ -35,6 +38,7 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(function PhaserGame
         {
 
             game.current = StartGame("game-container");
+            applyGameWindowSizePercent(getGameWindowSizePercent(), game.current);
 
             if (typeof ref === 'function')
             {
@@ -254,6 +258,7 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(function PhaserGame
     return (
         <div id="game-wrapper">
             <div id="game-container"></div>
+            <NativeOverlayCanvas gameRef={game} />
             <ToastContainer
                 position="bottom-right"
                 autoClose={3000}

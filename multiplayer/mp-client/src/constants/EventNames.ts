@@ -248,6 +248,36 @@ export const TOAST_REQUESTED = 'toast-requested';
 /** Dismiss the logout countdown info toast if it was shown with trackForLogoutDismiss. No payload. */
 export const TOAST_DISMISS_LOGOUT_COUNTDOWN = 'toast-dismiss-logout-countdown';
 
+/** Phaser → React: logout countdown seconds changed. Payload: { secondsLeft?: number } */
+export const OUT_UI_LOGOUT_COUNTDOWN_CHANGED = 'ui-logout-countdown-changed';
+
+/** Native overlay: floating damage/spell text rendered above Phaser at device resolution. */
+export const NATIVE_OVERLAY_FLOATING_TEXT_REQUESTED = 'native-overlay-floating-text-requested';
+
+/** Native overlay: player HP bar updated/hidden. */
+export const NATIVE_OVERLAY_HEALTH_BAR_UPDATED = 'native-overlay-health-bar-updated';
+export const NATIVE_OVERLAY_HEALTH_BAR_HIDDEN = 'native-overlay-health-bar-hidden';
+
+/** Native overlay: asset loading screen background and progress. */
+export const NATIVE_OVERLAY_LOADING_SCREEN_SHOWN = 'native-overlay-loading-screen-shown';
+export const NATIVE_OVERLAY_LOADING_SCREEN_PROGRESS = 'native-overlay-loading-screen-progress';
+export const NATIVE_OVERLAY_LOADING_SCREEN_HIDDEN = 'native-overlay-loading-screen-hidden';
+
+/** Native overlay: login screen background image. */
+export const NATIVE_OVERLAY_LOGIN_BACKGROUND_SHOWN = 'native-overlay-login-background-shown';
+export const NATIVE_OVERLAY_LOGIN_BACKGROUND_HIDDEN = 'native-overlay-login-background-hidden';
+
+/** Native overlay: in-game map loading fullscreen message. */
+export const NATIVE_OVERLAY_MAP_LOADING_SHOWN = 'native-overlay-map-loading-shown';
+export const NATIVE_OVERLAY_MAP_LOADING_HIDDEN = 'native-overlay-map-loading-hidden';
+
+/** Native overlay: logout countdown banner text. */
+export const NATIVE_OVERLAY_LOGOUT_COUNTDOWN_UPDATED = 'native-overlay-logout-countdown-updated';
+export const NATIVE_OVERLAY_LOGOUT_COUNTDOWN_HIDDEN = 'native-overlay-logout-countdown-hidden';
+
+/** Native overlay: request bounds resync after CSS scale or fullscreen layout change. */
+export const NATIVE_OVERLAY_RESIZE_REQUESTED = 'native-overlay-resize-requested';
+
 /**
  * EventBus OUT: Phaser → React
  * Events sent from Phaser scenes to React components.

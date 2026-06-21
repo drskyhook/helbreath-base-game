@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from 'react';
 import { useStore } from '@tanstack/react-store';
 import { DndContext } from '@dnd-kit/core';
 import { toast } from 'react-toastify';
-import type { Id } from 'react-toastify';
 import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { ControlsDialog } from './ui/dialogs/ControlsDialog';
 import { MapDialog } from './ui/dialogs/MapDialog';
@@ -29,7 +28,7 @@ import { ConnectingDialog } from './ui/dialogs/ConnectingDialog';
 import { ServerMessageDialog } from './ui/dialogs/ServerMessageDialog';
 import { ChatDialog } from './ui/dialogs/ChatDialog';
 import { EventBus, type ToastRequestedEvent } from './game/EventBus';
-import { OUT_MAP_LOADED, TOAST_DISMISS_LOGOUT_COUNTDOWN, TOAST_REQUESTED } from './constants/EventNames';
+import { OUT_MAP_LOADED, TOAST_REQUESTED } from './constants/EventNames';
 import { DIALOG_START_X, DIALOG_START_Y } from './Config';
 import { mapDialogStore, setMapDialogOpen } from './ui/store/MapDialog.store';
 import { cameraDialogStore, setCameraDialogOpen } from './ui/store/CameraDialog.store';
@@ -58,9 +57,6 @@ const DIALOG_STACK_POSITION = { x: DIALOG_START_X, y: DIALOG_START_Y };
 const CHILD_DIALOG_POSITION = { x: 310, y: DIALOG_START_Y };
 const CONNECTING_DIALOG_Z_INDEX = 9999;
 const SERVER_MESSAGE_DIALOG_Z_INDEX = 19000;
-
-/** Stashed id for the logout countdown info toast; cleared when dismissed or countdown ends. */
-let logoutCountdownToastId: Id | undefined;
 
 function App()
 {
@@ -203,14 +199,9 @@ function App()
             message,
             severity,
             autoClose,
-            trackForLogoutDismiss,
         }: ToastRequestedEvent) => {
             const toastMessage = <span className="rpg-toast-message">{message}</span>;
-            /** Only the logout countdown toast shows the auto-close progress strip. */
-            const options = {
-                hideProgressBar: trackForLogoutDismiss !== true,
-                ...(autoClose !== undefined ? { autoClose } : {}),
-            };
+            const options = autoClose !== undefined ? { autoClose } : {};
 
             switch (severity) {
                 case 'success':
@@ -222,31 +213,16 @@ function App()
                 case 'error':
                     toast.error(toastMessage, options);
                     break;
-                case 'info': {
-                    const id = toast.info(toastMessage, options);
-                    if (trackForLogoutDismiss) {
-                        logoutCountdownToastId = id;
-                    }
+                case 'info':
+                    toast.info(toastMessage, options);
                     break;
-                }
             }
-        };
-
-        const handleDismissLogoutCountdown = () => {
-            if (logoutCountdownToastId === undefined) {
-                return;
-            }
-
-            toast.dismiss(logoutCountdownToastId);
-            logoutCountdownToastId = undefined;
         };
 
         EventBus.on(TOAST_REQUESTED, handleToastRequested);
-        EventBus.on(TOAST_DISMISS_LOGOUT_COUNTDOWN, handleDismissLogoutCountdown);
 
         return () => {
             EventBus.off(TOAST_REQUESTED, handleToastRequested);
-            EventBus.off(TOAST_DISMISS_LOGOUT_COUNTDOWN, handleDismissLogoutCountdown);
         };
     }, []);
 
@@ -815,6 +791,7 @@ function App()
                 {showCameraDialog && (
                     <CameraDialog
                         position={cameraDialogPosition}
+                        phaserRef={phaserRef}
                         onClose={() => setCameraDialogOpen(false)}
                         zIndex={cameraDialogZIndex}
                         onBringToFront={() => bringDialogToFront('camera-dialog')}

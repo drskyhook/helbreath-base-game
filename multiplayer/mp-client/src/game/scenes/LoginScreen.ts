@@ -1,12 +1,10 @@
 import { Scene } from 'phaser';
-import { drawAppTitle } from '../../utils/SpriteUtils';
 import {
     appendPendingPlayerItemAppearancePrefetch,
     clearPendingPlayerItemAppearancePrefetch,
     createGameStateManager,
     getGameStateManager,
     getInventoryManager,
-    getLoginScreenBgKey,
     setInitialGameWorldState,
     setNetworkManager,
 } from '../../utils/RegistryUtils';
@@ -14,11 +12,14 @@ import {
     CURRENT_SCENE_READY,
     INITIAL_GAME_WORLD_STATE_RECEIVED,
     IN_UI_CONNECT_TO_SERVER,
+    NATIVE_OVERLAY_LOGIN_BACKGROUND_HIDDEN,
+    NATIVE_OVERLAY_LOGIN_BACKGROUND_SHOWN,
     OUT_UI_SET_SELECTED_MAP,
     PLAYER_ITEM_APPEARANCE_PREFETCH_REQUESTED,
     SOCKET_DISCONNECTED,
 } from '../../constants/EventNames';
 import type { ConnectToServerPayload, PlayerItemAppearancePrefetchEventData } from '../../constants/EventNames';
+import { SPLASH_BACKGROUND_IMAGE_SRC } from '../../constants/SceneOverlays';
 import { EventBus } from '../EventBus';
 import { NetworkManager } from '../../utils/NetworkManager';
 import type { InitialGameWorldStateEventData } from '../../Types';
@@ -30,7 +31,6 @@ import { openConnectDialogForLogin, setConnectDialogOpen } from '../../ui/store/
  * Creates GameStateManager and transitions to GameWorld after a successful connection.
  */
 export class LoginScreen extends Scene {
-    private backgroundImage!: Phaser.GameObjects.Image;
     private isConnecting = false;
     private pendingInitialGameWorldStateListener: ((data: InitialGameWorldStateEventData) => void) | undefined;
     /** When set, login is waiting for initial state after TCP connect; auth failure closes the socket first. */
@@ -48,28 +48,9 @@ export class LoginScreen extends Scene {
         this.clearConnectToServerListener();
         this.isConnecting = false;
 
-        // Set black background as fallback before image loads
         this.cameras.main.setBackgroundColor(0x000000);
 
-        // Get scene dimensions
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // Display background image immediately (loaded in Boot.ts)
-        // Get login screen background image key from registry (loaded in Boot.ts)
-        const loginBgKey = getLoginScreenBgKey(this);
-
-        // Add background image immediately so it displays before cache fetching
-        if (loginBgKey && this.textures.exists(loginBgKey)) {
-            this.backgroundImage = this.add.image(width / 2, height / 2, loginBgKey);
-            // Scale background to cover the entire scene
-            const scaleX = width / this.backgroundImage.width;
-            const scaleY = height / this.backgroundImage.height;
-            const scale = Math.max(scaleX, scaleY);
-            this.backgroundImage.setScale(scale);
-            // Send background to back so button appears on top
-            this.backgroundImage.setDepth(0);
-        }
+        EventBus.emit(NATIVE_OVERLAY_LOGIN_BACKGROUND_SHOWN, { imageSrc: SPLASH_BACKGROUND_IMAGE_SRC });
 
         createGameStateManager(this.game);
 
@@ -81,13 +62,11 @@ export class LoginScreen extends Scene {
             this.isConnecting = false;
             setConnectingDialogOpen(false);
             setConnectDialogOpen(false);
+            EventBus.emit(NATIVE_OVERLAY_LOGIN_BACKGROUND_HIDDEN);
         });
     }
 
     public create() {
-        // Draw application title and subtitle with black stripe background
-        drawAppTitle(this);
-
         const gsm = getGameStateManager(this.game);
         openConnectDialogForLogin(gsm.getCharacterName() ?? '');
 

@@ -3,11 +3,16 @@ import { unzip } from 'fflate';
 import { HBSpriteFile } from '../assets/HBSprite';
 import { HBMap } from '../assets/HBMap';
 import { getMapNames } from '../../constants/Maps';
-import { drawAppTitle } from '../../utils/SpriteUtils';
 import { getAssets, AssetType, getCreatePhaseTotalActivities, type AssetData } from '../../constants/Assets';
-import { getLoadingBgKey, setItemPackSpriteSheets, setItemPackEmittedTintKeys, setMap } from '../../utils/RegistryUtils';
+import { setItemPackSpriteSheets, setItemPackEmittedTintKeys, setMap } from '../../utils/RegistryUtils';
 import { EventBus } from '../EventBus';
-import { CURRENT_SCENE_READY } from '../../constants/EventNames';
+import {
+    CURRENT_SCENE_READY,
+    NATIVE_OVERLAY_LOADING_SCREEN_HIDDEN,
+    NATIVE_OVERLAY_LOADING_SCREEN_PROGRESS,
+    NATIVE_OVERLAY_LOADING_SCREEN_SHOWN,
+} from '../../constants/EventNames';
+import { SPLASH_BACKGROUND_IMAGE_SRC } from '../../constants/SceneOverlays';
 import { ENABLE_ZIP_LOADING, LOAD_MAP_ASSETS_ON_DEMAND } from '../../Config';
 
 type LoadingScreenInitData = {
@@ -19,14 +24,8 @@ type LoadingScreenInitData = {
  * After loading, transitions to LoginScreen.
  */
 export class LoadingScreen extends Scene {
-    private progressBar!: Phaser.GameObjects.Rectangle;
-    private progressBarOutline!: Phaser.GameObjects.Rectangle;
-    private progressBarTrack!: Phaser.GameObjects.Rectangle;
     private createPhaseProgress: number = 0;
-    private backgroundImage!: Phaser.GameObjects.Image;
-    private progressBarLeftEdge!: number;
-    private progressBarMaxWidth!: number;
-    private currentProgress: number = 0; // Overall progress 0-1
+    private currentProgress: number = 0;
     private loadingStartTime!: number;
     private usingZipLoading: boolean = false;
     private createPhaseTotalActivities: number = 1;
@@ -47,113 +46,33 @@ export class LoadingScreen extends Scene {
     }
 
     public init(data?: LoadingScreenInitData) {
-        // Store loading start time for performance measurement
         this.loadingStartTime = Date.now();
-        
-        // Set black background as fallback before image loads
         this.cameras.main.setBackgroundColor(0x000000);
-        
-        // Get scene dimensions
-        const width = this.scale.width;
-        const height = this.scale.height;
 
-        // Display background image immediately (loaded in Boot.ts)
-        // Get loading background image key from registry (loaded in Boot.ts)
-        const loadingBgKey = getLoadingBgKey(this);
-        
-        // Add background image immediately so it displays before cache fetching
-        if (loadingBgKey && this.textures.exists(loadingBgKey)) {
-            this.backgroundImage = this.add.image(width / 2, height / 2, loadingBgKey);
-            // Scale background to cover the entire scene
-            const scaleX = width / this.backgroundImage.width;
-            const scaleY = height / this.backgroundImage.height;
-            const scale = Math.max(scaleX, scaleY);
-            this.backgroundImage.setScale(scale);
-            // Send background to back so progress bar appears on top
-            this.backgroundImage.setDepth(0);
-        }
-
-        // RPG-themed progress bar at the bottom
-        // Colors matching UI theme: leather border, brown-dark background, gold fill
-        const barWidth = 320;
-        const barHeight = 12;
-        const barY = height - 40; // 40px from bottom
-        const barX = width / 2;
-
-        // Calculate track boundaries
-        const trackLeftEdge = barX - barWidth / 2;
-        const trackRightEdge = barX + barWidth / 2;
-        
-        // Progress bar should fit inside track with 1px padding on each side
-        const padding = 1;
-        this.progressBarLeftEdge = trackLeftEdge + padding;
-        const progressBarRightEdge = trackRightEdge - padding;
-        this.progressBarMaxWidth = progressBarRightEdge - this.progressBarLeftEdge;
-
-        // Progress bar outline (border) - leather color
-        this.progressBarOutline = this.add.rectangle(barX, barY, barWidth + 4, barHeight + 4, 0x704214);
-        this.progressBarOutline.setStrokeStyle(2, 0x704214);
-        this.progressBarOutline.setAlpha(1.0); // Fully opaque
-
-        // Progress bar background track - dark brown
-        this.progressBarTrack = this.add.rectangle(barX, barY, barWidth, barHeight, 0x2d1810);
-        this.progressBarTrack.setAlpha(1.0); // Fully opaque
-
-        // Progress bar fill - gold color (starts at 0 width, aligned with track)
-        // Height is barHeight - 2 to have 1px padding top and bottom
-        // Set origin to left-center so it grows from left to right
-        this.progressBar = this.add.rectangle(
-            this.progressBarLeftEdge, 
-            barY, 
-            0, 
-            barHeight - 2, 
-            0xd4af37
-        );
-        this.progressBar.setOrigin(0, 0.5); // Left-center origin
-        this.progressBar.setAlpha(1.0); // Fully opaque
-
-        // Ensure progress bar elements are on top of background
-        if (this.progressBarOutline) {
-            this.progressBarOutline.setDepth(10);
-        }
-        if (this.progressBarTrack) {
-            this.progressBarTrack.setDepth(10);
-        }
-        if (this.progressBar) {
-            this.progressBar.setDepth(11);
-        }
+        EventBus.emit(NATIVE_OVERLAY_LOADING_SCREEN_SHOWN, { imageSrc: SPLASH_BACKGROUND_IMAGE_SRC });
+        this.reportNativeOverlayProgress();
 
         this.usingZipLoading = data?.enableZipLoading ?? ENABLE_ZIP_LOADING;
         this.createPhaseTotalActivities = getCreatePhaseTotalActivities(this.getLoadingAssets());
-        
+
+        this.events.once('shutdown', () => {
+            EventBus.emit(NATIVE_OVERLAY_LOADING_SCREEN_HIDDEN);
+        });
+
         if (this.usingZipLoading) {
-            // For zip loading, we manually control progress in create()
-            // Progress phases: 0-25% fetch, 25-50% decompress, 50-100% process
+            // Zip loading progress is driven manually in create().
         } else {
-            // Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
-            // LoaderPlugin progress (0-1) maps to 0-50% of total progress
             this.load.on('progress', (progress: number) => {
-                // Update current progress and refresh bar
                 this.currentProgress = progress * 0.5;
-                this.updateProgressBar();
+                this.reportNativeOverlayProgress();
             });
         }
     }
 
-    private updateProgressBar() {
-        // Guard: progress bar might not exist yet
-        if (!this.progressBar || this.progressBarMaxWidth === undefined) {
-            return;
-        }
-        
-        // Clamp progress between 0 and 1
-        const clampedProgress = Math.max(0, Math.min(1, this.currentProgress));
-        
-        // Calculate bar width from progress
-        // Progress goes from 0 to 1, bar width goes from 0 to progressBarMaxWidth
-        // Since origin is left-center, we just set the width directly
-        const newWidth = this.progressBarMaxWidth * clampedProgress;
-        this.progressBar.width = newWidth;
+    private reportNativeOverlayProgress(): void {
+        EventBus.emit(NATIVE_OVERLAY_LOADING_SCREEN_PROGRESS, {
+            progress: Math.max(0, Math.min(1, this.currentProgress)),
+        });
     }
 
     private reportCreatePhaseProgress() {
@@ -161,7 +80,7 @@ export class LoadingScreen extends Scene {
         // create() phase progress maps to 50-100% of total progress
         const createPhaseProgressRatio = this.createPhaseProgress / this.createPhaseTotalActivities;
         this.currentProgress = 0.5 + (createPhaseProgressRatio * 0.5);
-        this.updateProgressBar();
+        this.reportNativeOverlayProgress();
     }
 
     private getLoadingAssets(): AssetData[] {
@@ -176,14 +95,10 @@ export class LoadingScreen extends Scene {
 
     private setProgress(progress: number) {
         this.currentProgress = progress;
-        this.updateProgressBar();
+        this.reportNativeOverlayProgress();
     }
 
     public preload() {
-        // Draw application title and subtitle with black stripe background
-        drawAppTitle(this);
-
-        //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
         // LoadingBg is already loaded in Boot.ts and available via registry
