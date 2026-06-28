@@ -96,8 +96,6 @@ The client is built with:
 - [React](https://react.dev/)
 - [Radix UI](https://www.radix-ui.com/)
 
-The UI is rendered outside the game canvas as standard web UI, which makes it easier to build, scale, and test. For more detail, see [`sp-client/docs/UI_LAYER.md`](./sp-client/docs/UI_LAYER.md).
-
 The multiplayer server is built with:
 
 - [C# / .NET 10](https://dotnet.microsoft.com/)
@@ -105,6 +103,24 @@ The multiplayer server is built with:
 - [Google.Protobuf](https://protobuf.dev/) for the wire format (shared `.proto` schemas in [`multiplayer/proto`](./multiplayer/proto))
 
 For the full server design, see [`multiplayer/server/README.md`](./multiplayer/server/README.md).
+
+### React and browser UI layer
+
+The client uses Phaser for the game world and React for the surrounding interface. Phaser owns the canvas, sprites, map rendering, animation, and low-level game input. React owns the browser-side UI: dialogs, controls, overlays, debug panels, inventory windows, and other interface pieces that are better expressed as HTML and CSS than as hand-drawn canvas elements.
+
+Keeping the UI in browser technologies has several practical benefits:
+
+- **Scalability**: The browser already knows how to scale UI. Users can zoom in or out, high-DPI screens are handled naturally, and CSS layout can resize panels, text, and controls without requiring every UI element to be redrawn manually inside the game canvas.
+- **Accessibility**: React UI can use semantic HTML, keyboard focus, ARIA attributes, native form controls, browser text selection, and other accessibility features that are difficult to reproduce inside WebGL or canvas-only interfaces. It also makes the project much easier for AI agents and browser automation tools to understand, inspect, and modify because the UI exists as a DOM tree rather than only as pixels.
+- **Translatability**: Browser translation tools such as Google Translate can automatically detect and translate much of the HTML-based UI. A canvas-only UI usually needs a custom localization pipeline before any translation is possible.
+- **Testability**: Browser UI can be tested with Playwright, Cypress, Testing Library, browser devtools, and ordinary DOM assertions. End-to-end tests can click real buttons, read visible text, validate dialogs, and drive gameplay through simulated keyboard and mouse input. With a small amount of instrumentation, those tests can also understand what is happening in the Phaser layer by combining DOM-visible state, exposed game state, screenshots, and input simulation.
+- **Developer velocity**: React, CSS, Radix UI, browser devtools, hot module reloading, and the broader web ecosystem make it fast to build and iterate on complex UI without rebuilding a custom widget system inside Phaser.
+- **Separation of concerns**: Phaser can stay focused on the game simulation and rendering pipeline, while React handles interface state, layout, forms, overlays, and developer tooling. That keeps each layer closer to the kind of problem it is good at solving.
+- **Portability**: The same UI works in any modern browser without native launchers or platform-specific UI code, which helps with demos, hosted multiplayer clients, and quick sharing during development.
+
+Demo video: [`PlaywrightE2EDemo.mp4`](./PlaywrightE2EDemo.mp4) shows browser-side UI being automated with Playwright while the Phaser layer is driven through simulated mouse and keyboard input. Client side E2E testing capabilities are not included with this project.
+
+For more detail, see [`sp-client/docs/UI_LAYER.md`](./sp-client/docs/UI_LAYER.md).
 
 ## Getting Started
 
