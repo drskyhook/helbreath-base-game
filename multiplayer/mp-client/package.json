@@ -20,20 +20,18 @@
         "typescript"
     ],
     "scripts": {
-        "proto:generate": "mkdir -p src/proto/generated && grpc_tools_node_protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/proto/generated --ts_proto_opt=esModuleInterop=true,env=browser,forceLong=bigint,oneof=unions-value,outputServices=none,outputJsonMethods=false ../proto/network.proto --proto_path=../proto",
-        "predev": "pnpm run proto:generate",
-        "dev": "sh -c 'for p in 8080; do lsof -iTCP:$p -sTCP:LISTEN -t 2>/dev/null | xargs kill -9 2>/dev/null; done; exec vite --config vite/config.dev.mjs'",
-        "prebuild": "pnpm run proto:generate",
+        "proto:generate": "node -e \"require('fs').mkdirSync('src/proto/generated',{recursive:true})\" && grpc_tools_node_protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto.cmd --ts_proto_out=./src/proto/generated --ts_proto_opt=esModuleInterop=true,env=browser,forceLong=bigint,oneof=unions-value,outputServices=none,outputJsonMethods=false ../proto/network.proto --proto_path=../proto",
+        "predev": "npm run proto:generate",
+        "dev": "vite --config vite/config.dev.mjs",
+        "prebuild": "npm run proto:generate",
         "build": "vite build --config vite/config.prod.mjs",
-        "predev-nolog": "pnpm run proto:generate",
         "dev-nolog": "vite --config vite/config.dev.mjs",
-        "prebuild-nolog": "pnpm run proto:generate",
         "build-nolog": "vite build --config vite/config.prod.mjs",
         "compress-assets": "node ../../tools/compress-assets.js --ratio=1",
         "compress-assets:fast": "node ../../tools/compress-assets.js --ratio=1",
         "compress-assets:best": "node ../../tools/compress-assets.js --ratio=9",
-        "lint": "pnpm exec tsc --noEmit",
-        "lint:eslint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.{ts,tsx}\""
+        "lint": "npx tsc --noEmit",
+        "lint:eslint": "eslint \"src/**/*.{ts,tsx}\""
     },
     "dependencies": {
         "@babel/runtime": "^7.28.6",

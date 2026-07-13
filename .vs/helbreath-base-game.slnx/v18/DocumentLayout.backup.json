@@ -1,0 +1,336 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\mp-client\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\mp-client\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\Server.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\Server.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\Map.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\World\\Game\\Map.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\mp-client\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\mp-client\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sp-client\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\10.0.301\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\WorldWorker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\World\\WorldWorker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\GameWorldMonster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\World\\Game\\GameWorldMonster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\GameWorld.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\World\\Game\\GameWorld.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Global\\GlobalWorld.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\World\\Global\\GlobalWorld.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\.cursor\\rules\\client-typescript-guidelines.mdc||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\.cursor\\rules\\client-typescript-guidelines.mdc||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\Helpers\\Casting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:multiplayer\\server\\Helpers\\Casting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\.cursor\\rules\\02-sprites-and-assets.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sp-client\\.cursor\\rules\\02-sprites-and-assets.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\.cursor\\rules\\01-code-guidelines.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sp-client\\.cursor\\rules\\01-code-guidelines.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Server.cpp||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:reference\\Server.cpp||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item3.cfg||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:reference\\Item3.cfg||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item2.cfg||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:reference\\Item2.cfg||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item.cfg||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:reference\\Item.cfg||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "package.json",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\mp-client\\package.json",
+              "RelativeDocumentMoniker": "multiplayer\\mp-client\\package.json",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\mp-client\\package.json",
+              "RelativeToolTip": "multiplayer\\mp-client\\package.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-13T18:10:47.249Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Map.cs",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\Map.cs",
+              "RelativeDocumentMoniker": "multiplayer\\server\\World\\Game\\Map.cs",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\Map.cs",
+              "RelativeToolTip": "multiplayer\\server\\World\\Game\\Map.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAABcAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T15:48:04.509Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Server.csproj",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\Server.csproj",
+              "RelativeDocumentMoniker": "multiplayer\\server\\Server.csproj",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\Server.csproj",
+              "RelativeToolTip": "multiplayer\\server\\Server.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-13T15:47:39.526Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\mp-client\\README.md",
+              "RelativeDocumentMoniker": "multiplayer\\mp-client\\README.md",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\mp-client\\README.md",
+              "RelativeToolTip": "multiplayer\\mp-client\\README.md",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAEUAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-07-13T15:29:41.622Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\README.md",
+              "RelativeDocumentMoniker": "sp-client\\README.md",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\README.md",
+              "RelativeToolTip": "sp-client\\README.md",
+              "ViewState": "AgIAAIEAAAAAAAAAAAAwwLIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-07-13T15:23:45.513Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Microsoft.PackageDependencyResolution.targets",
+              "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\10.0.301\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\dotnet\\sdk\\10.0.301\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "ToolTip": "C:\\Program Files\\dotnet\\sdk\\10.0.301\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\dotnet\\sdk\\10.0.301\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "ViewState": "AgIAAO8AAAAAAAAAAAAewAkBAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-07-13T15:00:02.009Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "WorldWorker.cs",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\WorldWorker.cs",
+              "RelativeDocumentMoniker": "multiplayer\\server\\World\\WorldWorker.cs",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\WorldWorker.cs",
+              "RelativeToolTip": "multiplayer\\server\\World\\WorldWorker.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAAkwGcAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T13:32:07.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "GameWorldMonster.cs",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\GameWorldMonster.cs",
+              "RelativeDocumentMoniker": "multiplayer\\server\\World\\Game\\GameWorldMonster.cs",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\GameWorldMonster.cs",
+              "RelativeToolTip": "multiplayer\\server\\World\\Game\\GameWorldMonster.cs",
+              "ViewState": "AgIAALYAAAAAAAAAAAAAAH0EAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T13:05:15.621Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "GlobalWorld.cs",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Global\\GlobalWorld.cs",
+              "RelativeDocumentMoniker": "multiplayer\\server\\World\\Global\\GlobalWorld.cs",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Global\\GlobalWorld.cs",
+              "RelativeToolTip": "multiplayer\\server\\World\\Global\\GlobalWorld.cs",
+              "ViewState": "AgIAALMAAAAAAAAAAAAkwM0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T12:52:57.502Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "client-typescript-guidelines.mdc",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\.cursor\\rules\\client-typescript-guidelines.mdc",
+              "RelativeDocumentMoniker": "multiplayer\\.cursor\\rules\\client-typescript-guidelines.mdc",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\.cursor\\rules\\client-typescript-guidelines.mdc",
+              "RelativeToolTip": "multiplayer\\.cursor\\rules\\client-typescript-guidelines.mdc",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-13T12:48:04.55Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Casting.cs",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\Helpers\\Casting.cs",
+              "RelativeDocumentMoniker": "multiplayer\\server\\Helpers\\Casting.cs",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\Helpers\\Casting.cs",
+              "RelativeToolTip": "multiplayer\\server\\Helpers\\Casting.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAC0AAABkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T12:46:54.16Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "02-sprites-and-assets.md",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\.cursor\\rules\\02-sprites-and-assets.md",
+              "RelativeDocumentMoniker": "sp-client\\.cursor\\rules\\02-sprites-and-assets.md",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\.cursor\\rules\\02-sprites-and-assets.md",
+              "RelativeToolTip": "sp-client\\.cursor\\rules\\02-sprites-and-assets.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-07-13T12:46:35.478Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "01-code-guidelines.md",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\.cursor\\rules\\01-code-guidelines.md",
+              "RelativeDocumentMoniker": "sp-client\\.cursor\\rules\\01-code-guidelines.md",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\sp-client\\.cursor\\rules\\01-code-guidelines.md",
+              "RelativeToolTip": "sp-client\\.cursor\\rules\\01-code-guidelines.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-07-13T12:46:34.753Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Server.cpp",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Server.cpp",
+              "RelativeDocumentMoniker": "reference\\Server.cpp",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Server.cpp",
+              "RelativeToolTip": "reference\\Server.cpp",
+              "ViewState": "AgIAAGcaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-07-13T12:46:10.662Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Item3.cfg",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item3.cfg",
+              "RelativeDocumentMoniker": "reference\\Item3.cfg",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item3.cfg",
+              "RelativeToolTip": "reference\\Item3.cfg",
+              "ViewState": "AgIAAGMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-13T12:46:04.871Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Item2.cfg",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item2.cfg",
+              "RelativeDocumentMoniker": "reference\\Item2.cfg",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item2.cfg",
+              "RelativeToolTip": "reference\\Item2.cfg",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-13T12:26:15.042Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Item.cfg",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item.cfg",
+              "RelativeDocumentMoniker": "reference\\Item.cfg",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\reference\\Item.cfg",
+              "RelativeToolTip": "reference\\Item.cfg",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-13T12:26:08.348Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\README.md",
+              "RelativeDocumentMoniker": "multiplayer\\README.md",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\README.md",
+              "RelativeToolTip": "multiplayer\\README.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-07-13T12:22:56.733Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "GameWorld.cs",
+              "DocumentMoniker": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\GameWorld.cs",
+              "RelativeDocumentMoniker": "multiplayer\\server\\World\\Game\\GameWorld.cs",
+              "ToolTip": "C:\\Users\\dillo\\source\\repos\\helbreath-base-game\\multiplayer\\server\\World\\Game\\GameWorld.cs",
+              "RelativeToolTip": "multiplayer\\server\\World\\Game\\GameWorld.cs",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAAAFUFAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T12:53:37.872Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

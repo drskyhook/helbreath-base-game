@@ -18,4 +18,11 @@
     <Protobuf Include="../proto/**/*.proto" ProtoRoot="../proto" GrpcServices="None" />
   </ItemGroup>
 
+  <!-- .csproj -->
+  <ItemGroup>
+    <None Include="Config\maps\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
