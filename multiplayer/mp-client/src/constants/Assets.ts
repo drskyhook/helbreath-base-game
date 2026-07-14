@@ -234,14 +234,20 @@ export function getMonsterAssets(spriteName: string): AssetData[] {
         return [];
     }
 
+    const spriteFormat = getMonsterAssetFormat(monster);
+
     const { spriteNames, sounds } = collectMonsterAssetNames(monster);
     const assets: AssetData[] = [];
     spriteNames.forEach((name) => {
         assets.push({
             key: `sprite-${name}`,
-            fileName: `${name}.spr`,
+            fileName:
+                spriteFormat === SpriteAssetFormat.Atlas
+                    ? `${name}/${name}.json`
+                    : `${name}.spr`,
             assetType: AssetType.SPRITE,
-            spriteType: SpriteType.Monster
+            spriteType: SpriteType.Monster,
+            spriteFormat,
         });
     });
     sounds.forEach((soundFile) => {
@@ -300,7 +306,7 @@ export function getAssets(options?: GetAssetsOptions): AssetData[] {
 
     const eagerMonsterAssets = options?.eagerMonsterAssets ?? !LOAD_MONSTER_ASSETS_ON_DEMAND;
     // Track unique monster sprites and sounds to avoid duplicates
-    const monsterSpriteNames = new Set<string>();
+    const monsterSpriteFormats = new Map<string, SpriteAssetFormat>();
     const monsterSounds = new Set<string>();
 
     // Extract monster sprites and sounds from MONSTERS array
@@ -308,30 +314,45 @@ export function getAssets(options?: GetAssetsOptions): AssetData[] {
         if (!eagerMonsterAssets) {
             if (monster.spriteName === MONSTER_PLACEHOLDER_SPRITE) {
                 const monsterAssetNames = collectMonsterAssetNames(monster);
-                monsterAssetNames.spriteNames.forEach((spriteName) => monsterSpriteNames.add(spriteName));
+                const spriteFormat = getMonsterAssetFormat(monster);
+
+                monsterAssetNames.spriteNames.forEach((spriteName) => {
+                    monsterSpriteFormats.set(spriteName, spriteFormat);
+                });
+
                 monsterAssetNames.sounds.forEach((soundFile) => monsterSounds.add(soundFile));
             }
+
             return;
         }
 
         const monsterAssetNames = collectMonsterAssetNames(monster);
-        monsterAssetNames.spriteNames.forEach((spriteName) => monsterSpriteNames.add(spriteName));
+        const spriteFormat = getMonsterAssetFormat(monster);
+
+        monsterAssetNames.spriteNames.forEach((spriteName) => {
+            monsterSpriteFormats.set(spriteName, spriteFormat);
+        });
+
         monsterAssetNames.sounds.forEach((soundFile) => monsterSounds.add(soundFile));
     });
     
     // Add monster sprite assets
-    monsterSpriteNames.forEach(spriteName => {
+    monsterSpriteFormats.forEach((spriteFormat, spriteName) => {
         assets.push({
             key: `sprite-${spriteName}`,
-            fileName: `${spriteName}.spr`,
+            fileName:
+                spriteFormat === SpriteAssetFormat.Atlas
+                    ? `${spriteName}/${spriteName}.json`
+                    : `${spriteName}.spr`,
             assetType: AssetType.SPRITE,
-            spriteType: SpriteType.Monster
+            spriteType: SpriteType.Monster,
+            spriteFormat,
         });
     });
 
     // Add NPC sprite assets (NPCs use Monster sprite type - same format)
     NPC_SPRITE_NAMES.forEach((sprite) => {
-        if (!assets.some((asset) => asset.key === `sprite-${sprite}`) && !monsterSpriteNames.has(sprite)) {
+        if (!assets.some((asset) => asset.key === `sprite-${sprite}`) && !monsterSpriteFormats.has(sprite)) {
             assets.push({
                 key: `sprite-${sprite}`,
                 fileName: `${sprite}.spr`,
