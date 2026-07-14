@@ -1,5 +1,6 @@
 import type { Scene } from 'phaser';
-import { GameAsset, type GameAssetConfig } from './GameAsset';
+import type { GameAsset, GameAssetConfig } from './GameAsset';
+import { createGameAsset } from '../assets/GameAssetFactory';
 import { FloatingText } from '../effects/FloatingText';
 import { convertWorldPosToPixelPos, Direction, getDirectionOffset, getNextDirection, getDirectionFromScreenSector, isCellMovable, toDirection, worldCellCenterPixelX, worldCellCenterPixelY } from '../../utils/CoordinateUtils';
 import { SoundManager } from '../../utils/SoundManager';
@@ -149,7 +150,7 @@ export abstract class GameObject {
                 !assetConfig.mapObject &&
                 assetConfig.spriteSheetIndex !== undefined &&
                 isPlayerItemAppearanceLazyEligible(scene, assetConfig.spriteName);
-            const asset = new GameAsset(scene, {
+            const asset = createGameAsset(scene, {
                 ...assetConfig,
                 x: pixelX,
                 y: pixelY,
