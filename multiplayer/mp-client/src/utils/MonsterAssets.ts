@@ -2,7 +2,7 @@ import type { Scene } from 'phaser';
 
 import { LOAD_MONSTER_ASSETS_ON_DEMAND, MONSTER_PLACEHOLDER_SPRITE } from '../Config';
 import { AssetType, getMonsterAssets, type AssetData } from '../constants/Assets';
-import { HBSpriteFile } from '../game/assets/HBSprite';
+import { getMonsterSpriteLoader } from '../game/assets/loaders/MonsterSpriteLoaderResolver';
 
 const monsterAssetLoadPromises = new Map<string, Promise<void>>();
 const assetLoadPromises = new Map<string, Promise<void>>();
@@ -26,7 +26,7 @@ export function areMonsterAssetsLoaded(scene: Scene, spriteName: string): boolea
     const assetsRegistered = getMonsterAssets(spriteName).every((asset) => {
         switch (asset.assetType) {
             case AssetType.SPRITE:
-                return scene.textures.exists(`${asset.key}-0`);
+                return isMonsterSpriteAssetLoaded(scene, asset);
             case AssetType.SOUND:
                 return scene.cache.audio.exists(asset.key);
             default:
@@ -64,7 +64,11 @@ export function loadMonsterAssetsOnDemand(scene: Scene, spriteName: string): Pro
 
 async function loadMonsterAssets(scene: Scene, spriteName: string): Promise<void> {
     const assets = getMonsterAssets(spriteName);
-    const spriteAssets = assets.filter((asset) => asset.assetType === AssetType.SPRITE && !scene.textures.exists(`${asset.key}-0`));
+    const spriteAssets = assets.filter(
+        (asset) =>
+            asset.assetType === AssetType.SPRITE &&
+            !isMonsterSpriteAssetLoaded(scene, asset),
+    );
     const soundAssets = assets.filter((asset) => asset.assetType === AssetType.SOUND && !scene.cache.audio.exists(asset.key));
     const startedAt = performance.now();
 
@@ -80,7 +84,7 @@ async function loadMonsterAssets(scene: Scene, spriteName: string): Promise<void
 
 function loadAssetOnce(scene: Scene, asset: AssetData): Promise<void> {
     if (
-        (asset.assetType === AssetType.SPRITE && scene.textures.exists(`${asset.key}-0`)) ||
+        (asset.assetType === AssetType.SPRITE && isMonsterSpriteAssetLoaded(scene, asset)) ||
         (asset.assetType === AssetType.SOUND && scene.cache.audio.exists(asset.key))
     ) {
         return Promise.resolve();
@@ -102,22 +106,13 @@ function loadAssetOnce(scene: Scene, asset: AssetData): Promise<void> {
     });
 }
 
-async function fetchAndRegisterMonsterSprite(scene: Scene, asset: AssetData): Promise<void> {
-    if (!asset.spriteType) {
-        throw new Error(`Monster sprite asset ${asset.key} is missing spriteType`);
-    }
-
-    const response = await fetch(`assets/sprites/${asset.fileName}`);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch monster sprite ${asset.fileName}: ${response.status} ${response.statusText}`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    scene.cache.binary.add(asset.key, arrayBuffer);
-
-    const hbFile = new HBSpriteFile(asset.key, asset.spriteType, asset.exportFramesAsDataUrls || false, asset.tileStartIndex);
-    await hbFile.load(scene);
+async function fetchAndRegisterMonsterSprite(
+    scene: Scene,
+    asset: AssetData,
+): Promise<void> {
+    await getMonsterSpriteLoader(asset).load(scene, asset);
 }
+
 
 async function fetchAndRegisterMonsterSound(scene: Scene, asset: AssetData): Promise<void> {
     const response = await fetch(`assets/sounds/${asset.fileName}`);
@@ -135,4 +130,11 @@ async function fetchAndRegisterMonsterSound(scene: Scene, asset: AssetData): Pro
     const arrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
     scene.cache.audio.add(asset.key, audioBuffer);
+}
+
+function isMonsterSpriteAssetLoaded(
+    scene: Scene,
+    asset: AssetData,
+): boolean {
+    return getMonsterSpriteLoader(asset).isLoaded(scene, asset);
 }
