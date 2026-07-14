@@ -1,4 +1,11 @@
 node_modules
 .DS_Store
 .pnpm-store
-/.vs/helbreath-base-game.slnx/FileContentIndex/7aee09ba-5848-4f05-a4a7-b48781bb6c08.vsidx
+.vs/
+bin/
+obj/
+node_modules/
+
+
+multiplayer/mp-client/public/assets/sprites/extracted/
+sp-client/public/assets/sprites/extracted/
