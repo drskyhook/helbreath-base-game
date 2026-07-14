@@ -24,7 +24,8 @@ import {
     LOAD_PLAYER_ITEM_APPEARANCE_ASSETS_ON_DEMAND,
     MONSTER_PLACEHOLDER_SPRITE,
 } from '../Config';
-import { getMonsterData, MONSTERS, type MonsterData, type MonsterStateConfig } from './Monsters';
+import { SpriteAssetFormat } from '../game/assets/SpriteAssetFormat';
+import { getMonsterAssetFormat, getMonsterData, MONSTERS, type MonsterData, type MonsterStateConfig } from './Monsters';
 import { NPC_SPRITE_NAMES } from './NPCs';
 import { EFFECTS } from './Effects';
 import { ITEMS } from './Items';
@@ -33,6 +34,8 @@ import { ITEMS } from './Items';
 export interface AssetData {
     key: string;
     fileName: string;
+    /** Runtime format used by sprite assets. Defaults to SPR. */
+    spriteFormat?: SpriteAssetFormat;
     assetType: AssetType;
     /** Map rows: display name in UI. */
     mapName?: string;

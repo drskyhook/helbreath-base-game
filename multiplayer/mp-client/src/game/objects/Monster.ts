@@ -19,6 +19,7 @@ import { AttackType, MonsterAllegiance, TemporaryEffectType } from '../../Types'
 import { calculateAnimationDuration, calculateFrameRateFromDuration } from '../../utils/AnimationUtils';
 import { MonsterEntityState } from '../../proto/generated/network';
 
+
 /**
  * Monster animation states mapping to sprite sheet indexes.
  */
@@ -1500,4 +1501,6 @@ export class Monster extends GameObject {
     public destroy(): void {
         super.destroy();
     }
+
+
 }

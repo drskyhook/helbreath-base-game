@@ -1,3 +1,4 @@
+import { SpriteAssetFormat } from '../game/assets/SpriteAssetFormat';
 import { MonsterShadow } from '../game/objects/Monster';
 
 /**
@@ -61,7 +62,13 @@ export interface MonsterStatesConfig {
 export interface MonsterData {
     /** Sprite name without extension (e.g., 'ettin') */
     spriteName: string;
-    
+
+    /**
+    * Runtime asset format used to render this monster.
+    * Existing monsters default to the legacy SPR format.
+    */
+    assetFormat?: SpriteAssetFormat;
+
     /** State-specific configuration (sound and animation data) */
     states?: MonsterStatesConfig;
     
@@ -199,6 +206,17 @@ export const MONSTERS: MonsterData[] = [
     },
     {
         spriteName: 'cat',
+        states: {
+            move: { sound: 'M72.mp3' },
+            attack: { sound: 'M76.mp3' },
+            takeDamage: { sound: 'M80.mp3' },
+            death: { sound: 'M84.mp3' }
+        },
+        corpseDecayTime: 3,
+        shadow: MonsterShadow.NoShadow
+    },
+    {
+        spriteName: 'bograt',
         states: {
             move: { sound: 'M72.mp3' },
             attack: { sound: 'M76.mp3' },
@@ -992,4 +1010,8 @@ export const MONSTERS: MonsterData[] = [
 /** Lookup in `MONSTERS` by basename (e.g. `ettin`). */
 export function getMonsterData(spriteName: string): MonsterData | undefined {
     return MONSTERS.find(monster => monster.spriteName === spriteName);
+}
+
+export function getMonsterAssetFormat(monster: MonsterData): SpriteAssetFormat {
+    return monster.assetFormat ?? SpriteAssetFormat.Spr;
 }
