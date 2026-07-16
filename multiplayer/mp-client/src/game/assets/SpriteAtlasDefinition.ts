@@ -14,6 +14,7 @@ export interface SpriteAtlasAnimation {
 }
 
 export interface SpriteAtlasDefinition {
+    version: number;
     image: string;
     frames: Record<string, SpriteAtlasFrame>;
     animations: Record<string, SpriteAtlasAnimation>;

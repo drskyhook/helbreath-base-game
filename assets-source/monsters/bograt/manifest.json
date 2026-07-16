@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "name": "bograt",
+  "cell": {
+    "width": 96,
+    "height": 96
+  },
+  "anchor": {
+    "x": 48,
+    "y": 80
+  }
+}

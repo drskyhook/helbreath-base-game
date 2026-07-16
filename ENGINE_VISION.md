@@ -70,6 +70,10 @@ Rendering systems should consume normalized runtime definitions rather than know
 - Tiled
 - another future tool
 
+Numeric sprite-sheet layout is a legacy adapter concern. New asset formats and
+gameplay-facing APIs should use semantic frame and animation identities.
+
+
 ## Near-Term Priorities
 
 1. Preserve all existing SPR behavior.

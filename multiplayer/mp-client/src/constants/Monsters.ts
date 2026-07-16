@@ -217,6 +217,7 @@ export const MONSTERS: MonsterData[] = [
     },
     {
         spriteName: 'bograt',
+        assetFormat: SpriteAssetFormat.Atlas,
         states: {
             move: { sound: 'M72.mp3' },
             attack: { sound: 'M76.mp3' },
